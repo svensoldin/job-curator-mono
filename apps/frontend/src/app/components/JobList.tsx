@@ -132,7 +132,12 @@ export default function JobList({ jobs }: JobListProps) {
   return (
     <>
       {/* Header row */}
-      <div className='mb-2 bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700'>
+      <div
+        className={cx(
+          'hidden',
+          'md:mb-2 md:bg-gray-50 md:dark:bg-gray-800 md:rounded-lg md:p-3 md:border md:border-gray-200 md:dark:border-gray-700'
+        )}
+      >
         <div className={cx('grid grid-cols-5 items-center', 'md:grid-cols-5')}>
           <span className='text-sm font-medium text-gray-700 dark:text-gray-300'>
             Job Title
@@ -180,8 +185,8 @@ export default function JobList({ jobs }: JobListProps) {
               </h2>
               <span
                 className={cx(
-                  'text-gray-600 truncate pr-2 hidden',
-                  'md:block',
+                  'hidden',
+                  'md:block md:text-gray-600 md:truncate md:pr-2 ',
                   'dark:text-gray-400'
                 )}
               >
@@ -209,8 +214,8 @@ export default function JobList({ jobs }: JobListProps) {
               </span>
               <span
                 className={cx(
-                  'text-sm text-gray-500 justify-self-end hidden',
-                  'md:block',
+                  'hidden',
+                  'md:block md:text-sm md:text-gray-500 md:justify-self-end',
                   'dark:text-gray-400'
                 )}
               >
