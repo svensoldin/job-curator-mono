@@ -113,10 +113,10 @@ export const scrapeWelcomeToTheJungle = async (
   searchParams: SearchParams
 ): Promise<JobPosting[]> => {
   const baseUrl = 'https://www.welcometothejungle.com/fr/jobs';
-  const searchQuery = 'développeur';
+  const searchQuery = 'frontend developer';
   const url = `${baseUrl}?query=${encodeURIComponent(
     searchQuery
-  )}refinementList[offices.country_code][]=FR&refinementList[remote][]=fulltime&refinementList[benefits][]=Ouvert au télétravail total&collections[]=digital_nomad`;
+  )}&refinementList[offices.country_code][]=FR&refinementList[remote][]=fulltime`;
 
   try {
     const page: Page = await browser.newPage();
