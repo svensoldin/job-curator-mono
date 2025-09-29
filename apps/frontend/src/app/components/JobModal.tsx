@@ -8,6 +8,7 @@ interface Job {
   url: string;
   company: string;
   score: number;
+  source: string;
 }
 
 interface JobModalProps {

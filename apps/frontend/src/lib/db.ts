@@ -6,6 +6,7 @@ interface Job {
   url: string;
   company: string;
   score: number;
+  source: string;
 }
 
 const url = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@mern.yy0tj.mongodb.net/?retryWrites=true&w=majority&appName=${process.env.DB_APP_NAME}`;
