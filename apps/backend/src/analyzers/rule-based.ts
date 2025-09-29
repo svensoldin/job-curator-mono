@@ -1,4 +1,5 @@
 import { logger } from '../utils/logger.js';
+
 import type { JobPosting, UserCriteria } from '../types.js';
 
 /**
@@ -132,6 +133,7 @@ function scoreLocation(
       'wfh',
       'distributed',
       'anywhere',
+      'télétravail',
     ];
     const hasRemote = remoteTerms.some((term) => jobText.includes(term));
 

@@ -112,10 +112,8 @@ export const scrapeWelcomeToTheJungle = async (
   browser: Browser,
   searchParams: SearchParams
 ): Promise<JobPosting[]> => {
-  const { keywords, location } = searchParams;
-  // Welcome to the Jungle search URL format
   const baseUrl = 'https://www.welcometothejungle.com/fr/jobs';
-  const searchQuery = keywords.replace(/,/g, ' ').trim();
+  const searchQuery = 'développeur';
   const url = `${baseUrl}?query=${encodeURIComponent(
     searchQuery
   )}refinementList[offices.country_code][]=FR&refinementList[remote][]=fulltime&refinementList[benefits][]=Ouvert au télétravail total&collections[]=digital_nomad`;

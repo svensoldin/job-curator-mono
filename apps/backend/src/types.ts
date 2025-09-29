@@ -38,7 +38,6 @@ export interface AppConfig {
 
 export interface AppState {
   isRunning: boolean;
-  transporter: any; // nodemailer.Transporter
 }
 
 // Utility types
