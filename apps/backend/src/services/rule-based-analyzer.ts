@@ -1,6 +1,5 @@
 import { logger } from '../utils/logger.js';
-
-import type { JobPosting, UserCriteria } from '../types.js';
+import type { JobPosting, UserCriteria, AnalysisResult } from '../types.js';
 
 /**
  * Create skill variations for better matching
@@ -58,13 +57,18 @@ function scoreSkills(
   }
 
   let score = 0;
+  const skillsRatio = matchedSkills / coreSkills.length;
 
-  if (matchedSkills > 2) {
-    score = 40;
-  } else if (matchedSkills === 0) {
-    score = 0;
-  } else if (matchedSkills <= 2) {
-    score = 30;
+  if (skillsRatio >= 0.8) {
+    score = 40; // 80%+ skills matched
+  } else if (skillsRatio >= 0.6) {
+    score = 30; // 60-79% skills matched
+  } else if (skillsRatio >= 0.3) {
+    score = 20; // 30-59% skills matched
+  } else if (matchedSkills > 0) {
+    score = 10; // Some skills matched
+  } else {
+    score = 0; // No skills matched
   }
 
   return { score, reasons };
@@ -84,9 +88,17 @@ function scoreExperienceLevel(
   const reasons: string[] = [];
 
   const levelMappings = {
-    junior: ['junior', 'entry', 'graduate', '0-2 years', 'new grad'],
+    junior: ['junior', 'entry', 'graduate', '0-2 years', 'new grad', 'trainee'],
     mid: ['mid', 'intermediate', '2-5 years', '3-5 years', 'experienced'],
-    senior: ['senior', 'lead', '5+ years', '7+ years', 'expert', 'principal'],
+    senior: [
+      'senior',
+      'lead',
+      '5+ years',
+      '7+ years',
+      'expert',
+      'principal',
+      'architect',
+    ],
   };
 
   const targetLevel = preferredLevel.toLowerCase();
@@ -104,7 +116,7 @@ function scoreExperienceLevel(
     score = 30;
     reasons.push(`✓ Matches ${preferredLevel} level`);
   } else if (hasConflict) {
-    score = 8;
+    score = 5;
     reasons.push(`⚠ Different experience level detected`);
   }
 
@@ -118,68 +130,38 @@ function scoreLocation(
   job: JobPosting,
   criteria: UserCriteria
 ): { score: number; reasons: string[] } {
-  const jobText = `${job.title} ${job.description}`.toLowerCase();
+  const jobText = `${job.title} ${job.description} ${
+    job.location || ''
+  }`.toLowerCase();
   const reasons: string[] = [];
   let score = 15; // Default score
 
   // Check for remote work
-  if (
-    criteria.remotePreference === 'remote' ||
-    criteria.remotePreference === 'hybrid'
-  ) {
-    const remoteTerms = [
-      'remote',
-      'work from home',
-      'wfh',
-      'distributed',
-      'anywhere',
-      'télétravail',
-    ];
-    const hasRemote = remoteTerms.some((term) => jobText.includes(term));
+  const remoteTerms = [
+    'remote',
+    'work from home',
+    'wfh',
+    'distributed',
+    'anywhere',
+    'télétravail',
+    'hybrid',
+  ];
+  const hasRemote = remoteTerms.some((term) => jobText.includes(term));
 
-    if (hasRemote) {
-      score = 30;
-      reasons.push('✓ Remote work available');
-    }
+  if (hasRemote) {
+    score = 30;
+    reasons.push('✓ Remote/Hybrid work available');
   }
 
   // Check location preferences
-  if (criteria.locations?.length) {
-    const hasLocationMatch = criteria.locations.some((location) =>
-      jobText.includes(location.toLowerCase())
-    );
+  const hasLocationMatch = jobText.includes(criteria.location.toLowerCase());
 
-    if (hasLocationMatch) {
-      score = Math.max(score, 25);
-      reasons.push('✓ Preferred location');
-    }
+  if (hasLocationMatch) {
+    score = Math.max(score, 25);
+    reasons.push('✓ Preferred location match');
   }
 
   return { score, reasons };
-}
-
-/**
- * Deduct points for excluded keywords
- */
-function scoreExclusions(
-  job: JobPosting,
-  criteria: UserCriteria
-): { score: number; reasons: string[] } {
-  const excludedKeywords = criteria.excludedKeywords || [];
-  if (!excludedKeywords.length) return { score: 0, reasons: [] };
-
-  const jobText = `${job.title} ${job.description}`.toLowerCase();
-  const reasons: string[] = [];
-  let penalty = 0;
-
-  for (const keyword of excludedKeywords) {
-    if (jobText.includes(keyword.toLowerCase())) {
-      penalty -= 10;
-      reasons.push(`✗ Contains excluded: ${keyword}`);
-    }
-  }
-
-  return { score: penalty, reasons };
 }
 
 /**
@@ -209,6 +191,11 @@ function scoreBonusFeatures(job: JobPosting): {
       points: 2,
       label: 'Learning opportunities',
     },
+    {
+      terms: ['health insurance', 'medical', 'dental'],
+      points: 2,
+      label: 'Health benefits',
+    },
   ];
 
   for (const indicator of premiumIndicators) {
@@ -224,66 +211,114 @@ function scoreBonusFeatures(job: JobPosting): {
 
 /**
  * Analyze job posting using rule-based scoring
- * New scoring distribution:
- * - Skills: 30 points max
+ * Scoring distribution:
+ * - Skills: 40 points max
  * - Experience Level: 30 points max
  * - Location/Remote: 30 points max
  * - Bonus Features: 10 points max
- * - Exclusions: -10 points each
+ * Total: 110 points max (capped at 100)
  */
 export function analyzeJob(
   job: JobPosting,
   criteria: UserCriteria
-): JobPosting {
+): JobPosting & { analysisResult: AnalysisResult } {
+  // Parse skills from comma-separated string
+  const coreSkills = criteria.skills
+    .split(',')
+    .map((skill) => skill.trim())
+    .filter(Boolean);
+
+  // Determine experience level from job title
+  const jobTitleLower = criteria.jobTitle.toLowerCase();
+  let experienceLevel: 'junior' | 'mid' | 'senior' | undefined;
+
+  if (jobTitleLower.includes('junior') || jobTitleLower.includes('entry')) {
+    experienceLevel = 'junior';
+  } else if (
+    jobTitleLower.includes('senior') ||
+    jobTitleLower.includes('lead') ||
+    jobTitleLower.includes('principal')
+  ) {
+    experienceLevel = 'senior';
+  } else {
+    experienceLevel = 'mid'; // Default to mid-level
+  }
+
   let score = 0;
   const reasons: string[] = [];
+  const breakdown = {
+    skills: 0,
+    experience: 0,
+    location: 0,
+    bonus: 0,
+    penalties: 0,
+  };
 
-  // 1. Required Skills Matching (30 points max)
-  const skillScore = scoreSkills(job, criteria.coreSkills || []);
+  // 1. Required Skills Matching (40 points max)
+  const skillScore = scoreSkills(job, coreSkills);
   score += skillScore.score;
+  breakdown.skills = skillScore.score;
   reasons.push(...skillScore.reasons);
 
   // 2. Experience Level Matching (30 points max)
-  const expScore = scoreExperienceLevel(job, criteria.experienceLevel);
+  const expScore = scoreExperienceLevel(job, experienceLevel);
   score += expScore.score;
+  breakdown.experience = expScore.score;
   reasons.push(...expScore.reasons);
 
   // 3. Location/Remote Preference (30 points max)
   const locationScore = scoreLocation(job, criteria);
   score += locationScore.score;
+  breakdown.location = locationScore.score;
   reasons.push(...locationScore.reasons);
 
-  // 4. Exclude negative keywords (deduct points)
-  const excludeScore = scoreExclusions(job, criteria);
-  score += excludeScore.score;
-  reasons.push(...excludeScore.reasons);
-
-  // 5. Bonus points for premium indicators (10 points max)
+  // 4. Bonus points for premium indicators (10 points max)
   const bonusScore = scoreBonusFeatures(job);
   score += bonusScore.score;
+  breakdown.bonus = bonusScore.score;
   reasons.push(...bonusScore.reasons);
 
   // Ensure score is between 0-100
   score = Math.max(0, Math.min(100, score));
 
+  const analysisResult: AnalysisResult = {
+    score: Math.round(score),
+    reasons,
+    breakdown,
+  };
+
   return {
     ...job,
-    score: Math.round(score),
+    score: analysisResult.score,
+    analysisResult,
   };
 }
 
-// Export individual functions for testing
-export {
-  scoreSkills,
-  scoreExperienceLevel,
-  scoreLocation,
-  scoreExclusions,
-  scoreBonusFeatures,
-};
+/**
+ * Analyze multiple jobs and return top N sorted by score
+ */
+export function analyzeAndRankJobs(
+  jobs: JobPosting[],
+  criteria: UserCriteria,
+  topN: number = 3
+): JobPosting[] {
+  logger.info(`Analyzing ${jobs.length} jobs with rule-based scoring`);
 
-// Keep backward compatibility with the class-based approach
-export const RuleBasedAnalyzer = {
-  analyzeJob,
-};
+  // Analyze all jobs
+  const analyzedJobs = jobs.map((job) => analyzeJob(job, criteria));
 
-export default { analyzeJob };
+  // Sort by score (highest first) and take top N
+  const topJobs = analyzedJobs
+    .sort((a, b) => (b.score || 0) - (a.score || 0))
+    .slice(0, topN);
+
+  logger.info(
+    `Selected top ${topN} jobs with scores: ${topJobs
+      .map((j) => j.score)
+      .join(', ')}`
+  );
+
+  return topJobs;
+}
+
+export default { analyzeJob, analyzeAndRankJobs };

@@ -1,7 +1,6 @@
-import winston from 'winston';
-import path from 'path';
 import fs from 'fs';
-import type { LogLevel } from '../types.js';
+import path from 'path';
+import winston from 'winston';
 
 // Create logs directory if it doesn't exist
 const logsDir: string = path.join(process.cwd(), 'logs');
@@ -11,7 +10,7 @@ if (!fs.existsSync(logsDir)) {
 
 // Configure Winston logger
 export const logger: winston.Logger = winston.createLogger({
-  level: (process.env.LOG_LEVEL as LogLevel) || 'info',
+  level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
     winston.format.timestamp({
       format: 'YYYY-MM-DD HH:mm:ss',
