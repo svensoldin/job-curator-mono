@@ -1,10 +1,11 @@
-import { logger } from '../utils/logger.js';
 import { JobPosting, ScrapeCriteria } from '../types.js';
+import { logger } from '../utils/logger.js';
 import puppeteer, { Browser, Page } from 'puppeteer';
 
 // import { config } from '../config.js';
 
 // Local config for scraping
+const MAX_JOBS_PER_BOARD = 25;
 const MAX_JOBS = 50;
 const DELAY_BETWEEN_REQUESTS = 1000;
 
@@ -106,6 +107,7 @@ const scrapeWelcomeToTheJungle = async (
             title: linkText,
             company: company,
             url: href,
+            description: '',
             source: 'welcometothejungle',
           });
         }
@@ -115,8 +117,87 @@ const scrapeWelcomeToTheJungle = async (
     });
 
     await page.close();
-    logger.info(`Scraped ${jobs.length} jobs from Welcome to the Jungle`);
-    return jobs.slice(0, MAX_JOBS); // Limit to max jobs
+
+    logger.info(`Found ${jobs.length} Welcome to the Jungle jobs`);
+
+    // Limit to MAX_JOBS_PER_BOARD before fetching descriptions
+    const limitedJobs = jobs.slice(0, MAX_JOBS_PER_BOARD);
+
+    logger.info(
+      `Fetching descriptions for ${limitedJobs.length} Welcome to the Jungle jobs...`
+    );
+
+    // Fetch descriptions for limited jobs only
+    for (let i = 0; i < limitedJobs.length; i++) {
+      const job = limitedJobs[i];
+      if (!job || !job.url) continue;
+
+      try {
+        logger.info(
+          `📖 Fetching WTTJ description ${i + 1}/${limitedJobs.length}: ${
+            job.title
+          }`
+        );
+
+        const descPage = await browser.newPage();
+        await descPage.setUserAgent(
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        );
+
+        await descPage.goto(job.url, {
+          waitUntil: 'networkidle2',
+          timeout: 30000,
+        });
+
+        // Try multiple selectors for WTTJ job description
+        let description = '';
+        const selectors = [
+          '#the-position-section',
+          '[data-testid="job-description"]',
+          '.sc-1g2uzm9-0',
+          '[class*="description"]',
+          '.job-description',
+        ];
+
+        for (const selector of selectors) {
+          try {
+            await descPage.waitForSelector(selector, { timeout: 3000 });
+            description = await descPage.$eval(
+              selector,
+              (el) => el.textContent?.trim() || ''
+            );
+            if (description && description.length > 100) {
+              logger.info(
+                `✅ Found description with selector: ${selector} (${description.length} chars)`
+              );
+              break;
+            }
+          } catch (e) {
+            // Try next selector
+          }
+        }
+
+        job.description = description;
+
+        if (!description || description.length < 100) {
+          logger.warn(`⚠️ No description found for: ${job.title}`);
+        }
+
+        await descPage.close();
+
+        // Delay between requests to be respectful
+        await new Promise((resolve) =>
+          setTimeout(resolve, DELAY_BETWEEN_REQUESTS)
+        );
+      } catch (error) {
+        logger.error(`❌ Error fetching description for ${job.title}:`, error);
+      }
+    }
+
+    logger.info(
+      `Scraped ${limitedJobs.length} jobs from Welcome to the Jungle`
+    );
+    return limitedJobs;
   } catch (error) {
     logger.error('Error scraping Welcome to the Jungle:', error);
     return [];
@@ -190,8 +271,7 @@ export const scrapeLinkedIn = async (
 
     logger.info(`Found ${jobs.length} LinkedIn jobs`);
 
-    // Limit to MAX_JOBS to avoid too many requests (or 5 for testing)
-    const testLimit = process.env.TEST_MODE === 'true' ? 5 : MAX_JOBS;
+    const testLimit = MAX_JOBS_PER_BOARD;
     const limitedJobs = jobs.slice(0, Math.min(testLimit, jobs.length));
 
     // Fetch descriptions by visiting each job URL
@@ -272,131 +352,6 @@ export const scrapeLinkedIn = async (
 };
 
 /**
- * Get detailed job description from a job URL
- */
-const getJobDescription = async (
-  browser: Browser,
-  jobUrl: string
-): Promise<string> => {
-  try {
-    const page: Page = await browser.newPage();
-
-    // Set user agent to avoid bot detection
-    await page.setUserAgent(
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    );
-
-    await page.goto(jobUrl, { waitUntil: 'networkidle2', timeout: 30000 });
-
-    let description = '';
-
-    if (jobUrl.includes('linkedin.com')) {
-      try {
-        // Wait for LinkedIn job description to load
-        await page.waitForSelector('.show-more-less-html__markup', {
-          timeout: 15000,
-        });
-        const descriptionElement = await page.$('.show-more-less-html__markup');
-
-        if (descriptionElement) {
-          description = await page.evaluate(
-            (el) => el.textContent?.trim() || '',
-            descriptionElement
-          );
-        }
-      } catch (selectorError) {
-        logger.warn(
-          'LinkedIn: Primary description selector not found, trying fallbacks'
-        );
-
-        // Fallback selectors for LinkedIn
-        const fallbackSelectors = [
-          '.description__text',
-          '[class*="description"]',
-          '.job-view-layout',
-          '[data-job-details]',
-          'article',
-        ];
-
-        for (const selector of fallbackSelectors) {
-          try {
-            const element = await page.$(selector);
-            if (element) {
-              description = await page.evaluate(
-                (el) => el.textContent?.trim() || '',
-                element
-              );
-              if (description && description.length > 50) {
-                logger.info(
-                  `LinkedIn: Found description with fallback selector: ${selector}`
-                );
-                break;
-              }
-            }
-          } catch (e) {
-            // Continue to next selector
-          }
-        }
-      }
-    } else if (jobUrl.includes('welcometothejungle.com')) {
-      try {
-        await page.waitForSelector('#the-position-section', { timeout: 15000 });
-        const descriptionElement = await page.$('#the-position-section');
-
-        if (descriptionElement) {
-          description = await page.evaluate(
-            (el) => el.textContent?.trim() || '',
-            descriptionElement
-          );
-        }
-      } catch (selectorError) {
-        // Fallback selectors
-        const fallbackSelectors = [
-          '[data-testid="job-description"]',
-          '.sc-1g2uzm9-0',
-          '[class*="description"]',
-          '.job-description',
-        ];
-
-        for (const selector of fallbackSelectors) {
-          try {
-            const element = await page.$(selector);
-            if (element) {
-              description = await page.evaluate(
-                (el) => el.textContent?.trim() || '',
-                element
-              );
-              if (description && description.length > 50) break;
-            }
-          } catch (e) {
-            // Continue to next selector
-          }
-        }
-      }
-    }
-
-    await page.close();
-
-    if (description && description.length > 50) {
-      logger.info(
-        `✅ Successfully fetched description (${
-          description.length
-        } chars) from ${jobUrl.includes('linkedin') ? 'LinkedIn' : 'WTTJ'}`
-      );
-    } else {
-      logger.warn(
-        `❌ Failed to fetch description from ${jobUrl} (${description.length} chars)`
-      );
-    }
-
-    return description;
-  } catch (error) {
-    logger.warn(`Could not fetch job description from ${jobUrl}:`, error);
-    return '';
-  }
-};
-
-/**
  * Scrape jobs for analysis based on user criteria
  */
 export const scrapeJobsForAnalysis = async (
@@ -426,23 +381,13 @@ export const scrapeJobsForAnalysis = async (
       return [];
     }
 
-    // Limit to max jobs configured
+    // Limit to max jobs configured (50 total, up to 25 from each board)
     const limitedJobs = uniqueJobs.slice(0, MAX_JOBS);
 
-    // Fetch descriptions for jobs
-    logger.info(`📄 Fetching descriptions for ${limitedJobs.length} jobs...`);
-    for (let i = 0; i < limitedJobs.length; i++) {
-      const job = limitedJobs[i];
-      if (!job) continue;
-      logger.info(
-        `📖 Fetching description ${i + 1}/${limitedJobs.length}: ${job.title}`
-      );
-      const description = await getJobDescription(browser, job.url);
-      job.description = description || job.title; // Fallback to title if description fails
-      await new Promise((resolve) =>
-        setTimeout(resolve, DELAY_BETWEEN_REQUESTS)
-      );
-    }
+    // Descriptions are already fetched by individual scrapers
+    logger.info(
+      `✅ Successfully scraped ${limitedJobs.length} jobs with descriptions`
+    );
 
     // Return jobs directly, stateless
     return limitedJobs;

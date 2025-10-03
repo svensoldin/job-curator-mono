@@ -6,7 +6,6 @@ export interface UserCriteria {
   salary: string;
 }
 
-// Scraping criteria derived from UserCriteria (only the fields needed for scraping)
 export type ScrapeCriteria = Pick<UserCriteria, 'jobTitle' | 'location'>;
 
 export interface JobPosting {

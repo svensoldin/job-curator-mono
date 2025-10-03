@@ -1,6 +1,5 @@
 import { scrapeJobsForAnalysis } from '../services/scraping.js';
 import { analyzeAndRankJobs } from '../services/rule-based-analyzer.js';
-import { ScrapeCriteria } from '../types.js';
 import { logger } from '../utils/logger.js';
 import express from 'express';
 
