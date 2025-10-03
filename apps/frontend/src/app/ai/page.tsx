@@ -1,107 +1,250 @@
 'use client';
 
 import { useState } from 'react';
+import { UserCriteria } from '../../types/user-criteria';
 
-interface JobPreferences {
-  jobTitle: string;
-  location: string;
-  salaryExpectation: string;
-}
-
-type Step = 'jobTitle' | 'location' | 'salary' | 'complete';
+import content from './data';
 
 export default function AIPage() {
-  const [currentStep, setCurrentStep] = useState<Step>('jobTitle');
-  const [preferences, setPreferences] = useState<JobPreferences>({
+  const [currentStep, setCurrentStep] = useState(0);
+  const [preferences, setPreferences] = useState<UserCriteria>({
     jobTitle: '',
     location: '',
-    salaryExpectation: '',
+    skills: '',
+    salary: '',
   });
   const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleNext = () => {
-    if (currentStep === 'jobTitle') {
-      setPreferences((prev) => ({ ...prev, jobTitle: inputValue }));
-      setCurrentStep('location');
-    } else if (currentStep === 'location') {
-      setPreferences((prev) => ({ ...prev, location: inputValue }));
-      setCurrentStep('salary');
-    } else if (currentStep === 'salary') {
-      setPreferences((prev) => ({ ...prev, salaryExpectation: inputValue }));
-      setCurrentStep('complete');
+    const currentStepKey = content[currentStep].key;
+    if (currentStepKey !== 'complete') {
+      setPreferences((prev) => ({ ...prev, [currentStepKey]: inputValue }));
     }
+    setCurrentStep(currentStep + 1);
     setInputValue('');
   };
 
   const handleBack = () => {
-    if (currentStep === 'location') {
-      setCurrentStep('jobTitle');
-      setInputValue(preferences.jobTitle);
-    } else if (currentStep === 'salary') {
-      setCurrentStep('location');
-      setInputValue(preferences.location);
-    } else if (currentStep === 'complete') {
-      setCurrentStep('salary');
-      setInputValue(preferences.salaryExpectation);
-    }
+    const newStep = currentStep - 1;
+    setCurrentStep(newStep);
+    const newStepKey = content[newStep].key;
+    if (newStepKey !== 'complete') setInputValue(preferences[newStepKey]);
   };
 
-  const handleRestart = () => {
-    setCurrentStep('jobTitle');
+  const handleStartOver = () => {
+    setCurrentStep(0);
     setPreferences({
       jobTitle: '',
       location: '',
-      salaryExpectation: '',
+      skills: '',
+      salary: '',
     });
     setInputValue('');
+    setResults(null);
+    setError(null);
+    setIsLoading(false);
   };
 
   const getStepNumber = () => {
-    switch (currentStep) {
-      case 'jobTitle':
-        return 1;
-      case 'location':
-        return 2;
-      case 'salary':
-        return 3;
-      case 'complete':
-        return 4;
-      default:
-        return 1;
-    }
-  };
-
-  const getStepTitle = () => {
-    switch (currentStep) {
-      case 'jobTitle':
-        return 'What job title are you looking for?';
-      case 'location':
-        return 'Where would you like to work?';
-      case 'salary':
-        return 'What is your salary expectation?';
-      case 'complete':
-        return 'Perfect! Here are your preferences:';
-      default:
-        return '';
-    }
-  };
-
-  const getPlaceholder = () => {
-    switch (currentStep) {
-      case 'jobTitle':
-        return 'e.g., Fullstack Developer, Data Scientist, Product Manager...';
-      case 'location':
-        return 'e.g., Paris, Remote, London, Berlin...';
-      case 'salary':
-        return 'e.g., 45, 60, 80...';
-      default:
-        return '';
-    }
+    return currentStep + 1;
   };
 
   const isStepValid = () => {
     return inputValue.trim().length > 0;
   };
+
+  const handleSubmit = async () => {
+    if (content[currentStep].key !== 'complete') return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/ai/api', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(preferences),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze jobs');
+      }
+
+      const data = await response.json();
+      setResults(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors flex items-center justify-center'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4'></div>
+          <h2 className='text-xl font-semibold text-gray-900 dark:text-white mb-2'>
+            Finding & Analyzing Jobs...
+          </h2>
+          <p className='text-gray-600 dark:text-gray-400'>
+            Searching for jobs and analyzing how well they match your criteria
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Success state
+  if (results) {
+    return (
+      <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors'>
+        <div className='container mx-auto px-4 py-8'>
+          <div className='max-w-4xl mx-auto'>
+            <div className='text-center mb-8'>
+              <h1 className='text-3xl font-bold text-gray-900 dark:text-white mb-2'>
+                Job Search Complete! 🎉
+              </h1>
+              <p className='text-gray-600 dark:text-gray-400'>
+                Found {results.totalJobs} jobs ranked by AI match score
+              </p>
+            </div>
+
+            <div className='bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-8'>
+              {results.analyzedJobs.length === 0 ? (
+                <div className='text-center py-8'>
+                  <h3 className='text-xl font-semibold text-gray-900 dark:text-white mb-2'>
+                    No jobs found
+                  </h3>
+                  <p className='text-gray-600 dark:text-gray-400 mb-6'>
+                    Try adjusting your search criteria or location
+                  </p>
+                  <button
+                    onClick={handleStartOver}
+                    className='px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : (
+                results.analyzedJobs.map((job: any, index: number) => (
+                  <div key={index} className='mb-6'>
+                    <div className='flex items-center justify-between mb-4'>
+                      <div>
+                        <h3 className='text-xl font-semibold text-gray-900 dark:text-white'>
+                          {job.title}
+                        </h3>
+                        <p className='text-gray-600 dark:text-gray-400'>
+                          {job.company} • {job.source}
+                        </p>
+                      </div>
+                      <div className='text-right'>
+                        <div
+                          className={`text-3xl font-bold ${
+                            job.aiScore >= 80
+                              ? 'text-green-600'
+                              : job.aiScore >= 60
+                              ? 'text-yellow-600'
+                              : 'text-red-600'
+                          }`}
+                        >
+                          {job.aiScore || 'N/A'}/100
+                        </div>
+                        <div className='text-sm text-gray-500 dark:text-gray-400'>
+                          Match Score
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-4'>
+                      <h4 className='font-medium text-gray-900 dark:text-white mb-2'>
+                        Job Description:
+                      </h4>
+                      <p className='text-sm text-gray-600 dark:text-gray-400 line-clamp-3'>
+                        {job.description.substring(0, 300)}...
+                      </p>
+                    </div>
+
+                    <a
+                      href={job.url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+                    >
+                      View Job Posting
+                      <svg
+                        className='ml-2 w-4 h-4'
+                        fill='none'
+                        stroke='currentColor'
+                        viewBox='0 0 24 24'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14'
+                        />
+                      </svg>
+                    </a>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className='text-center mt-8'>
+              <button
+                onClick={handleStartOver}
+                className='px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium'
+              >
+                Search more jobs
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors flex items-center justify-center'>
+        <div className='text-center max-w-md mx-auto'>
+          <div className='text-red-600 mb-4'>
+            <svg
+              className='w-12 h-12 mx-auto'
+              fill='none'
+              stroke='currentColor'
+              viewBox='0 0 24 24'
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+              />
+            </svg>
+          </div>
+          <h2 className='text-xl font-semibold text-gray-900 dark:text-white mb-2'>
+            Job Search Failed
+          </h2>
+          <p className='text-gray-600 dark:text-gray-400 mb-6'>{error}</p>
+          <button
+            onClick={handleStartOver}
+            className='px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors'>
@@ -120,7 +263,7 @@ export default function AIPage() {
         <div className='mb-12'>
           <div className='flex items-center justify-center mb-4'>
             <div className='flex items-center space-x-4'>
-              {[1, 2, 3, 4].map((step) => (
+              {[1, 2, 3, 4, 5].map((step) => (
                 <div key={step} className='flex items-center'>
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
@@ -131,7 +274,7 @@ export default function AIPage() {
                   >
                     {step}
                   </div>
-                  {step < 4 && (
+                  {step < 5 && (
                     <div
                       className={`w-8 h-0.5 mx-2 transition-colors ${
                         step < getStepNumber()
@@ -145,7 +288,7 @@ export default function AIPage() {
             </div>
           </div>
           <p className='text-center text-sm text-gray-500 dark:text-gray-400'>
-            Step {getStepNumber()} of 4
+            Step {getStepNumber()} of 5
           </p>
         </div>
 
@@ -153,17 +296,17 @@ export default function AIPage() {
         <div className='max-w-2xl mx-auto'>
           <div className='bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-8'>
             <h2 className='text-2xl font-semibold text-gray-900 dark:text-white mb-8 text-center'>
-              {getStepTitle()}
+              {content[currentStep].title}
             </h2>
 
-            {currentStep !== 'complete' ? (
+            {content[currentStep].key !== 'complete' ? (
               <div className='space-y-6'>
                 <div className='space-y-2'>
                   <input
                     type='text'
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    placeholder={getPlaceholder()}
+                    placeholder={content[currentStep].placeholder}
                     className='w-full p-4 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors'
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && isStepValid()) {
@@ -172,7 +315,7 @@ export default function AIPage() {
                     }}
                     autoFocus
                   />
-                  {currentStep === 'salary' && (
+                  {content[currentStep].key === 'salary' && (
                     <p className='text-sm text-gray-500 dark:text-gray-400 ml-2'>
                       Amount in thousands of euros (k€)
                     </p>
@@ -182,7 +325,7 @@ export default function AIPage() {
                 <div className='flex justify-between space-x-4'>
                   <button
                     onClick={handleBack}
-                    disabled={currentStep === 'jobTitle'}
+                    disabled={currentStep === 0}
                     className='px-6 py-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                   >
                     Back
@@ -192,7 +335,9 @@ export default function AIPage() {
                     disabled={!isStepValid()}
                     className='px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium'
                   >
-                    {currentStep === 'salary' ? 'Complete' : 'Next'}
+                    {content[currentStep].key === 'salary'
+                      ? 'Complete'
+                      : 'Next'}
                   </button>
                 </div>
               </div>
@@ -219,10 +364,19 @@ export default function AIPage() {
 
                   <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg'>
                     <div className='text-sm font-medium text-gray-500 dark:text-gray-400 mb-1'>
+                      Skills
+                    </div>
+                    <div className='text-lg font-semibold text-gray-900 dark:text-white'>
+                      {preferences.skills}
+                    </div>
+                  </div>
+
+                  <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg'>
+                    <div className='text-sm font-medium text-gray-500 dark:text-gray-400 mb-1'>
                       Salary Expectation
                     </div>
                     <div className='text-lg font-semibold text-gray-900 dark:text-white'>
-                      {preferences.salaryExpectation}k€
+                      {preferences.salary}k€
                     </div>
                   </div>
                 </div>
@@ -235,19 +389,17 @@ export default function AIPage() {
                     Edit
                   </button>
                   <button
-                    onClick={handleRestart}
+                    onClick={handleStartOver}
                     className='px-6 py-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors'
                   >
                     Start Over
                   </button>
                   <button
-                    onClick={() => {
-                      // TODO: Submit to AI matching service
-                      alert('AI matching will be implemented here!');
-                    }}
+                    onClick={handleSubmit}
                     className='px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium'
+                    type='submit'
                   >
-                    Find Matches
+                    Search Jobs
                   </button>
                 </div>
               </div>
@@ -256,7 +408,7 @@ export default function AIPage() {
         </div>
 
         {/* Tips */}
-        {currentStep !== 'complete' && (
+        {content[currentStep].key !== 'complete' && (
           <div className='max-w-2xl mx-auto mt-8'>
             <div className='bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4'>
               <div className='flex items-start space-x-3'>
@@ -278,12 +430,7 @@ export default function AIPage() {
                     Tips for better matches
                   </h3>
                   <p className='text-sm text-blue-700 dark:text-blue-300'>
-                    {currentStep === 'jobTitle' &&
-                      'Be specific about your role: "Senior React Developer" works better than just "Developer"'}
-                    {currentStep === 'location' &&
-                      'You can specify multiple locations or "Remote" for remote work opportunities'}
-                    {currentStep === 'salary' &&
-                      'Consider your experience level and market rates for your location and role'}
+                    {content[currentStep]?.tip}
                   </p>
                 </div>
               </div>

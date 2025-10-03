@@ -1,5 +1,5 @@
-import { getAllJobs } from '@/lib/db';
 import JobList from '@/app/components/JobList';
+import { getAllJobs } from '@/lib/db';
 
 export default async function Home() {
   const jobs = (await getAllJobs()).sort((a, b) => b.score - a.score);
