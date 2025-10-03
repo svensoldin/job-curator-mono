@@ -1,25 +1,25 @@
+import { UserCriteria } from '../../../types/user-criteria';
 import { Mistral } from '@mistralai/mistralai';
 import * as dotenv from 'dotenv';
-
-import { UserCriteria } from '../../../types/user-criteria';
 
 dotenv.config();
 
 const apiKey = process.env.MISTRAL_API_KEY;
 const client = new Mistral({ apiKey });
 
-export interface ScrapedJob {
+export interface JobPosting {
   source: string;
   title: string;
   company: string;
   description: string;
   url: string;
+  score?: number;
 }
 
 export async function getScrapedJobs(
   userCriteria: UserCriteria
-): Promise<ScrapedJob[]> {
-  const baseUrl = process.env.JOB_SCRAPER_URL || 'http://localhost:4000';
+): Promise<JobPosting[]> {
+  const baseUrl = process.env.JOB_SCRAPER_URL;
 
   try {
     const response = await fetch(`${baseUrl}/jobs`, {
@@ -28,9 +28,8 @@ export async function getScrapedJobs(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        title: userCriteria.jobTitle,
-        location: userCriteria.location,
-        limit: 50, // Default limit for number of jobs to scrape
+        ...userCriteria,
+        limit: 5,
       }),
     });
 
@@ -42,19 +41,9 @@ export async function getScrapedJobs(
 
     const data = await response.json();
 
-    // Transform the response to match our ScrapedJob interface
-    const scrapedJobs: ScrapedJob[] = data.jobs.map((job: any) => ({
-      source: job.source,
-      title: job.title,
-      company: job.company,
-      description: job.description || '',
-      url: job.url,
-    }));
-
-    return scrapedJobs;
+    return data.jobs;
   } catch (error) {
     console.error('Error fetching scraped jobs:', error);
-    // Return empty array if scraping fails so the rest of the app can continue
     return [];
   }
 }
@@ -86,7 +75,7 @@ Score only:`;
 }
 
 export async function analyzeJobsWithAI(
-  jobs: ScrapedJob[],
+  jobs: JobPosting[],
   userCriteria: UserCriteria
 ) {
   const model = 'mistral-small-latest';

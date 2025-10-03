@@ -94,7 +94,8 @@ export default function AIPage() {
             Finding & Analyzing Jobs...
           </h2>
           <p className='text-gray-600 dark:text-gray-400'>
-            Searching for jobs and analyzing how well they match your criteria
+            This usually takes a few minutes. Rest your eyes, look at something
+            distant.
           </p>
         </div>
       </div>
