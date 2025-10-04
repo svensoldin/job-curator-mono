@@ -8,10 +8,7 @@ import helmet from 'helmet';
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Security middleware
 app.use(helmet());
-
-// CORS configuration
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN || '*',
@@ -19,8 +16,6 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
-
-// Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
@@ -30,16 +25,6 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Specific rate limiting for analysis endpoint (more restrictive)
-const analysisLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // Limit each IP to 10 analysis requests per hour
-  message: {
-    error: 'Too many analysis requests from this IP, please try again later.',
-  },
-});
-
-// Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -52,7 +37,6 @@ app.use((req, res, next) => {
 // API Routes
 app.use('/jobs', jobRoutes);
 
-// 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({
     error: 'Route not found',
