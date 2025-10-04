@@ -7,14 +7,17 @@ export default async function DashboardPage() {
   const supabase = await createClient();
 
   // Check if user is authenticated
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
   if (userError || !user) {
     redirect('/login');
   }
 
   // Fetch user's job searches with stats
-  const { data: searches, error: searchesError } = await supabase
+  const { data, error: searchesError } = await supabase
     .from('job_searches_with_stats')
     .select('*')
     .order('created_at', { ascending: false });
@@ -24,8 +27,8 @@ export default async function DashboardPage() {
   }
 
   return (
-    <DashboardClient 
-      searches={(searches as unknown as JobSearchWithStats[]) || []} 
+    <DashboardClient
+      data={(data as unknown as JobSearchWithStats[]) || []}
       userEmail={user.email || 'User'}
     />
   );
