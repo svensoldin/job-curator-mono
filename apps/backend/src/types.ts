@@ -1,44 +1,31 @@
+// Client-side user criteria (coming from job-searcher-client)
+export interface UserCriteria {
+  jobTitle: string;
+  location: string;
+  skills: string;
+  salary: string;
+}
+
+export type ScrapeCriteria = Pick<UserCriteria, 'jobTitle' | 'location'>;
+
 export interface JobPosting {
   title: string;
   company: string;
+  location?: string;
   url: string;
-  description?: string;
+  description: string;
+  source: string;
   score?: number;
-  // Database fields
-  _id?: string;
-  scraped_at?: Date;
-  analysis_status?: 'pending' | 'analyzed' | 'failed';
-  source?: string;
-  hash?: string;
 }
 
-export interface SearchParams {
-  keywords: string;
-  location: string;
-  experienceLevel?: string;
-  maxResults?: number;
-}
-
-export interface UserCriteria {
-  keywords: string[];
-  locations: string[];
-  experienceLevel: string;
-  coreSkills: string[];
-  remotePreference: string;
-  excludedKeywords?: string[];
-}
-
-export interface AppConfig {
-  jobCriteria: UserCriteria;
-  logging: {
-    level: string;
-    file: string;
+export interface AnalysisResult {
+  score: number;
+  reasons: string[];
+  breakdown: {
+    skills: number;
+    experience: number;
+    location: number;
+    bonus: number;
+    penalties: number;
   };
 }
-
-export interface AppState {
-  isRunning: boolean;
-}
-
-// Utility types
-export type LogLevel = 'error' | 'warn' | 'info' | 'debug';

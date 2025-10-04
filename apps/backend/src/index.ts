@@ -1,142 +1,104 @@
-import {
-  config,
-  getSearchParams,
-  validateConfig,
-  SearchParams,
-} from './config.js';
-import {
-  connectDatabase,
-  disconnectDatabase,
-  getDatabaseStats,
-} from './database.js';
-import { runWeeklyJobProcessing } from './scraper.js';
+import jobRoutes from './routes/jobs.js';
 import { logger } from './utils/logger.js';
+import cors from 'cors';
+import express from 'express';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
 
-/**
- * Application state interface
- */
-interface AppState {
-  isRunning: boolean;
-}
+const app = express();
+const PORT = process.env.PORT || 4000;
 
-/**
- * Application state
- */
-let appState: AppState = {
-  isRunning: false,
-};
+app.use(helmet());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: {
+    error: 'Too many requests from this IP, please try again later.',
+  },
+});
+app.use(limiter);
 
-/**
- * Initialize all services
- */
-const initializeServices = async (): Promise<void> => {
-  try {
-    console.log('🚀 Initializing AI Job Hunter...');
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
 
-    // Validate configuration
-    console.log('⚙️  Validating configuration...');
-    validateConfig();
-    console.log('✅ Configuration validated');
+// Request logging middleware
+app.use((req, res, next) => {
+  logger.info(`${req.method} ${req.path} - ${req.ip}`);
+  next();
+});
 
-    // Connect to database
-    console.log('🔌 Connecting to database...');
-    await connectDatabase();
-    console.log('✅ Database connected');
+// API Routes
+app.use('/jobs', jobRoutes);
 
-    console.log('🎉 AI Job Hunter initialized successfully');
-  } catch (error) {
-    console.error('❌ Failed to initialize AI Job Hunter:', error);
-    throw error;
-  }
-};
-
-/**
- * Run weekly job processing (scraping + analysis + saving)
- */
-const runWeeklyJobs = async (): Promise<void> => {
-  if (appState.isRunning) {
-    console.log('⚠️  Job process already in progress, skipping...');
-    return;
-  }
-
-  appState.isRunning = true;
-  const startTime = Date.now();
-
-  try {
-    console.log('🚀 Starting weekly job processing...');
-
-    console.log('📝 Getting search parameters...');
-    const searchParams: SearchParams = getSearchParams();
-    console.log('🔍 Search params:', searchParams);
-
-    console.log('🕷️  Starting job scraping and processing...');
-    const processedCount = await runWeeklyJobProcessing(searchParams);
-
-    console.log(`✅ Successfully processed ${processedCount} jobs`);
-
-    console.log('📊 Getting database stats...');
-    const stats = await getDatabaseStats();
-    console.log('📈 Database stats:', stats);
-
-    const duration = (Date.now() - startTime) / 1000;
-    console.log(`🎉 Weekly job processing completed in ${duration}s`);
-  } catch (error) {
-    console.error('❌ Weekly job processing failed:', error);
-    throw error;
-  } finally {
-    appState.isRunning = false;
-  }
-};
-
-
-
-/**
- * Handle graceful shutdown
- */
-const handleShutdown = async (signal: string): Promise<void> => {
-  logger.info(`Received ${signal}, shutting down gracefully...`);
-
-  try {
-    await disconnectDatabase();
-  } catch (error) {
-    logger.error('Error during shutdown:', error);
-  }
-
-  process.exit(0);
-};
-
-/**
- * Main application entry point
- */
-const main = async (): Promise<void> => {
-  try {
-    await initializeServices();
-
-    console.log('� Running weekly job processing...');
-    await runWeeklyJobs();
-    console.log('🏁 Weekly job processing completed');
-    
-    await disconnectDatabase();
-    process.exit(0);
-  } catch (error) {
-    console.error('Application failed to start:', error);
-    await disconnectDatabase();
-    process.exit(1);
-  }
-};
-
-// Export functions for testing
-export {
-  initializeServices,
-  runWeeklyJobs,
-  handleShutdown,
-  main,
-};
-
-// Run the application
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((error: Error) => {
-    console.error('Unhandled error:', error);
-    process.exit(1);
+app.use('*', (req, res) => {
+  res.status(404).json({
+    error: 'Route not found',
+    message: `The route ${req.originalUrl} does not exist.`,
   });
+});
+
+// Global error handler
+app.use(
+  (
+    err: any,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    logger.error('Unhandled error:', err);
+
+    res.status(err.status || 500).json({
+      error: 'Internal server error',
+      message:
+        process.env.NODE_ENV === 'development'
+          ? err.message
+          : 'Something went wrong',
+    });
+  }
+);
+
+/**
+ * Initialize the server and required services
+ */
+async function initializeServer() {
+  try {
+    logger.info('🚀 Initializing Job scraping API Server...');
+
+    // Start the server
+    app.listen(PORT, () => {
+      logger.info(`✅ Server is running on port ${PORT}`);
+      logger.info(
+        `📖 API Documentation available at http://localhost:${PORT}/api/health`
+      );
+      logger.info('🎯 Ready to analyze jobs!');
+    });
+  } catch (error) {
+    logger.error('❌ Failed to initialize server:', error);
+    process.exit(1);
+  }
 }
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, shutting down gracefully');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  logger.info('SIGINT received, shutting down gracefully');
+  process.exit(0);
+});
+
+// Start the server if this file is run directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  initializeServer();
+}
+
+export default app;
