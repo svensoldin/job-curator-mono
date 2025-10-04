@@ -6,7 +6,7 @@
   "type": "module",
   "packageManager": "yarn@4.0.0",
   "scripts": {
-    "start": "yarn build && node dist/index.js",
+    "start": "yarn && yarn build && node dist/index.js",
     "dev": "nodemon --exec \"yarn build && node dist/index.js\" --watch src --ext ts",
     "build": "tsc",
     "build:watch": "tsc --watch",
