@@ -30,17 +30,21 @@
   "author": "Sven Soldin",
   "license": "MIT",
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "mongoose": "^8.18.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
     "puppeteer": "^22.0.0",
     "validator": "^13.11.0",
     "winston": "^3.11.0"
   },
   "devDependencies": {
     "@types/cheerio": "^1.0.0",
+    "@types/cors": "^2",
+    "@types/express": "^5",
     "@types/handlebars": "^4.1.0",
     "@types/jest": "^29.5.8",
-    "@types/mongoose": "^5.11.97",
     "@types/node": "^20.10.0",
     "@types/validator": "^13.11.7",
     "@types/winston": "^2.4.4",
