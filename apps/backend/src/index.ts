@@ -2,7 +2,6 @@ import jobRoutes from './routes/jobs.js';
 import { logger } from './utils/logger.js';
 import cors from 'cors';
 import express from 'express';
-import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 
 const app = express();
@@ -16,14 +15,6 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: {
-    error: 'Too many requests from this IP, please try again later.',
-  },
-});
-app.use(limiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -75,9 +66,6 @@ async function initializeServer() {
     // Start the server
     app.listen(PORT, () => {
       logger.info(`✅ Server is running on port ${PORT}`);
-      logger.info(
-        `📖 API Documentation available at http://localhost:${PORT}/api/health`
-      );
       logger.info('🎯 Ready to analyze jobs!');
     });
   } catch (error) {
