@@ -121,7 +121,14 @@ class SearchTaskManager {
       task.message = 'Scraping job boards (LinkedIn, Welcome to the Jungle)...';
       logger.info(`Task ${task.id}: Starting to scrape job boards`);
 
-      const scrapedJobOffers = await scrapeJobsForAnalysis(scrapeCriteria);
+      const scrapedJobOffers = await scrapeJobsForAnalysis(
+        scrapeCriteria,
+        (progress, message) => {
+          task.progress = progress;
+          task.message = message;
+          logger.info(`Task ${task.id}: ${progress}% - ${message}`);
+        }
+      );
 
       // Update progress after scraping completes
       task.progress = 70;

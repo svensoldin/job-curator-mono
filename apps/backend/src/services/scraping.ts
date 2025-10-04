@@ -338,18 +338,29 @@ export const scrapeLinkedIn = async (
  * Scrape jobs for analysis based on user criteria
  */
 export const scrapeJobsForAnalysis = async (
-  criteria: ScrapeCriteria
+  criteria: ScrapeCriteria,
+  onProgress?: (progress: number, message: string) => void
 ): Promise<JobPosting[]> => {
   const browser = await createBrowser();
 
   try {
     logger.info(`🕷️ Starting job scraping for: ${criteria.jobTitle}`);
 
-    // Scrape from both sources
-    const [welcomeToTheJungleJobs, linkedInJobs] = await Promise.all([
-      scrapeWelcomeToTheJungle(browser, criteria),
-      scrapeLinkedIn(browser, criteria),
-    ]);
+    onProgress?.(15, 'Scraping Welcome to the Jungle...');
+    const welcomeToTheJungleJobs = await scrapeWelcomeToTheJungle(
+      browser,
+      criteria
+    );
+
+    onProgress?.(
+      40,
+      `Found ${welcomeToTheJungleJobs.length} jobs from Welcome to the Jungle`
+    );
+
+    onProgress?.(45, 'Scraping LinkedIn...');
+    const linkedInJobs = await scrapeLinkedIn(browser, criteria);
+
+    onProgress?.(65, `Found ${linkedInJobs.length} jobs from LinkedIn`);
 
     const allJobs = [...welcomeToTheJungleJobs, ...linkedInJobs];
 
