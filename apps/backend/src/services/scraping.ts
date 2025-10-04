@@ -8,6 +8,8 @@ import puppeteer, { Browser, Page } from 'puppeteer';
 const MAX_JOBS_PER_BOARD = 25;
 const MAX_JOBS = 50;
 const DELAY_BETWEEN_REQUESTS = 1000;
+const USER_AGENT =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 /**
  * Create and initialize a browser instance
@@ -63,9 +65,7 @@ const scrapeWelcomeToTheJungle = async (
     const page: Page = await browser.newPage();
 
     // Set user agent to avoid bot detection
-    await page.setUserAgent(
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    );
+    await page.setUserAgent(USER_AGENT);
 
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
@@ -140,9 +140,7 @@ const scrapeWelcomeToTheJungle = async (
         );
 
         const descPage = await browser.newPage();
-        await descPage.setUserAgent(
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        );
+        await descPage.setUserAgent(USER_AGENT);
 
         await descPage.goto(job.url, {
           waitUntil: 'networkidle2',
@@ -220,11 +218,7 @@ export const scrapeLinkedIn = async (
   try {
     const page: Page = await browser.newPage();
 
-    // Set user agent to avoid bot detection
-    await page.setUserAgent(
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    );
-
+    await page.setUserAgent(USER_AGENT);
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
     // Wait for job listings to load
@@ -237,7 +231,6 @@ export const scrapeLinkedIn = async (
       await page.waitForSelector('body', { timeout: 5000 });
     }
 
-    // Extract job data from the search results
     const jobs: JobPosting[] = await page.evaluate(() => {
       const jobElements = document.querySelectorAll('.job-search-card');
       return Array.from(jobElements).map((element) => {
@@ -289,9 +282,7 @@ export const scrapeLinkedIn = async (
         );
 
         const descPage = await browser.newPage();
-        await descPage.setUserAgent(
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        );
+        await descPage.setUserAgent(USER_AGENT);
 
         await descPage.goto(job.url, {
           waitUntil: 'networkidle2',

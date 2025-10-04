@@ -1,4 +1,5 @@
 import { logger } from '../utils/logger.js';
+
 import type { JobPosting, UserCriteria, AnalysisResult } from '../types.js';
 
 /**
@@ -222,11 +223,13 @@ export function analyzeJob(
   job: JobPosting,
   criteria: UserCriteria
 ): JobPosting & { analysisResult: AnalysisResult } {
-  // Parse skills from comma-separated string
-  const coreSkills = criteria.skills
-    .split(',')
-    .map((skill) => skill.trim())
-    .filter(Boolean);
+  const coreSkills =
+    typeof criteria.skills === 'string'
+      ? criteria.skills
+          .split(',')
+          .map((skill) => skill.trim())
+          .filter(Boolean)
+      : [];
 
   // Determine experience level from job title
   const jobTitleLower = criteria.jobTitle.toLowerCase();
