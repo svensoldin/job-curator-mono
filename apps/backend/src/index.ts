@@ -37,7 +37,8 @@ app.use((req, res, next) => {
 // API Routes
 app.use('/jobs', jobRoutes);
 
-app.use('*', (req, res) => {
+// 404 handler - must be after all other routes
+app.use((req, res) => {
   res.status(404).json({
     error: 'Route not found',
     message: `The route ${req.originalUrl} does not exist.`,
