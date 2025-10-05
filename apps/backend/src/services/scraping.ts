@@ -43,7 +43,8 @@ export const closeBrowser = async (browser: Browser): Promise<void> => {
  */
 const scrapeWelcomeToTheJungle = async (
   browser: Browser,
-  criteria: ScrapeCriteria
+  criteria: ScrapeCriteria,
+  limit: number = MAX_JOBS_PER_BOARD
 ): Promise<JobPosting[]> => {
   const baseUrl = 'https://www.welcometothejungle.com/fr/jobs';
 
@@ -77,13 +78,15 @@ const scrapeWelcomeToTheJungle = async (
       await page.waitForSelector('body', { timeout: 5000 });
     }
 
-    const jobs: JobPosting[] = await page.evaluate(() => {
+    const jobs: JobPosting[] = await page.evaluate((maxJobs) => {
       const jobLinks = Array.from(
         document.querySelectorAll('a[href*="/jobs/"]')
       );
       const jobsMap = new Map();
 
       for (const link of jobLinks) {
+        if (jobsMap.size >= maxJobs) break;
+
         const href = (link as HTMLAnchorElement).href;
         const linkText = link.textContent?.trim() || '';
 
@@ -114,29 +117,24 @@ const scrapeWelcomeToTheJungle = async (
       }
 
       return Array.from(jobsMap.values());
-    });
+    }, limit);
 
     await page.close();
 
     logger.info(`Found ${jobs.length} Welcome to the Jungle jobs`);
 
-    // Limit to MAX_JOBS_PER_BOARD before fetching descriptions
-    const limitedJobs = jobs.slice(0, MAX_JOBS_PER_BOARD);
-
     logger.info(
-      `Fetching descriptions for ${limitedJobs.length} Welcome to the Jungle jobs...`
+      `Fetching descriptions for ${jobs.length} Welcome to the Jungle jobs...`
     );
 
-    // Fetch descriptions for limited jobs only
-    for (let i = 0; i < limitedJobs.length; i++) {
-      const job = limitedJobs[i];
+    // Fetch descriptions for jobs
+    for (let i = 0; i < jobs.length; i++) {
+      const job = jobs[i];
       if (!job || !job.url) continue;
 
       try {
         logger.info(
-          `📖 Fetching WTTJ description ${i + 1}/${limitedJobs.length}: ${
-            job.title
-          }`
+          `📖 Fetching WTTJ description ${i + 1}/${jobs.length}: ${job.title}`
         );
 
         const descPage = await browser.newPage();
@@ -192,10 +190,8 @@ const scrapeWelcomeToTheJungle = async (
       }
     }
 
-    logger.info(
-      `Scraped ${limitedJobs.length} jobs from Welcome to the Jungle`
-    );
-    return limitedJobs;
+    logger.info(`Scraped ${jobs.length} jobs from Welcome to the Jungle`);
+    return jobs;
   } catch (error) {
     logger.error('Error scraping Welcome to the Jungle:', error);
     return [];
@@ -207,7 +203,8 @@ const scrapeWelcomeToTheJungle = async (
  */
 export const scrapeLinkedIn = async (
   browser: Browser,
-  criteria: ScrapeCriteria
+  criteria: ScrapeCriteria,
+  limit: number = MAX_JOBS_PER_BOARD
 ): Promise<JobPosting[]> => {
   const keywords = criteria.jobTitle;
   const location = criteria.location || '';
@@ -231,9 +228,10 @@ export const scrapeLinkedIn = async (
       await page.waitForSelector('body', { timeout: 5000 });
     }
 
-    const jobs: JobPosting[] = await page.evaluate(() => {
+    const jobs: JobPosting[] = await page.evaluate((maxJobs) => {
       const jobElements = document.querySelectorAll('.job-search-card');
-      return Array.from(jobElements).map((element) => {
+      const limitedElements = Array.from(jobElements).slice(0, maxJobs);
+      return limitedElements.map((element) => {
         const titleElement = element.querySelector('.base-search-card__title');
         const companyElement = element.querySelector(
           '.base-search-card__subtitle'
@@ -258,27 +256,21 @@ export const scrapeLinkedIn = async (
           source: 'linkedin',
         };
       });
-    });
+    }, limit);
 
     await page.close();
 
     logger.info(`Found ${jobs.length} LinkedIn jobs`);
 
-    const testLimit = MAX_JOBS_PER_BOARD;
-    const limitedJobs = jobs.slice(0, Math.min(testLimit, jobs.length));
+    logger.info(`Fetching descriptions for ${jobs.length} LinkedIn jobs...`);
 
-    // Fetch descriptions by visiting each job URL
-    logger.info(
-      `Fetching descriptions for ${limitedJobs.length} LinkedIn jobs...`
-    );
-
-    for (let i = 0; i < limitedJobs.length; i++) {
-      const job = limitedJobs[i];
+    for (let i = 0; i < jobs.length; i++) {
+      const job = jobs[i];
       if (!job || !job.url) continue;
 
       try {
         logger.info(
-          `📖 Fetching description ${i + 1}/${limitedJobs.length}: ${job.title}`
+          `📖 Fetching description ${i + 1}/${jobs.length}: ${job.title}`
         );
 
         const descPage = await browser.newPage();
@@ -334,8 +326,8 @@ export const scrapeLinkedIn = async (
       }
     }
 
-    logger.info(`Scraped ${limitedJobs.length} jobs from LinkedIn`);
-    return limitedJobs;
+    logger.info(`Scraped ${jobs.length} jobs from LinkedIn`);
+    return jobs;
   } catch (error) {
     logger.error('Error scraping LinkedIn:', error);
     return [];
@@ -346,18 +338,29 @@ export const scrapeLinkedIn = async (
  * Scrape jobs for analysis based on user criteria
  */
 export const scrapeJobsForAnalysis = async (
-  criteria: ScrapeCriteria
+  criteria: ScrapeCriteria,
+  onProgress?: (progress: number, message: string) => void
 ): Promise<JobPosting[]> => {
   const browser = await createBrowser();
 
   try {
     logger.info(`🕷️ Starting job scraping for: ${criteria.jobTitle}`);
 
-    // Scrape from both sources
-    const [welcomeToTheJungleJobs, linkedInJobs] = await Promise.all([
-      scrapeWelcomeToTheJungle(browser, criteria),
-      scrapeLinkedIn(browser, criteria),
-    ]);
+    onProgress?.(15, 'Scraping Welcome to the Jungle...');
+    const welcomeToTheJungleJobs = await scrapeWelcomeToTheJungle(
+      browser,
+      criteria
+    );
+
+    onProgress?.(
+      40,
+      `Found ${welcomeToTheJungleJobs.length} jobs from Welcome to the Jungle`
+    );
+
+    onProgress?.(45, 'Scraping LinkedIn...');
+    const linkedInJobs = await scrapeLinkedIn(browser, criteria);
+
+    onProgress?.(65, `Found ${linkedInJobs.length} jobs from LinkedIn`);
 
     const allJobs = [...welcomeToTheJungleJobs, ...linkedInJobs];
 

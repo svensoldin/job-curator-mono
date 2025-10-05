@@ -1,27 +1,26 @@
-import { analyzeAndRankJobs } from '../services/rule-based-analyzer.js';
-import { scrapeJobsForAnalysis } from '../services/scraping.js';
+import { searchTaskManager } from '../services/search-task-manager.js';
 import { logger } from '../utils/logger.js';
 import express from 'express';
 
 const router = express.Router();
 
 /**
- * POST /jobs
- * Scrape jobs from LinkedIn and Welcome to the Jungle based on user criteria
- * Body params: jobTitle, location, skills, salary, limit (optional, defaults to 50)
+ * POST /jobs/start
+ * Start an async search task for job offers
+ * Returns immediately with a task ID that can be polled for status
+ * Body params: jobTitle, location, skills, salary
  */
-router.post('/', async (req, res) => {
+router.post('/start', async (req, res) => {
   try {
-    const { jobTitle, location, skills, salary, limit = 50 } = req.body;
+    const { jobTitle, location, skills, salary } = req.body;
 
-    if (!jobTitle || !location) {
-      res
-        .status(400)
-        .json({ error: 'Missing required parameters: jobTitle, location' });
-      return;
+    if (!jobTitle || !location || !jobTitle.length || !location.length) {
+      return res.status(400).json({
+        error: 'Missing required parameters: jobTitle, location',
+      });
     }
 
-    // Build user criteria for rule-based analysis
+    // Build user criteria
     const userCriteria = {
       jobTitle,
       location,
@@ -29,37 +28,106 @@ router.post('/', async (req, res) => {
       salary: salary || '',
     };
 
-    logger.info(`Scraping jobs for title="${jobTitle}" location="${location}"`);
-    const jobs = await scrapeJobsForAnalysis({ jobTitle, location });
+    // Create async search task
+    const taskId = searchTaskManager.createTask(userCriteria);
 
-    if (jobs.length === 0) {
-      res.json({
-        total_jobs: 0,
-        jobs: [],
-      });
-      return;
-    }
+    logger.info(
+      `Created search task ${taskId} for "${jobTitle}" in "${location}"`
+    );
 
-    // Apply rule-based analysis to get top N jobs (based on limit)
-    logger.info(`Applying rule-based analysis to ${jobs.length} jobs`);
-    const topJobs = analyzeAndRankJobs(jobs, userCriteria, limit);
-
-    res.json({
-      total_jobs: topJobs.length,
-      jobs: topJobs.map((job) => ({
-        title: job.title,
-        company: job.company,
-        location: job.location,
-        url: job.url,
-        description: job.description,
-        source: job.source,
-        score: job.score,
-      })),
+    return res.json({
+      success: true,
+      taskId,
+      message: 'Search task created successfully',
+      statusUrl: `/jobs/status/${taskId}`,
+      resultsUrl: `/jobs/results/${taskId}`,
     });
   } catch (error) {
-    logger.error('Error scraping jobs:', error);
-    res.status(500).json({ error: 'Failed to scrape jobs' });
-    return;
+    logger.error('Error creating search task:', error);
+    return res.status(500).json({ error: 'Failed to create search task' });
+  }
+});
+
+/**
+ * GET /jobs/status/:taskId
+ * Get the status and progress of a search task
+ */
+router.get('/status/:taskId', async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const task = searchTaskManager.getTask(taskId);
+
+    if (!task) {
+      return res.status(404).json({ error: 'Search task not found' });
+    }
+
+    return res.json({
+      taskId: task.id,
+      status: task.status,
+      progress: task.progress,
+      message: task.message,
+      error: task.error,
+      createdAt: task.createdAt,
+      completedAt: task.completedAt,
+    });
+  } catch (error) {
+    logger.error('Error getting task status:', error);
+    return res.status(500).json({ error: 'Failed to get task status' });
+  }
+});
+
+/**
+ * GET /jobs/results/:taskId
+ * Get the results of a completed search task
+ */
+router.get('/results/:taskId', async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const task = searchTaskManager.getTask(taskId);
+
+    if (!task) {
+      return res.status(404).json({ error: 'Search task not found' });
+    }
+
+    if (task.status === 'pending' || task.status === 'processing') {
+      return res.status(400).json({
+        error: 'Search task not completed yet',
+        status: task.status,
+        progress: task.progress,
+        message: task.message,
+      });
+    }
+
+    if (task.status === 'failed') {
+      return res.status(500).json({
+        error: 'Search task failed',
+        message: task.error || 'Unknown error',
+      });
+    }
+
+    // Task is completed - return job offers
+    return res.json({
+      success: true,
+      total_jobs: task.jobOffers?.length || 0,
+      jobs: task.jobOffers || [],
+    });
+  } catch (error) {
+    logger.error('Error getting task results:', error);
+    return res.status(500).json({ error: 'Failed to get task results' });
+  }
+});
+
+/**
+ * GET /jobs/stats
+ * Get queue statistics (for monitoring/debugging)
+ */
+router.get('/stats', async (req, res) => {
+  try {
+    const stats = searchTaskManager.getStats();
+    return res.json(stats);
+  } catch (error) {
+    logger.error('Error getting stats:', error);
+    return res.status(500).json({ error: 'Failed to get stats' });
   }
 });
 
