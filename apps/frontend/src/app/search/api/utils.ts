@@ -28,7 +28,7 @@ export async function startSearchTask(
   searchId: string,
   userId: string
 ): Promise<string> {
-  const baseUrl = process.env.JOB_SCRAPER_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_JOB_SCRAPER_URL;
 
   // Step 1: Create the search task
   const startResponse = await fetch(`${baseUrl}/jobs/start`, {
@@ -67,7 +67,7 @@ async function processTaskInBackground(
   userId: string,
   userCriteria: UserCriteria
 ): Promise<void> {
-  const baseUrl = process.env.JOB_SCRAPER_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_JOB_SCRAPER_URL;
   const maxAttempts = 120; // 10 minutes maximum
   const pollInterval = 10_000; // Poll every 10 seconds
 
@@ -151,7 +151,7 @@ async function processTaskInBackground(
 export async function getScrapedJobs(
   userCriteria: UserCriteria
 ): Promise<JobPosting[]> {
-  const baseUrl = process.env.JOB_SCRAPER_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_JOB_SCRAPER_URL;
 
   try {
     console.log('Starting async job search task...');

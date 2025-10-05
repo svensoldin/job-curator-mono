@@ -1,3 +1,4 @@
+import { AUTH_API, HOME, LOGIN } from '@/routes';
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -30,8 +31,7 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Do not run code between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
+  // supabase.auth.getUser().
 
   // IMPORTANT: DO NOT REMOVE auth.getUser()
 
@@ -41,13 +41,13 @@ export async function updateSession(request: NextRequest) {
 
   if (
     !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth') &&
-    !request.nextUrl.pathname.startsWith('/error')
+    !request.nextUrl.pathname.startsWith(LOGIN) &&
+    !request.nextUrl.pathname.startsWith(AUTH_API) &&
+    request.nextUrl.pathname !== HOME
   ) {
-    // no user
+    // no user, redirect to login (but allow home page access)
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = LOGIN;
     return NextResponse.redirect(url);
   }
 

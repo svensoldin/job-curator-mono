@@ -20,6 +20,7 @@ export default async function DashboardPage() {
   const { data, error: searchesError } = await supabase
     .from('job_searches_with_stats')
     .select('*')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (searchesError) {
