@@ -14,7 +14,7 @@ router.post('/start', async (req, res) => {
   try {
     const { jobTitle, location, skills, salary } = req.body;
 
-    if (!jobTitle || !location) {
+    if (!jobTitle || !location || !jobTitle.length || !location.length) {
       return res.status(400).json({
         error: 'Missing required parameters: jobTitle, location',
       });
