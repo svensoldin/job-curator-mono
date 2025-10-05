@@ -32,7 +32,7 @@ class SearchTaskManager {
   createTask(criteria: UserCriteria): string {
     const id = `search_${Date.now()}_${Math.random()
       .toString(36)
-      .substr(2, 9)}`;
+      .substring(2, 11)}`;
 
     const task: SearchTask = {
       id,
