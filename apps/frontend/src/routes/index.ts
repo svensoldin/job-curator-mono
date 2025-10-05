@@ -5,4 +5,4 @@ export const SEARCH = `/search`;
 
 // API
 export const AUTH_API = '/auth';
-export const SEARCH_API = `${SEARCH}api/`;
+export const SEARCH_API = `${SEARCH}/api/`;

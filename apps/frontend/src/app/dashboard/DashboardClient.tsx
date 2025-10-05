@@ -123,6 +123,7 @@ export default function DashboardClient({
                 search={search}
                 onClick={() => handleViewSearch(search)}
                 onDelete={(e) => handleDeleteSearch(search.id, e)}
+                isPending={pendingSearchIds.includes(search.id)}
               />
             ))}
           </div>

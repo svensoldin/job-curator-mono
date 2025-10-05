@@ -58,7 +58,7 @@ export default function SearchDetailView({
         <div className='flex items-center justify-between mb-8'>
           <button
             onClick={onBack}
-            className='flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors'
+            className='cursor-pointer flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors'
           >
             <svg
               className='w-5 h-5 mr-2'

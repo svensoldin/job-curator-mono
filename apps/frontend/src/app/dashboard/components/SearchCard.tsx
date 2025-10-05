@@ -6,12 +6,14 @@ interface SearchCardProps {
   search: JobSearchWithStats;
   onClick: () => void;
   onDelete: (e: React.MouseEvent) => void;
+  isPending?: boolean;
 }
 
 export default function SearchCard({
   search,
   onClick,
   onDelete,
+  isPending = false,
 }: SearchCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -26,32 +28,60 @@ export default function SearchCard({
 
   return (
     <div
-      onClick={onClick}
-      className='bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6 cursor-pointer hover:shadow-xl hover:border-blue-500 dark:hover:border-blue-400 transition-all'
+      onClick={isPending ? undefined : onClick}
+      className={`rounded-lg shadow-lg p-6 transition-all relative ${
+        isPending
+          ? 'bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-400 dark:border-blue-500 animate-pulse-slow cursor-not-allowed'
+          : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-xl hover:border-blue-500 dark:hover:border-blue-400'
+      }`}
     >
-      <div className='flex items-start justify-between mb-4'>
-        <h3 className='text-lg font-semibold text-gray-900 dark:text-white flex-1'>
-          {search.job_title}
-        </h3>
-        <button
-          onClick={onDelete}
-          className='text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors'
-          title='Delete search'
-        >
-          <svg
-            className='w-5 h-5'
-            fill='none'
-            stroke='currentColor'
-            viewBox='0 0 24 24'
-          >
+      {/* Pending Badge */}
+      {isPending && (
+        <div className='absolute top-4 right-4 flex items-center space-x-2 bg-blue-500 dark:bg-blue-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg'>
+          <svg className='w-4 h-4 animate-spin' fill='none' viewBox='0 0 24 24'>
+            <circle
+              className='opacity-25'
+              cx='12'
+              cy='12'
+              r='10'
+              stroke='currentColor'
+              strokeWidth='4'
+            />
             <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth={2}
-              d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+              className='opacity-75'
+              fill='currentColor'
+              d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
             />
           </svg>
-        </button>
+          <span>Processing</span>
+        </div>
+      )}
+
+      <div className='flex items-start justify-between mb-4'>
+        <h3 className='text-lg font-semibold text-gray-900 dark:text-white flex-1 pr-2'>
+          {search.job_title}
+        </h3>
+        {!isPending && (
+          <button
+            onClick={onDelete}
+            className='text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors'
+            title='Delete search'
+          >
+            <svg
+              className='w-5 h-5'
+              fill='none'
+              stroke='currentColor'
+              viewBox='0 0 24 24'
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+              />
+            </svg>
+          </button>
+        )}
       </div>
 
       <div className='space-y-2 mb-4'>
@@ -96,31 +126,42 @@ export default function SearchCard({
       </div>
 
       <div className='pt-4 border-t border-gray-200 dark:border-gray-700'>
-        <div className='flex items-center justify-between'>
-          <div>
-            <div className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
-              {search.result_count}
-            </div>
-            <div className='text-xs text-gray-500 dark:text-gray-400'>
-              Results
-            </div>
+        {isPending ? (
+          <div className='text-center py-2'>
+            <p className='text-sm text-blue-600 dark:text-blue-400 font-medium'>
+              ⏳ Searching job boards and analyzing results...
+            </p>
+            <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+              This usually takes 5-10 minutes
+            </p>
           </div>
-          {search.avg_ai_score && (
+        ) : (
+          <div className='flex items-center justify-between'>
             <div>
-              <div className='text-2xl font-bold text-green-600 dark:text-green-400'>
-                {Math.round(search.avg_ai_score)}
+              <div className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
+                {search.result_count}
               </div>
               <div className='text-xs text-gray-500 dark:text-gray-400'>
-                Avg Score
+                Results
               </div>
             </div>
-          )}
-          <div className='text-right'>
-            <div className='text-xs text-gray-500 dark:text-gray-400'>
-              {formatDate(search.created_at)}
+            {search.avg_ai_score && (
+              <div>
+                <div className='text-2xl font-bold text-green-600 dark:text-green-400'>
+                  {Math.round(search.avg_ai_score)}
+                </div>
+                <div className='text-xs text-gray-500 dark:text-gray-400'>
+                  Avg Score
+                </div>
+              </div>
+            )}
+            <div className='text-right'>
+              <div className='text-xs text-gray-500 dark:text-gray-400'>
+                {formatDate(search.created_at)}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
