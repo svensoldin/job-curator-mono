@@ -2,12 +2,15 @@ import { JobPosting, ScrapeCriteria, UserCriteria } from '../types.js';
 import { logger } from '../utils/logger.js';
 import { analyzeAndRankJobs } from './rule-based-analyzer.js';
 import { scrapeJobsForAnalysis } from './scraping.js';
+import { supabase, CreateJobResultInput } from '../lib/supabase.js';
 
 /**
  * Represents a search task for job offers
  */
 interface SearchTask {
   id: string;
+  userId: string;
+  searchId: string; // Supabase job_searches record ID
   status: 'pending' | 'processing' | 'completed' | 'failed';
   progress: number; // 0-100
   message: string;
@@ -29,13 +32,15 @@ class SearchTaskManager {
   /**
    * Create a new search task
    */
-  createTask(criteria: UserCriteria): string {
+  createTask(criteria: UserCriteria, userId: string, searchId: string): string {
     const id = `search_${Date.now()}_${Math.random()
       .toString(36)
       .substring(2, 11)}`;
 
     const task: SearchTask = {
       id,
+      userId,
+      searchId,
       status: 'pending',
       progress: 0,
       message: 'Search task queued',
@@ -46,7 +51,9 @@ class SearchTaskManager {
     this.tasks.set(id, task);
     this.taskQueue.push(id);
 
-    logger.info(`Created search task ${id} for "${criteria.jobTitle}"`);
+    logger.info(
+      `Created search task ${id} for user ${userId}, search ${searchId}, "${criteria.jobTitle}"`
+    );
 
     // Start processing if not already running
     this.processQueue();
@@ -157,6 +164,64 @@ class SearchTaskManager {
         task.criteria,
         10
       );
+
+      // Save results to Supabase
+      task.progress = 90;
+      task.message = 'Saving results to database...';
+      logger.info(
+        `Task ${task.id}: Saving ${rankedJobOffers.length} results to Supabase`
+      );
+
+      try {
+        // Update the search record with total jobs count
+        const { error: updateError } = await supabase
+          .from('job_searches')
+          .update({ total_jobs: rankedJobOffers.length })
+          .eq('id', task.searchId);
+
+        if (updateError) {
+          logger.error(
+            `Task ${task.id}: Failed to update search record:`,
+            updateError
+          );
+          throw updateError;
+        }
+
+        // Save job results
+        if (rankedJobOffers.length > 0) {
+          const jobResults: CreateJobResultInput[] = rankedJobOffers.map(
+            (job) => ({
+              search_id: task.searchId,
+              title: job.title,
+              company: job.company,
+              description: job.description || null,
+              url: job.url,
+              source: job.source,
+              ai_score: job.score || null,
+            })
+          );
+
+          const { error: insertError } = await supabase
+            .from('job_results')
+            .insert(jobResults);
+
+          if (insertError) {
+            logger.error(
+              `Task ${task.id}: Failed to insert job results:`,
+              insertError
+            );
+            throw insertError;
+          }
+        }
+
+        logger.info(
+          `Task ${task.id}: Successfully saved ${rankedJobOffers.length} results to Supabase`
+        );
+      } catch (dbError) {
+        logger.error(`Task ${task.id}: Database error:`, dbError);
+        // Continue with task completion even if DB save fails
+        // Client can still see results via the task API
+      }
 
       // Task completed successfully
       task.status = 'completed';
