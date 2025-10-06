@@ -1,17 +1,18 @@
 'use client';
 
 import { JobSearchWithStats } from '@/types/database';
+import Link from 'next/link';
 
 interface SearchCardProps {
   search: JobSearchWithStats;
-  onClick: () => void;
+  href: string;
   onDelete: (e: React.MouseEvent) => void;
   isPending?: boolean;
 }
 
 export default function SearchCard({
   search,
-  onClick,
+  href,
   onDelete,
   isPending = false,
 }: SearchCardProps) {
@@ -26,13 +27,12 @@ export default function SearchCard({
     });
   };
 
-  return (
+  const CardContent = (
     <div
-      onClick={isPending ? undefined : onClick}
       className={`rounded-lg shadow-lg p-6 transition-all relative ${
         isPending
-          ? 'bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-400 dark:border-blue-500 animate-pulse-slow cursor-not-allowed'
-          : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-xl hover:border-blue-500 dark:hover:border-blue-400'
+          ? 'bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-400 dark:border-blue-500 animate-pulse-slow'
+          : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-xl hover:border-blue-500 dark:hover:border-blue-400'
       }`}
     >
       {/* Pending Badge */}
@@ -164,5 +164,15 @@ export default function SearchCard({
         )}
       </div>
     </div>
+  );
+
+  if (isPending) {
+    return CardContent;
+  }
+
+  return (
+    <Link href={href} className='block cursor-pointer'>
+      {CardContent}
+    </Link>
   );
 }

@@ -1,14 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { JobSearchWithStats } from '@/types/database';
 import { createClient } from '@/lib/supabase/client';
 import PendingTasksSection from './components/PendingTasksSection';
 import SearchCard from './components/SearchCard';
-import SearchDetailView from './components/SearchDetailView';
 import EmptyState from './components/EmptyState';
+import { SEARCH } from '@/routes';
 
 interface DashboardClientProps {
   data: JobSearchWithStats[];
@@ -20,18 +19,12 @@ export default function DashboardClient({
   userEmail,
 }: DashboardClientProps) {
   const router = useRouter();
-  const [selectedSearch, setSelectedSearch] =
-    useState<JobSearchWithStats | null>(null);
   const supabase = createClient();
 
   // Get IDs of searches with no results (pending)
   const pendingSearchIds = data
     .filter((search) => search.total_jobs === 0)
     .map((search) => search.id);
-
-  const handleViewSearch = (search: JobSearchWithStats) => {
-    setSelectedSearch(search);
-  };
 
   const handleDeleteSearch = async (searchId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -58,9 +51,6 @@ export default function DashboardClient({
       localStorage.removeItem(`task_title_${searchId}`);
 
       router.refresh();
-      if (selectedSearch?.id === searchId) {
-        setSelectedSearch(null);
-      }
     }
   };
 
@@ -69,17 +59,6 @@ export default function DashboardClient({
     router.push('/login');
   };
 
-  // Detail view when a search is selected
-  if (selectedSearch) {
-    return (
-      <SearchDetailView
-        search={selectedSearch}
-        onBack={() => setSelectedSearch(null)}
-      />
-    );
-  }
-
-  // Dashboard list view
   return (
     <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors'>
       <div className='container mx-auto px-4 py-8'>
@@ -121,7 +100,7 @@ export default function DashboardClient({
               <SearchCard
                 key={search.id}
                 search={search}
-                onClick={() => handleViewSearch(search)}
+                href={`${SEARCH}/${search.id}`}
                 onDelete={(e) => handleDeleteSearch(search.id, e)}
                 isPending={pendingSearchIds.includes(search.id)}
               />

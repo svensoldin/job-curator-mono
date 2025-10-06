@@ -1,48 +1,54 @@
-'use client';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import { JobResult } from '@/types/database';
+import Link from 'next/link';
+import JobResultCard from '@/app/dashboard/components/JobResultCard';
+import { DASHBOARD, LOGIN } from '@/routes';
 
-import { useState, useEffect } from 'react';
-import { JobSearchWithStats, JobResult } from '@/types/database';
-import { createClient } from '@/lib/supabase/client';
-import JobResultCard from './JobResultCard';
-
-interface SearchDetailViewProps {
-  search: JobSearchWithStats;
-  onBack: () => void;
+interface SearchDetailPageProps {
+  params: Promise<{
+    id: string;
+  }>;
 }
 
-export default function SearchDetailView({
-  search,
-  onBack,
-}: SearchDetailViewProps) {
-  const [jobResults, setJobResults] = useState<JobResult[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const supabase = createClient();
+export default async function SearchDetailPage({
+  params,
+}: SearchDetailPageProps) {
+  const { id } = await params;
+  const supabase = await createClient();
 
-  useEffect(() => {
-    const fetchResults = async () => {
-      setIsLoading(true);
+  const { data: search, error: searchError } = await supabase
+    .from('job_searches')
+    .select('*')
+    .eq('id', id)
+    .single();
 
-      const { data, error } = await supabase
-        .from('job_results')
-        .select('*')
-        .eq('search_id', search.id)
-        .order('ai_score', { ascending: false, nullsFirst: false });
+  if (searchError || !search) {
+    redirect(DASHBOARD);
+  }
 
-      if (error) {
-        console.error('Error fetching job results:', error);
-      } else {
-        setJobResults(data || []);
-      }
+  const { data: jobResults, error: resultsError } = await supabase
+    .from('job_results')
+    .select('*')
+    .eq('search_id', id)
+    .order('ai_score', { ascending: false, nullsFirst: false });
 
-      setIsLoading(false);
-    };
+  if (resultsError) {
+    console.error('Error fetching job results:', resultsError);
+  }
 
-    fetchResults();
-  }, [search.id, supabase]);
+  const results = (jobResults || []) as JobResult[];
+
+  const resultCount = results.length;
+  const avgAiScore =
+    results.length > 0
+      ? results.reduce((acc, job) => acc + (job.ai_score || 0), 0) /
+        results.length
+      : null;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('fr-FR', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -56,9 +62,9 @@ export default function SearchDetailView({
       <div className='container mx-auto px-4 py-8'>
         {/* Header */}
         <div className='flex items-center justify-between mb-8'>
-          <button
-            onClick={onBack}
-            className='cursor-pointer flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors'
+          <Link
+            href={DASHBOARD}
+            className='flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors'
           >
             <svg
               className='w-5 h-5 mr-2'
@@ -74,7 +80,7 @@ export default function SearchDetailView({
               />
             </svg>
             Back to Dashboard
-          </button>
+          </Link>
         </div>
 
         {/* Search Details */}
@@ -121,16 +127,16 @@ export default function SearchDetailView({
           <div className='flex items-center space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700'>
             <div className='flex items-center'>
               <span className='text-2xl font-bold text-blue-600 dark:text-blue-400 mr-2'>
-                {search.result_count}
+                {resultCount}
               </span>
               <span className='text-sm text-gray-600 dark:text-gray-400'>
                 Results
               </span>
             </div>
-            {search.avg_ai_score && (
+            {avgAiScore && (
               <div className='flex items-center'>
                 <span className='text-2xl font-bold text-green-600 dark:text-green-400 mr-2'>
-                  {Math.round(search.avg_ai_score)}
+                  {Math.round(avgAiScore)}
                 </span>
                 <span className='text-sm text-gray-600 dark:text-gray-400'>
                   Avg Score
@@ -141,14 +147,7 @@ export default function SearchDetailView({
         </div>
 
         {/* Job Results */}
-        {isLoading ? (
-          <div className='text-center py-12'>
-            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4'></div>
-            <p className='text-gray-600 dark:text-gray-400'>
-              Loading results...
-            </p>
-          </div>
-        ) : jobResults.length === 0 ? (
+        {results.length === 0 ? (
           <div className='text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700'>
             <p className='text-gray-600 dark:text-gray-400'>
               No results found for this search
@@ -156,7 +155,7 @@ export default function SearchDetailView({
           </div>
         ) : (
           <div className='space-y-4'>
-            {jobResults.map((job) => (
+            {results.map((job) => (
               <JobResultCard key={job.id} job={job} />
             ))}
           </div>
