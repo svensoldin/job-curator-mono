@@ -2,8 +2,10 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 
 import { createClient } from '@/lib/supabase/server';
+import { CALLBACK_API } from '@/routes';
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
@@ -57,15 +59,19 @@ export async function signup(formData: FormData) {
 export async function loginWithGitHub() {
   const supabase = await createClient();
 
+  // Get the origin dynamically from request headers (works in production)
+  const headersList = await headers();
+  const origin = headersList.get('origin');
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      redirectTo: `${origin}/auth/callback`,
     },
   });
 
   if (error) {
-    redirect('/error');
+    console.log(error);
   }
 
   if (data.url) {
