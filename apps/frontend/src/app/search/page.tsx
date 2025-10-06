@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { UserCriteria } from '../../types/user-criteria';
+import { SearchApiResponse } from './api/route';
 
 import content from './data';
 import { DASHBOARD, SEARCH_API } from '@/routes';
 import Link from 'next/link';
 
-export default function AIPage() {
+export default function Search() {
   const [currentStep, setCurrentStep] = useState(0);
   const [preferences, setPreferences] = useState<UserCriteria>({
     jobTitle: '',
@@ -82,23 +83,11 @@ export default function AIPage() {
         throw new Error('Failed to start job search');
       }
 
-      const data = await response.json();
+      const data: SearchApiResponse = await response.json();
 
       if (data.pending) {
-        // Task started successfully - show pending message
-        // Store taskId and job title in localStorage so dashboard can poll for status
-        localStorage.setItem(`task_${data.searchId}`, data.taskId);
-        localStorage.setItem(
-          `task_title_${data.searchId}`,
-          preferences.jobTitle
-        );
-
-        setTaskStarted({
-          searchId: data.searchId,
-          taskId: data.taskId,
-        });
+        setTaskStarted({ searchId: data.searchId, taskId: data.taskId });
       } else {
-        // Old flow (shouldn't happen with new implementation)
         setResults(data);
       }
     } catch (err) {
@@ -108,7 +97,6 @@ export default function AIPage() {
     }
   };
 
-  // Loading state
   if (isLoading) {
     return (
       <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors flex items-center justify-center'>
@@ -125,7 +113,6 @@ export default function AIPage() {
     );
   }
 
-  // Task started - invite user to dashboard
   if (taskStarted) {
     return (
       <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors flex items-center justify-center'>
@@ -192,7 +179,6 @@ export default function AIPage() {
     );
   }
 
-  // Success state
   if (results) {
     return (
       <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors'>
@@ -304,7 +290,6 @@ export default function AIPage() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors flex items-center justify-center'>
@@ -352,7 +337,6 @@ export default function AIPage() {
           </p>
         </div>
 
-        {/* Progress Bar */}
         <div className='mb-12'>
           <div className='flex items-center justify-center mb-4'>
             <div className='flex items-center space-x-4'>

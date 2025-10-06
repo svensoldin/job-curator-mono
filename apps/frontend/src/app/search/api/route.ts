@@ -1,8 +1,5 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { CreateJobSearchInput } from '@/types/database';
-
-import { startSearchTask } from './utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +15,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get authenticated user
     const supabase = await createClient();
     const {
       data: { user },
@@ -31,37 +27,36 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Create a pending search record in the database
-    const searchInput: CreateJobSearchInput = {
-      user_id: user.id,
-      job_title: jobTitle,
-      location,
-      skills,
-      salary,
-      total_jobs: 0, // Will be updated when task completes
-    };
+    const baseUrl = process.env.NEXT_PUBLIC_JOB_SCRAPER_URL;
+    const startResponse = await fetch(`${baseUrl}/jobs/start`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        jobTitle,
+        location,
+        skills,
+        salary,
+      }),
+    });
 
-    const { data: search, error: searchError } = await supabase
-      .from('job_searches')
-      .insert(searchInput)
-      .select()
-      .single();
-
-    if (searchError) {
-      console.error('Error saving search:', searchError);
-      return new Response('Failed to create search', {
-        status: 500,
+    if (!startResponse.ok) {
+      const errorText = await startResponse.text();
+      console.error('Backend API error:', errorText);
+      return new Response('Failed to start search task', {
+        status: startResponse.status,
       });
     }
 
-    // Start the async task and return immediately
-    const taskId = await startSearchTask(body, search.id, user.id);
+    const data = await startResponse.json();
 
     return Response.json({
       success: true,
       pending: true,
-      searchId: search.id,
-      taskId,
+      searchId: data.searchId,
+      taskId: data.taskId,
       message: 'Search task started. Check your dashboard for results.',
     });
   } catch (error) {
@@ -70,4 +65,12 @@ export async function POST(request: NextRequest) {
       status: 500,
     });
   }
+}
+
+export interface SearchApiResponse {
+  success: boolean;
+  pending: boolean;
+  searchId: string;
+  taskId: string;
+  message: string;
 }

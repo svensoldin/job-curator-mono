@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import PendingTasksSection from './components/PendingTasksSection';
 import SearchCard from './components/SearchCard';
 import EmptyState from './components/EmptyState';
-import { SEARCH } from '@/routes';
+import { LOGIN, SEARCH } from '@/routes';
 
 interface DashboardClientProps {
   data: JobSearchWithStats[];
@@ -21,7 +21,6 @@ export default function DashboardClient({
   const router = useRouter();
   const supabase = createClient();
 
-  // Get IDs of searches with no results (pending)
   const pendingSearchIds = data
     .filter((search) => search.total_jobs === 0)
     .map((search) => search.id);
@@ -46,17 +45,13 @@ export default function DashboardClient({
       console.error('Error deleting search:', error);
       alert('Failed to delete search');
     } else {
-      // Clean up localStorage for deleted search
-      localStorage.removeItem(`task_${searchId}`);
-      localStorage.removeItem(`task_title_${searchId}`);
-
       router.refresh();
     }
   };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push('/login');
+    router.push(LOGIN);
   };
 
   return (
@@ -88,10 +83,8 @@ export default function DashboardClient({
           </div>
         </div>
 
-        {/* Pending Tasks Section */}
         <PendingTasksSection searchIds={pendingSearchIds} />
 
-        {/* Searches List */}
         {data.length === 0 ? (
           <EmptyState />
         ) : (

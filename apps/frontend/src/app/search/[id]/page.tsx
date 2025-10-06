@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { JobResult } from '@/types/database';
 import Link from 'next/link';
 import JobResultCard from '@/app/dashboard/components/JobResultCard';
-import { DASHBOARD, LOGIN } from '@/routes';
+import { DASHBOARD } from '@/routes';
 
 interface SearchDetailPageProps {
   params: Promise<{
