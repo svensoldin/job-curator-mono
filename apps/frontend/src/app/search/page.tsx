@@ -255,10 +255,12 @@ export default function AIPage() {
 
                     <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-4'>
                       <h4 className='font-medium text-gray-900 dark:text-white mb-2'>
-                        Job Description:
+                        {job.description
+                          ? 'Job Description:'
+                          : 'No job description'}
                       </h4>
                       <p className='text-sm text-gray-600 dark:text-gray-400 line-clamp-3'>
-                        {job.description.substring(0, 300)}...
+                        {job.description?.substring(0, 300)}...
                       </p>
                     </div>
 

@@ -144,7 +144,6 @@ async function processTaskInBackground(
     throw new Error('Search task timed out after 10 minutes');
   } catch (error) {
     console.error('Error processing task in background:', error);
-    // Optionally: Update the search record with an error status
   }
 }
 
@@ -175,7 +174,7 @@ export async function getScrapedJobs(
     console.log(`Search task created with ID: ${taskId}`);
 
     // Step 2: Poll for task completion
-    const maxAttempts = 120; // 10 minutes maximum (5 second intervals)
+    const maxAttempts = 60;
     const pollInterval = 10_000; // Poll every 10 seconds
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -233,11 +232,9 @@ function buildAIPrompt(userCriteria: UserCriteria, jobDescription: string) {
     .join(', ');
   return `Rate job match (0-100, be strict):
 
-Candidate: ${userCriteria.jobTitle}, skills: ${skillsText}, location: ${
-    userCriteria.location
-  }, salary: ${userCriteria.salary}k€
+Candidate: ${userCriteria.jobTitle}, skills: ${skillsText}, location: ${userCriteria.location}, salary: ${userCriteria.salary}k€
 
-Job: ${jobDescription.substring(0, 1000)}
+Job: ${jobDescription}
 
 **Strict Scoring:**
 - 90-100: Perfect match - exact role, all skills, right level
