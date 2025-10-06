@@ -1,5 +1,6 @@
 import { searchTaskManager } from '../services/search-task-manager.js';
 import { logger } from '../utils/logger.js';
+import { supabase, CreateJobSearchInput } from '../lib/supabase.js';
 import express from 'express';
 
 const router = express.Router();
@@ -7,20 +8,45 @@ const router = express.Router();
 /**
  * POST /jobs/start
  * Start an async search task for job offers
- * Returns immediately with a task ID that can be polled for status
- * Body params: jobTitle, location, skills, salary
+ * Creates a job_searches record in Supabase and returns taskId + searchId
+ * Body params: userId, jobTitle, location, skills, salary
  */
 router.post('/start', async (req, res) => {
   try {
-    const { jobTitle, location, skills, salary } = req.body;
+    const { userId, jobTitle, location, skills, salary } = req.body;
 
-    if (!jobTitle || !location || !jobTitle.length || !location.length) {
+    if (!userId || !jobTitle || !location) {
       return res.status(400).json({
-        error: 'Missing required parameters: jobTitle, location',
+        error: 'Missing required parameters: userId, jobTitle, location',
       });
     }
 
-    // Build user criteria
+    // Create job_searches record in Supabase
+    const searchInput: CreateJobSearchInput = {
+      user_id: userId,
+      job_title: jobTitle,
+      location,
+      skills: skills || '',
+      salary: parseInt(salary) || 0,
+    };
+
+    const { data: search, error: dbError } = await supabase
+      .from('job_searches')
+      .insert(searchInput)
+      .select()
+      .single();
+
+    if (dbError || !search) {
+      logger.error('Failed to create search record in Supabase:', dbError);
+      return res.status(500).json({
+        error: 'Failed to create search record',
+      });
+    }
+
+    logger.info(
+      `Created Supabase search record ${search.id} for user ${userId}`
+    );
+
     const userCriteria = {
       jobTitle,
       location,
@@ -28,16 +54,20 @@ router.post('/start', async (req, res) => {
       salary: salary || '',
     };
 
-    // Create async search task
-    const taskId = searchTaskManager.createTask(userCriteria);
+    const taskId = searchTaskManager.createTask(
+      userCriteria,
+      userId,
+      search.id
+    );
 
     logger.info(
-      `Created search task ${taskId} for "${jobTitle}" in "${location}"`
+      `Created search task ${taskId} for "${jobTitle}" in "${location}" (search ID: ${search.id})`
     );
 
     return res.json({
       success: true,
       taskId,
+      searchId: search.id,
       message: 'Search task created successfully',
       statusUrl: `/jobs/status/${taskId}`,
       resultsUrl: `/jobs/results/${taskId}`,
@@ -62,13 +92,9 @@ router.get('/status/:taskId', async (req, res) => {
     }
 
     return res.json({
+      ...task,
       taskId: task.id,
-      status: task.status,
-      progress: task.progress,
-      message: task.message,
-      error: task.error,
-      createdAt: task.createdAt,
-      completedAt: task.completedAt,
+      id: undefined,
     });
   } catch (error) {
     logger.error('Error getting task status:', error);
