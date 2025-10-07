@@ -74,8 +74,8 @@ export default async function Home() {
             <p>
               Powered by{' '}
               <span className='font-semibold text-gray-700 dark:text-gray-300'>
-                Mistral AI
-              </span>{' '}
+                Mistral AI 🇪🇺
+              </span>
             </p>
           </div>
         </div>

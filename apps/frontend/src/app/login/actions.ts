@@ -2,14 +2,15 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 
 import { createClient } from '@/lib/supabase/server';
+import { CALLBACK_API, HOME } from '@/routes';
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
   // type-casting here for convenience
-  // in practice, you should validate your inputs
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
@@ -22,8 +23,8 @@ export async function login(formData: FormData) {
     return { error: error.message };
   }
 
-  revalidatePath('/', 'layout');
-  redirect('/');
+  revalidatePath(HOME, 'layout');
+  redirect(HOME);
 }
 
 export async function signup(formData: FormData) {
@@ -50,22 +51,26 @@ export async function signup(formData: FormData) {
     };
   }
 
-  revalidatePath('/', 'layout');
-  redirect('/');
+  revalidatePath(HOME, 'layout');
+  redirect(HOME);
 }
 
 export async function loginWithGitHub() {
   const supabase = await createClient();
 
+  // Get the url from headers
+  const headersList = await headers();
+  const origin = headersList.get('origin');
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      redirectTo: `${origin}${CALLBACK_API}`,
     },
   });
 
   if (error) {
-    redirect('/error');
+    console.log(error);
   }
 
   if (data.url) {
