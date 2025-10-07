@@ -1,8 +1,8 @@
+import { CreateJobResultInput, supabase } from '../lib/supabase.js';
 import { JobPosting, ScrapeCriteria, UserCriteria } from '../types.js';
 import { logger } from '../utils/logger.js';
-import { analyzeAndRankJobs } from './rule-based-analyzer.js';
+import { analyzeAndRankJobs } from './ai-analyzer.js';
 import { scrapeJobsForAnalysis } from './scraping.js';
-import { supabase, CreateJobResultInput } from '../lib/supabase.js';
 
 /**
  * Represents a search task for job offers
@@ -10,12 +10,12 @@ import { supabase, CreateJobResultInput } from '../lib/supabase.js';
 interface SearchTask {
   id: string;
   userId: string;
-  searchId: string; // Supabase job_searches record ID
+  searchId: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
-  progress: number; // 0-100
+  progress: number;
   message: string;
   criteria: UserCriteria;
-  jobOffers?: JobPosting[]; // Use 'jobOffers' to be clear these are job postings
+  jobOffers?: JobPosting[];
   error?: string;
   createdAt: Date;
   completedAt?: Date;
@@ -152,20 +152,18 @@ class SearchTaskManager {
         return;
       }
 
-      // Analyze and rank job offers
+      // Analyze and rank job offers with AI
       task.progress = 75;
-      task.message = `Analyzing ${scrapedJobOffers.length} job offers...`;
+      task.message = `Analyzing ${scrapedJobOffers.length} job offers with AI...`;
       logger.info(
-        `Task ${task.id}: Analyzing ${scrapedJobOffers.length} job offers`
+        `Task ${task.id}: Analyzing ${scrapedJobOffers.length} job offers with AI`
       );
 
-      const rankedJobOffers = analyzeAndRankJobs(
+      const rankedJobOffers = await analyzeAndRankJobs(
         scrapedJobOffers,
-        task.criteria,
-        10
+        task.criteria
       );
 
-      // Save results to Supabase
       task.progress = 90;
       task.message = 'Saving results to database...';
       logger.info(

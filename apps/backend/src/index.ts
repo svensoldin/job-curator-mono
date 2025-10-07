@@ -61,14 +61,17 @@ app.use(
  */
 async function initializeServer() {
   try {
+    console.log('🚀 Initializing Job scraping API Server...');
     logger.info('🚀 Initializing Job scraping API Server...');
 
-    // Start the server
     app.listen(PORT, () => {
+      console.log(`✅ Server is running on port ${PORT}`);
+      console.log('🎯 Ready to analyze jobs!');
       logger.info(`✅ Server is running on port ${PORT}`);
       logger.info('🎯 Ready to analyze jobs!');
     });
   } catch (error) {
+    console.error('❌ Failed to initialize server:', error);
     logger.error('❌ Failed to initialize server:', error);
     process.exit(1);
   }
@@ -85,9 +88,7 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-// Start the server if this file is run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  initializeServer();
-}
+// Start the server
+initializeServer();
 
 export default app;
