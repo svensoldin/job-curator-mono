@@ -2,10 +2,7 @@ import { JobPosting, ScrapeCriteria } from '../types.js';
 import { logger } from '../utils/logger.js';
 import puppeteer, { Browser, Page } from 'puppeteer';
 
-// import { config } from '../config.js';
-
-// Local config for scraping
-const MAX_JOBS_PER_BOARD = 25;
+const MAX_JOBS_PER_BOARD = 15;
 const MAX_JOBS = 50;
 const DELAY_BETWEEN_REQUESTS = 1000;
 const USER_AGENT =

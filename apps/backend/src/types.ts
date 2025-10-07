@@ -17,15 +17,3 @@ export interface JobPosting {
   source: string;
   score?: number;
 }
-
-export interface AnalysisResult {
-  score: number;
-  reasons: string[];
-  breakdown: {
-    skills: number;
-    experience: number;
-    location: number;
-    bonus: number;
-    penalties: number;
-  };
-}
