@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { UserCriteria } from '../../types/user-criteria';
 import { SearchApiResponse } from './api/route';
 
@@ -25,31 +25,29 @@ export default function Search() {
     taskId: string;
   } | null>(null);
 
+  const currentStepName = content[currentStep].key;
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const text = e.target.value;
+    setPreferences((prev) => ({
+      ...prev,
+      [currentStepName]: text,
+    }));
+  };
+
+  const isLastStep = currentStepName === 'complete';
+
   const handleNext = () => {
-    const currentStepKey = content[currentStep].key;
-    if (currentStepKey !== 'complete') {
-      setPreferences((prev) => ({ ...prev, [currentStepKey]: inputValue }));
-    }
     setCurrentStep(currentStep + 1);
-    setInputValue('');
   };
 
   const handleBack = () => {
-    const newStep = currentStep - 1;
-    setCurrentStep(newStep);
-    const newStepKey = content[newStep].key;
-    if (newStepKey !== 'complete') setInputValue(preferences[newStepKey]);
+    setCurrentStep(currentStep - 1);
   };
 
   const handleStartOver = () => {
     setCurrentStep(0);
-    setPreferences({
-      jobTitle: '',
-      location: '',
-      skills: '',
-      salary: '',
-    });
-    setInputValue('');
     setResults(null);
     setError(null);
     setIsLoading(false);
@@ -61,11 +59,11 @@ export default function Search() {
   };
 
   const isStepValid = () => {
-    return inputValue.trim().length > 0;
+    if (!isLastStep) return preferences[currentStepName].length > 0;
   };
 
   const handleSubmit = async () => {
-    if (content[currentStep].key !== 'complete') return;
+    if (!isLastStep) return;
 
     setIsLoading(true);
     setError(null);
@@ -376,13 +374,13 @@ export default function Search() {
               {content[currentStep].title}
             </h2>
 
-            {content[currentStep].key !== 'complete' ? (
+            {currentStepName !== 'complete' ? (
               <div className='space-y-6'>
                 <div className='space-y-2'>
                   <input
                     type='text'
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
+                    value={preferences[currentStepName]}
+                    onChange={handleChange}
                     placeholder={content[currentStep].placeholder}
                     className='w-full p-4 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors'
                     onKeyDown={(e) => {
@@ -392,7 +390,7 @@ export default function Search() {
                     }}
                     autoFocus
                   />
-                  {content[currentStep].key === 'salary' && (
+                  {currentStepName === 'salary' && (
                     <p className='text-sm text-gray-500 dark:text-gray-400 ml-2'>
                       Amount in thousands of euros (k€)
                     </p>
@@ -412,9 +410,7 @@ export default function Search() {
                     disabled={!isStepValid()}
                     className='px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium'
                   >
-                    {content[currentStep].key === 'salary'
-                      ? 'Complete'
-                      : 'Next'}
+                    {currentStepName === 'salary' ? 'Complete' : 'Next'}
                   </button>
                 </div>
               </div>
@@ -485,7 +481,7 @@ export default function Search() {
         </div>
 
         {/* Tips */}
-        {content[currentStep].key !== 'complete' && (
+        {currentStepName !== 'complete' && (
           <div className='max-w-2xl mx-auto mt-8'>
             <div className='bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4'>
               <div className='flex items-start space-x-3'>
