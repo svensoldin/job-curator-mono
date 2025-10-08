@@ -50,9 +50,21 @@ export default function LoginPage() {
   const handleGithubLogin = async () => {
     setIsLoading(true);
     setError(null);
+    
+    const origin = window.location.origin;
+    console.log('[Client] Calling loginWithGitHub with origin:', origin);
+    
     try {
-      await loginWithGitHub(window.location.origin);
+      const result = await loginWithGitHub(origin);
+      
+      if (result?.error) {
+        console.error('[Client] Server action returned error:', result.error);
+        setError(result.error);
+        setIsLoading(false);
+      }
+      // If successful, redirect happens server-side
     } catch (err) {
+      console.error('[Client] Exception during GitHub login:', err);
       setError(err instanceof Error ? err.message : 'GitHub login failed');
       setIsLoading(false);
     }

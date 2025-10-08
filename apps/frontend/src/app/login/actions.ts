@@ -73,7 +73,7 @@ export async function loginWithGitHub(clientOrigin?: string) {
   }
 
   if (data.url) {
-    console.log(`redirecting to ${data.url}`);
+    console.log(`supabase url ${data.url}`);
     redirect(data.url);
   }
 }
