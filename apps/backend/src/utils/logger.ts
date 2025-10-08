@@ -8,46 +8,35 @@ if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// Configure Winston logger
 export const logger: winston.Logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL?.toLowerCase() || 'info',
   format: winston.format.combine(
     winston.format.timestamp({
       format: 'YYYY-MM-DD HH:mm:ss',
     }),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
+    winston.format.errors({ stack: true })
   ),
   defaultMeta: { service: 'ai-job-hunter' },
   transports: [
-    // Write all logs with importance level of `error` or less to `error.log`
+    // File transports with JSON format
     new winston.transports.File({
       filename: path.join(logsDir, 'error.log'),
       level: 'error',
+      format: winston.format.json(),
     }),
-    // Write all logs with importance level of `info` or less to `combined.log`
     new winston.transports.File({
       filename: path.join(logsDir, 'combined.log'),
+      format: winston.format.json(),
     }),
-  ],
-});
-
-// If we're not in production, log to the console with a simple format
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
-        winston.format.simple(),
-        winston.format.printf((info: winston.Logform.TransformableInfo) => {
-          const { timestamp, level, message, service, ...meta } = info;
-          return `${timestamp} [${service}] ${level}: ${message} ${
-            Object.keys(meta).length ? JSON.stringify(meta, null, 2) : ''
-          }`;
+        winston.format.printf((info) => {
+          return `${info.timestamp} [${info.level}]: ${info.message}`;
         })
       ),
-    })
-  );
-}
+    }),
+  ],
+});
 
 export default logger;
