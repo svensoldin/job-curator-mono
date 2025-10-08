@@ -61,12 +61,9 @@ app.use(
  */
 async function initializeServer() {
   try {
-    console.log('🚀 Initializing Job scraping API Server...');
     logger.info('🚀 Initializing Job scraping API Server...');
 
     app.listen(PORT, () => {
-      console.log(`✅ Server is running on port ${PORT}`);
-      console.log('🎯 Ready to analyze jobs!');
       logger.info(`✅ Server is running on port ${PORT}`);
       logger.info('🎯 Ready to analyze jobs!');
     });
