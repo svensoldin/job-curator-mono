@@ -56,10 +56,11 @@ export async function signup(formData: FormData) {
 }
 
 export async function loginWithGitHub(clientOrigin?: string) {
+  // Need to setup whitelisted URLs in Supabase dashboard
+  // Authentication -> URL configuration
   const supabase = await createClient();
 
   const redirectUrl = `${clientOrigin}${CALLBACK_API}`;
-  console.log('Full redirect URL:', redirectUrl);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
@@ -73,7 +74,6 @@ export async function loginWithGitHub(clientOrigin?: string) {
   }
 
   if (data.url) {
-    console.log(`supabase url ${data.url}`);
     redirect(data.url);
   }
 }
