@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { JobSearchWithStats } from '@/types/database';
@@ -15,13 +16,18 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({
-  data,
+  data: initialData,
   userEmail,
 }: DashboardClientProps) {
   const router = useRouter();
   const supabase = createClient();
+  const [searches, setSearches] = useState<JobSearchWithStats[]>(initialData);
 
-  const pendingSearchIds = data
+  useEffect(() => {
+    setSearches(initialData);
+  }, [initialData]);
+
+  const pendingSearchIds = searches
     .filter((search) => search.total_jobs === 0)
     .map((search) => search.id);
 
@@ -36,6 +42,8 @@ export default function DashboardClient({
       return;
     }
 
+    setSearches((prev) => prev.filter((search) => search.id !== searchId));
+
     const { error } = await supabase
       .from('job_searches')
       .delete()
@@ -44,9 +52,13 @@ export default function DashboardClient({
     if (error) {
       console.error('Error deleting search:', error);
       alert('Failed to delete search');
-    } else {
-      router.refresh();
+      // Rollback optimistic update
+      setSearches(initialData);
     }
+  };
+
+  const handleSearchComplete = (searchId: string) => {
+    router.refresh();
   };
 
   const handleSignOut = async () => {
@@ -83,13 +95,16 @@ export default function DashboardClient({
           </div>
         </div>
 
-        <PendingTasksSection searchIds={pendingSearchIds} />
+        <PendingTasksSection
+          searchIds={pendingSearchIds}
+          onSearchComplete={handleSearchComplete}
+        />
 
-        {data.length === 0 ? (
+        {searches.length === 0 ? (
           <EmptyState />
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {data.map((search) => (
+            {searches.map((search) => (
               <SearchCard
                 key={search.id}
                 search={search}

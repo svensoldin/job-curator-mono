@@ -2,21 +2,17 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { JobSearchWithStats } from '@/types/database';
 import DashboardClient from './DashboardClient';
+import { LOGIN } from '@/routes';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
 
-  // Check if user is authenticated
   const {
     data: { user },
-    error: userError,
   } = await supabase.auth.getUser();
 
-  if (userError || !user) {
-    redirect('/login');
-  }
+  if (!user) redirect(LOGIN);
 
-  // Fetch user's job searches with stats
   const { data, error: searchesError } = await supabase
     .from('job_searches_with_stats')
     .select('*')

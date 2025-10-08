@@ -13,10 +13,12 @@ interface PendingSearch {
 
 interface PendingTasksSectionProps {
   searchIds: string[];
+  onSearchComplete?: (searchId: string) => void;
 }
 
 export default function PendingTasksSection({
   searchIds,
+  onSearchComplete,
 }: PendingTasksSectionProps) {
   const router = useRouter();
   const [pendingSearches, setPendingSearches] = useState<PendingSearch[]>([]);
@@ -56,7 +58,6 @@ export default function PendingTasksSection({
           filter: `id=in.(${searchIds.join(',')})`,
         },
         (payload) => {
-          console.log('Search updated via Realtime:', payload);
           const updatedSearch = payload.new as {
             id: string;
             total_jobs: number;
@@ -64,14 +65,13 @@ export default function PendingTasksSection({
 
           // If total_jobs changed from 0 to something, the search is complete
           if (updatedSearch.total_jobs > 0) {
-            console.log(
-              `Search ${updatedSearch.id} completed with ${updatedSearch.total_jobs} jobs`
+            setPendingSearches((prev) =>
+              prev.filter((search) => search.id !== updatedSearch.id)
             );
 
-            // Refresh the page to show new results
-            setTimeout(() => {
-              router.refresh();
-            }, 1000);
+            if (onSearchComplete) {
+              onSearchComplete(updatedSearch.id);
+            }
           }
         }
       )
@@ -80,8 +80,7 @@ export default function PendingTasksSection({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [searchIds, router, supabase]);
-
+  }, [searchIds, router, supabase, onSearchComplete]);
   if (pendingSearches.length === 0) {
     return null;
   }
