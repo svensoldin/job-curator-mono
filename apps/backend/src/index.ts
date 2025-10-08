@@ -61,7 +61,6 @@ app.use(
  */
 async function initializeServer() {
   try {
-    console.log('hello');
     logger.info('🚀 Initializing Job scraping API Server...');
 
     app.listen(PORT, () => {

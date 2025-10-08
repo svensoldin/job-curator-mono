@@ -18,7 +18,6 @@ export const logger: winston.Logger = winston.createLogger({
   ),
   defaultMeta: { service: 'ai-job-hunter' },
   transports: [
-    // File transports with JSON format
     new winston.transports.File({
       filename: path.join(logsDir, 'error.log'),
       level: 'error',
