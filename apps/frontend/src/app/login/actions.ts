@@ -61,6 +61,7 @@ export async function loginWithGitHub() {
   // Get the url from headers
   const headersList = await headers();
   const origin = headersList.get('origin');
+  console.log({ origin });
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
