@@ -55,26 +55,25 @@ export async function signup(formData: FormData) {
   redirect(HOME);
 }
 
-export async function loginWithGitHub() {
+export async function loginWithGitHub(clientOrigin?: string) {
   const supabase = await createClient();
 
-  // Get the url from headers
-  const headersList = await headers();
-  const origin = headersList.get('origin');
-  console.log({ origin });
+  const redirectUrl = `${clientOrigin}${CALLBACK_API}`;
+  console.log('Full redirect URL:', redirectUrl);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
     options: {
-      redirectTo: `${origin}${CALLBACK_API}`,
+      redirectTo: redirectUrl,
     },
   });
 
   if (error) {
-    console.log(error);
+    console.log('OAuth error:', error);
   }
 
   if (data.url) {
+    console.log(`redirecting to ${data.url}`);
     redirect(data.url);
   }
 }

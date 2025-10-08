@@ -51,7 +51,7 @@ export default function LoginPage() {
     setIsLoading(true);
     setError(null);
     try {
-      await loginWithGitHub();
+      await loginWithGitHub(window.location.origin);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'GitHub login failed');
       setIsLoading(false);
