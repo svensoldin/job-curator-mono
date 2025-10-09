@@ -68,7 +68,7 @@ export default function DashboardClient({
 
   return (
     <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors'>
-      <div className='container mx-auto px-4 py-8'>
+      <div className='container mx-auto pl-32 py-16'>
         {/* Header */}
         <div className='flex items-center justify-between mb-8'>
           <div>
@@ -78,20 +78,6 @@ export default function DashboardClient({
             <p className='text-gray-600 dark:text-gray-400'>
               Welcome back, {userEmail}
             </p>
-          </div>
-          <div className='flex items-center space-x-4'>
-            <Link
-              href='/search'
-              className='px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium'
-            >
-              New Search
-            </Link>
-            <button
-              onClick={handleSignOut}
-              className='px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors'
-            >
-              Sign Out
-            </button>
           </div>
         </div>
 

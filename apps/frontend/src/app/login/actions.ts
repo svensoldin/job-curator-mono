@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 
 import { createClient } from '@/lib/supabase/server';
-import { CALLBACK_API, HOME } from '@/routes';
+import { CALLBACK_API, HOME, LOGIN } from '@/routes';
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
@@ -76,4 +76,11 @@ export async function loginWithGitHub(clientOrigin?: string) {
   if (data.url) {
     redirect(data.url);
   }
+}
+
+export async function logout() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  revalidatePath('/', 'layout');
+  redirect(LOGIN);
 }
