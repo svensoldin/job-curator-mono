@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { JobSearchWithStats } from '@/types/database';
 import { createClient } from '@/lib/supabase/client';
@@ -52,7 +51,6 @@ export default function DashboardClient({
     if (error) {
       console.error('Error deleting search:', error);
       alert('Failed to delete search');
-      // Rollback optimistic update
       setSearches(initialData);
     }
   };
@@ -61,13 +59,8 @@ export default function DashboardClient({
     router.refresh();
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push(LOGIN);
-  };
-
   return (
-    <div className='min-h-screen'>
+    <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors'>
       <div className='container mx-auto pl-32 py-16'>
         {/* Header */}
         <div className='flex items-center justify-between mb-8'>

@@ -20,7 +20,9 @@ export default async function AuthenticatedLayout({
   return (
     <>
       <Sidebar />
-      <div className='pl-16'>{children}</div>
+      <div className='bg-white dark:bg-gray-900 transition-colors px-16'>
+        {children}
+      </div>
     </>
   );
 }

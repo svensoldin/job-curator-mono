@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, LogOut } from 'lucide-react';
+import { Home, Search, BarChart3, LogOut } from 'lucide-react';
 import { logout } from '@/app/login/actions';
+import { ANALYTICS, DASHBOARD, SEARCH } from '@/routes';
 
 const navigation = [
-  { name: 'Home', href: '/dashboard', icon: Home },
-  { name: 'Search', href: '/search', icon: Search },
+  { name: 'Home', href: DASHBOARD, icon: Home },
+  { name: 'Search', href: SEARCH, icon: Search },
+  { name: 'Analytics', href: ANALYTICS, icon: BarChart3 },
 ];
 
 export default function Sidebar() {
