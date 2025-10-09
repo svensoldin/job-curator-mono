@@ -95,10 +95,12 @@ export default function DashboardClient({
           </div>
         </div>
 
-        <PendingTasksSection
-          searchIds={pendingSearchIds}
-          onSearchComplete={handleSearchComplete}
-        />
+        {pendingSearchIds.length > 0 ? (
+          <PendingTasksSection
+            searchIds={pendingSearchIds}
+            onSearchComplete={handleSearchComplete}
+          />
+        ) : null}
 
         {searches.length === 0 ? (
           <EmptyState />
