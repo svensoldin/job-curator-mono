@@ -113,8 +113,7 @@ async function analyzeJob(
  */
 export async function analyzeAndRankJobs(
   jobs: JobPosting[],
-  userCriteria: UserCriteria,
-  topN: number = 10
+  userCriteria: UserCriteria
 ): Promise<JobPosting[]> {
   logger.info(`Analyzing ${jobs.length} jobs with AI (Mistral)`);
 
@@ -147,15 +146,7 @@ export async function analyzeAndRankJobs(
     }
   }
 
-  const topJobs = analyzedJobs
-    .sort((a, b) => (b.score || 0) - (a.score || 0))
-    .slice(0, topN);
-
-  logger.info(
-    `Selected top ${topN} jobs with AI scores: ${topJobs
-      .map((j) => j.score)
-      .join(', ')}`
-  );
+  const topJobs = analyzedJobs.sort((a, b) => (b.score || 0) - (a.score || 0));
 
   return topJobs;
 }
