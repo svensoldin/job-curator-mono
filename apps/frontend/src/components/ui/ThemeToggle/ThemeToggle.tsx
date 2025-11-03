@@ -6,7 +6,6 @@ export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    // Check if dark mode was previously enabled
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia(
       '(prefers-color-scheme: dark)'
