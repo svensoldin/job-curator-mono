@@ -1,7 +1,7 @@
 'use client';
 
 import { ChangeEvent, useState } from 'react';
-import { UserCriteria } from '../../types/user-criteria';
+import { UserCriteria } from '@/types/user-criteria';
 import { SearchApiResponse } from './api/route';
 
 import content from './data';
