@@ -1,5 +1,5 @@
-import React from 'react';
 import Link from 'next/link';
+import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
@@ -26,7 +26,7 @@ const sizeClasses = {
   lg: 'px-8 py-4 text-lg',
 };
 
-export function Button({
+export default function Button({
   variant = 'primary',
   size = 'md',
   isLoading = false,
@@ -48,6 +48,7 @@ export function Button({
         xmlns='http://www.w3.org/2000/svg'
         fill='none'
         viewBox='0 0 24 24'
+        aria-hidden='true'
       >
         <circle
           className='opacity-25'
@@ -78,7 +79,12 @@ export function Button({
   }
 
   return (
-    <button className={classes} disabled={disabled || isLoading} {...props}>
+    <button
+      className={classes}
+      disabled={disabled || isLoading}
+      aria-busy={isLoading}
+      {...props}
+    >
       {content}
     </button>
   );
