@@ -1,4 +1,4 @@
-import { UserCriteria } from '../../types/user-criteria';
+import { UserCriteria } from '@/types/user-criteria';
 
 export type StepKey = keyof UserCriteria | 'complete';
 
