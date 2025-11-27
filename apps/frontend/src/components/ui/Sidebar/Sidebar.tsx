@@ -3,8 +3,11 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Search, BarChart3, LogOut } from 'lucide-react';
+import cx from 'classnames';
+
 import { logout } from '@/app/login/actions';
 import { ANALYTICS, DASHBOARD, SEARCH } from '@/routes';
+import Image from 'next/image';
 
 const navigation = [
   { name: 'Home', href: DASHBOARD, icon: Home },
@@ -20,12 +23,31 @@ export default function Sidebar() {
   };
 
   return (
-    <div className='group fixed left-0 top-0 z-40 flex h-screen w-16 flex-col border-r border-gray-200 bg-white transition-all duration-300 hover:w-64 dark:border-gray-800 dark:bg-gray-950'>
-      {/* Logo */}
-      <div className='flex h-16 items-center justify-center border-b border-gray-200 px-4 dark:border-gray-800 group-hover:justify-start group-hover:px-6'>
-        <h1 className='text-xl font-semibold text-gray-900 dark:text-white'>
-          <span className='block group-hover:hidden'>JC</span>
-          <span className='hidden group-hover:block'>Job Curator</span>
+    <div
+      className={cx(
+        'group fixed left-0 top-0 z-40 flex h-screen w-16 flex-col border-r border-gray-200 bg-white transition-all duration-300',
+        'hover:w-64 dark:border-gray-800 dark:bg-gray-950'
+      )}
+    >
+      <div
+        className={cx(
+          'flex h-16 items-center justify-center border-b border-gray-200 px-4',
+          'dark:border-gray-800 group-hover:justify-start'
+        )}
+      >
+        <Image
+          src='/favicon.ico'
+          alt='Job Curator Logo'
+          width={32}
+          height={32}
+        />
+        <h1
+          className={cx(
+            'hidden min-w-50 text-xl font-bold',
+            'group-hover:block'
+          )}
+        >
+          Job Curator
         </h1>
       </div>
 
