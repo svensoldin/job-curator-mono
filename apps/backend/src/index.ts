@@ -1,8 +1,9 @@
-import jobRoutes from './routes/jobs.js';
-import { logger } from './utils/logger.js';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
+
+import jobRoutes from './routes/jobs.js';
+import { logger } from './utils/logger.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -25,10 +26,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// API Routes
 app.use('/jobs', jobRoutes);
 
-// 404 handler - must be after all other routes
 app.use((req, res) => {
   res.status(404).json({
     error: 'Route not found',
@@ -36,7 +35,6 @@ app.use((req, res) => {
   });
 });
 
-// Global error handler
 app.use(
   (
     err: any,
@@ -74,7 +72,6 @@ async function initializeServer() {
   }
 }
 
-// Graceful shutdown
 process.on('SIGTERM', () => {
   logger.info('SIGTERM received, shutting down gracefully');
   process.exit(0);
@@ -85,7 +82,6 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-// Start the server
 initializeServer();
 
 export default app;
