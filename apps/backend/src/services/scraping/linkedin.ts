@@ -1,4 +1,4 @@
-import type { Browser } from 'puppeteer';
+import type { Browser, Page } from 'puppeteer';
 
 import type { JobPosting, ScrapeCriteria } from 'types.js';
 import logger from 'utils/logger.js';
@@ -12,7 +12,7 @@ import {
 const BASE_URL = 'https://www.linkedin.com/jobs/search/';
 const PRIMARY_SELECTOR = '.jobs-search__results-list';
 
-const getJobs = async (page: import('puppeteer').Page, limit: number) => {
+const getJobs = async (page: Page, limit: number) => {
   const jobs: JobPosting[] = await page.evaluate((maxJobs) => {
     const jobElements = document.querySelectorAll('.job-search-card');
     const limitedElements = Array.from(jobElements).slice(0, maxJobs);
