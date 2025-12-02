@@ -1,8 +1,8 @@
-import { CreateJobResultInput, supabase } from '../lib/supabase.js';
-import { JobPosting, ScrapeCriteria, UserCriteria } from '../types.js';
+import { type CreateJobResultInput, supabase } from '../lib/supabase.js';
+import type { JobPosting, ScrapeCriteria, UserCriteria } from '../types.js';
 import { logger } from '../utils/logger.js';
 import { analyzeAndRankJobs } from './ai-analyzer.js';
-import { scrapeJobsForAnalysis } from './scraping.js';
+import scrapeJobsForAnalysis from './scraping/scraping.js';
 
 /**
  * Represents a search task for job offers
