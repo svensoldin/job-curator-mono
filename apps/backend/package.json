@@ -9,7 +9,7 @@
     "dev": "nodemon --exec \"pnpm build && node dist/index.js\" --watch src --ext ts",
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
