@@ -4,10 +4,9 @@
   "description": "AI-powered job hunting agent that searches, analyzes, and curates job postings",
   "main": "dist/index.js",
   "type": "module",
-  "packageManager": "yarn@4.0.0",
   "scripts": {
-    "start": "yarn && yarn build && node dist/index.js",
-    "dev": "nodemon --exec \"yarn build && node dist/index.js\" --watch src --ext ts",
+    "start": "pnpm install && pnpm build && node dist/index.js",
+    "dev": "nodemon --exec \"pnpm build && node dist/index.js\" --watch src --ext ts",
     "build": "tsc",
     "build:watch": "tsc --watch",
     "test": "jest",
@@ -15,7 +14,7 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "clean": "rm -rf dist",
-    "install:deps": "yarn install"
+    "install:deps": "pnpm install"
   },
   "keywords": [
     "job-hunting",
@@ -41,14 +40,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@types/cheerio": "^1.0.0",
     "@types/cors": "^2",
     "@types/express": "^5",
-    "@types/handlebars": "^4.1.0",
     "@types/jest": "^29.5.8",
     "@types/node": "^20.10.0",
     "@types/validator": "^13.11.7",
-    "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^6.13.0",
     "@typescript-eslint/parser": "^6.13.0",
     "eslint": "^9.39.1",
@@ -61,5 +57,6 @@
   },
   "engines": {
     "node": "^22.0.0"
-  }
+  },
+  "packageManager": "pnpm@10.17.1+sha512.17c560fca4867ae9473a3899ad84a88334914f379be46d455cbf92e5cf4b39d34985d452d2583baf19967fa76cb5c17bc9e245529d0b98745721aa7200ecaf7a"
 }
