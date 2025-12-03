@@ -1,10 +1,10 @@
 import jobRoutes from './routes/jobs.js';
 import { logger } from './utils/logger.js';
 import cors from 'cors';
-import express from 'express';
+import express, { type Express } from 'express';
 import helmet from 'helmet';
 
-const app = express();
+const app: Express = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(helmet());
