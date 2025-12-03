@@ -1,102 +1,83 @@
-# 🤖 Job Hunter
+# Job Curator Backend
 
-A job hunting agent that automatically searches for job postings, analyzes them according to the user's criteria, and stores them in MongoDB with weekly refresh cycles.
+A backend API service that searches job boards, analyzes postings with AI, and curates relevant opportunities based on user preferences.
 
-## ✨ Features
+## What it does
 
-- **Automated Job Scraping**: Searches multiple job boards (LinkedIn, WTTJ) weekly
-- **Rule-based Job Analysis**: Make your own custom rules in .env and score jobs accordingly
-- **MongoDB Integration**: Efficient database storage with weekly refresh pattern
-- **Modern Architecture**: TypeScript, MongoDB, simplified workflow
+This service provides REST endpoints that accept job search requests (title, location, skills, salary preferences) and returns curated job postings. It:
 
-## 🚀 Quick Start
+- Scrapes job listings from LinkedIn and Welcome to the Jungle
+- Uses AI (Mistral) to analyze and score each job against user criteria
+- Stores search results in Supabase for persistence
+- Manages asynchronous search tasks with progress tracking
+
+Users can start a search, check its status, and retrieve scored results once complete.
+
+## Quick Start
 
 ### Prerequisites
 
 - Node.js 18+
-- MongoDB database
+- Supabase account and project
+- Mistral API key
 
-### Installation
+### Setup
 
-1. **Clone the repository**
-
-   ```bash
-   git clone <repository-url>
-   cd ai-job-hunter
-   ```
-
-2. **Install dependencies**
+1. Install dependencies:
 
    ```bash
-   npm install
+   pnpm install
    ```
 
-3. **Set up environment variables**
+2. Configure environment variables:
 
    ```bash
    cp .env.template .env
    ```
 
-   Edit `.env` and add your configuration:
+   Add your credentials:
 
    ```env
-
-   # Job Search Criteria
-   JOB_KEYWORDS=software engineer,developer,programmer
-   JOB_LOCATIONS=Remote,New York,San Francisco
-   CORE_SKILLS=JavaScript,Python,React
+   SUPABASE_URL=your_supabase_url
+   SUPABASE_KEY=your_supabase_key
+   MISTRAL_API_KEY=your_mistral_key
+   PORT=4000
    ```
 
-4. **Test the setup**
-
+3. Run the server:
    ```bash
-   npm run start -- --test
+   pnpm dev
    ```
 
-5. **Run the weekly job processing**
+## API Usage
 
-   ```bash
-   yarn start
-   ```
+Start a job search:
 
-   Or for development:
-
-   ```bash
-   yarn dev
-   ```
-
-## ⚙️ Configuration
-
-### Job Search Criteria
-
-Customize your job search in `.env`:
-
-```env
-# What roles to search for
-JOB_KEYWORDS=software engineer,full stack developer,frontend developer
-
-# Where you want to work
-JOB_LOCATIONS=Remote,San Francisco,New York,Austin
-
-# Your experience level
-EXPERIENCE_LEVEL=Mid-level
-
-# Must-have skills
-CORE_SKILLS=JavaScript,React,Node.js
-
-# Remote work preference
-REMOTE_PREFERENCE=Remote preferred
+```bash
+POST /jobs/start
+{
+  "userId": "123",
+  "jobTitle": "Software Engineer",
+  "location": "Paris",
+  "skills": "TypeScript, React",
+  "salary": "60000"
+}
 ```
 
-### Deployment
+Check search progress:
 
-This application is designed to run as a one-shot process, perfect for Heroku Scheduler or similar cron services:
+```bash
+GET /jobs/status/:taskId
+```
 
-- **Heroku**: Use Heroku Scheduler to run `yarn start` weekly
-- **AWS Lambda**: Deploy as a scheduled Lambda function
-- **GitHub Actions**: Use cron triggers in workflows
-- **Local Cron**: Add to your system's crontab
+Get results:
+
+```bash
+GET /jobs/results/:taskId
+```
 
 ## License
+
+MIT
 
 MIT License
