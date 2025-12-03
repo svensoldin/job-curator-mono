@@ -8,7 +8,7 @@ This service provides REST endpoints that accept job search requests (title, loc
 
 - Scrapes job listings from LinkedIn and Welcome to the Jungle
 - Uses AI (Mistral) to analyze and score each job against user criteria
-- Stores search results in Supabase for persistence
+- Stores search results in Supabase
 - Manages asynchronous search tasks with progress tracking
 
 Users can start a search, check its status, and retrieve scored results once complete.
@@ -31,17 +31,18 @@ Users can start a search, check its status, and retrieve scored results once com
 
 2. Configure environment variables:
 
+   Copy the .env.example file
+
    ```bash
-   cp .env.template .env
+   cp .env.example .env
    ```
 
    Add your credentials:
 
    ```env
    SUPABASE_URL=your_supabase_url
-   SUPABASE_KEY=your_supabase_key
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_key
    MISTRAL_API_KEY=your_mistral_key
-   PORT=4000
    ```
 
 3. Run the server:
@@ -79,5 +80,3 @@ GET /jobs/results/:taskId
 ## License
 
 MIT
-
-MIT License
