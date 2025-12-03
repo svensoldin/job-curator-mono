@@ -1,9 +1,9 @@
 import { searchTaskManager } from '../services/search-task-manager.js';
 import { logger } from '../utils/logger.js';
-import { supabase, CreateJobSearchInput } from '../lib/supabase.js';
-import express from 'express';
+import { supabase, type CreateJobSearchInput } from '../lib/supabase.js';
+import express, { type Router } from 'express';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 /**
  * POST /jobs/start
