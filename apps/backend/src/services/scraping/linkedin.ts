@@ -89,7 +89,8 @@ const getJobDescriptions = async (
             );
             break;
           }
-        } catch (e) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (err) {
           continue;
         }
       }

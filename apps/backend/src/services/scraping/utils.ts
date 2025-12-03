@@ -1,4 +1,4 @@
-import puppeteer, { type Browser, type Page } from 'puppeteer';
+import puppeteer, { Browser, Page } from 'puppeteer';
 import logger from 'utils/logger.js';
 
 export const MAX_JOBS_PER_BOARD = 15;
@@ -43,7 +43,7 @@ export const initializePageAndNavigate = async (
       timeout: 10000,
     });
   } catch (selectorError) {
-    logger.warn('Primary selectors not found');
+    logger.warn('Primary selectors not found', selectorError);
     await page.waitForSelector('body', { timeout: 5000 });
   }
 

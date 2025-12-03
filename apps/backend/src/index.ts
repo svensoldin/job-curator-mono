@@ -1,9 +1,8 @@
+import jobRoutes from './routes/jobs.js';
+import { logger } from './utils/logger.js';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
-
-import jobRoutes from './routes/jobs.js';
-import { logger } from './utils/logger.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -20,7 +19,6 @@ app.use(
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Request logging middleware
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.path} - ${req.ip}`);
   next();
@@ -35,20 +33,23 @@ app.use((req, res) => {
   });
 });
 
+// Error handler
 app.use(
   (
-    err: any,
+    err: { status: number; message: string },
     req: express.Request,
     res: express.Response,
-    next: express.NextFunction
+    // `next` is included so Express recognises this as an error handler
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _next: express.NextFunction
   ) => {
     logger.error('Unhandled error:', err);
 
-    res.status(err.status || 500).json({
+    res.status(err?.status || 500).json({
       error: 'Internal server error',
       message:
         process.env.NODE_ENV === 'development'
-          ? err.message
+          ? err?.message
           : 'Something went wrong',
     });
   }

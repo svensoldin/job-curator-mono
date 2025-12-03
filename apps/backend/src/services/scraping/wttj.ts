@@ -106,6 +106,7 @@ export const getJobDescriptions = async (
             );
             break;
           }
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
           continue;
         }
