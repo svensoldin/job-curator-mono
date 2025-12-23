@@ -7,13 +7,14 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint .",
-    "test": "jest",
+    "test": "vitest",
     "e2e": "playwright test"
   },
   "dependencies": {
     "@mistralai/mistralai": "^1.10.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.58.0",
+    "@testing-library/jest-dom": "^6.9.1",
     "classnames": "^2.5.1",
     "dotenv": "^17.2.3",
     "lucide-react": "^0.545.0",
@@ -27,13 +28,21 @@
     "@eslint/js": "^9.39.0",
     "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^5.1.2",
     "eslint": "^9.37.0",
     "eslint-config-next": "15.5.3",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.5.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.50.1",
+    "vite-tsconfig-paths": "^6.0.3",
+    "vitest": "^4.0.16"
   },
   "packageManager": "pnpm@10.17.1+sha512.17c560fca4867ae9473a3899ad84a88334914f379be46d455cbf92e5cf4b39d34985d452d2583baf19967fa76cb5c17bc9e245529d0b98745721aa7200ecaf7a"
 }

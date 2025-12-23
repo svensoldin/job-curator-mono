@@ -1,16 +1,18 @@
+import { ANALYTICS, DASHBOARD, SEARCH } from '@/routes';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
+
 import Sidebar from './Sidebar';
-import { ANALYTICS, DASHBOARD, SEARCH } from '@/routes';
 
 // Mock the next/navigation module
-jest.mock('next/navigation', () => ({
-  usePathname: jest.fn().mockReturnValue(DASHBOARD),
+vi.mock('next/navigation', () => ({
+  usePathname: vi.fn().mockReturnValue(DASHBOARD),
 }));
 
 // Mock the logout action
-jest.mock('@/app/login/actions', () => ({
-  logout: jest.fn(),
+vi.mock('@/app/login/actions', () => ({
+  logout: vi.fn(),
 }));
 
 describe('Sidebar', () => {
