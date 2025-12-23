@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { Fragment } from 'react';
 
 interface StepIndicatorProps {
   currentStep: number;
@@ -15,7 +15,7 @@ export function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
       <div className='flex items-center justify-center mb-4'>
         <div className='flex items-center space-x-4'>
           {steps.map((step, index) => (
-            <React.Fragment key={step}>
+            <Fragment key={step}>
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
                   step <= currentStep
@@ -34,7 +34,7 @@ export function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
                   }`}
                 />
               )}
-            </React.Fragment>
+            </Fragment>
           ))}
         </div>
       </div>
