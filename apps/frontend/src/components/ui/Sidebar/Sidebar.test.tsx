@@ -3,6 +3,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
+import { logout } from '@/app/login/actions';
+
 import Sidebar from './Sidebar';
 
 // Mock the next/navigation module
@@ -43,7 +45,6 @@ describe('Sidebar', () => {
   });
 
   it('renders logout button', async () => {
-    const { logout } = require('@/app/login/actions');
     render(<Sidebar />);
 
     const logoutButton = screen.getByRole('button', { name: /logout/i });

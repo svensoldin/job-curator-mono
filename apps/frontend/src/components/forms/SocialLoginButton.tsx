@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Button } from '@/components/ui';
 
 interface SocialLoginButtonProps {
   provider: 'github' | 'google';
@@ -12,7 +11,8 @@ interface SocialLoginButtonProps {
 const providerConfig = {
   github: {
     name: 'GitHub',
-    bgClass: 'bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600',
+    bgClass:
+      'bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600',
     icon: (
       <svg className='w-5 h-5 mr-2' fill='currentColor' viewBox='0 0 20 20'>
         <path
@@ -25,7 +25,8 @@ const providerConfig = {
   },
   google: {
     name: 'Google',
-    bgClass: 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600',
+    bgClass:
+      'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600',
     icon: (
       <svg className='w-5 h-5 mr-2' viewBox='0 0 24 24'>
         <path

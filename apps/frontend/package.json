@@ -11,14 +11,12 @@
     "e2e": "playwright test"
   },
   "dependencies": {
-    "@mistralai/mistralai": "^1.10.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.58.0",
     "@testing-library/jest-dom": "^6.9.1",
     "classnames": "^2.5.1",
     "dotenv": "^17.2.3",
     "lucide-react": "^0.545.0",
-    "mongodb": "^6.20.0",
     "next": "15.5.9",
     "react": "19.1.0",
     "react-dom": "19.1.0",

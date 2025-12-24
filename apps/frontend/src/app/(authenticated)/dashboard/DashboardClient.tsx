@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import PendingTasksSection from './components/PendingTasksSection';
 import SearchCard from './components/SearchCard';
 import EmptyState from './components/EmptyState';
-import { LOGIN, SEARCH } from '@/routes';
+import { SEARCH } from '@/routes';
 
 interface DashboardClientProps {
   data: JobSearchWithStats[];
@@ -56,13 +56,8 @@ export default function DashboardClient({
     }
   };
 
-  const handleSearchComplete = (searchId: string) => {
+  const handleSearchComplete = () => {
     router.refresh();
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push(LOGIN);
   };
 
   return (
