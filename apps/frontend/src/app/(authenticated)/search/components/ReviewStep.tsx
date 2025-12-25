@@ -11,7 +11,6 @@ interface ReviewStepProps {
   onSubmit: () => void;
 }
 
-// Memoize to prevent unnecessary re-renders
 export const ReviewStep = memo(function ReviewStep({
   preferences,
   onBack,

@@ -1,0 +1,34 @@
+name: CI
+permissions:
+    contents: read
+
+on:
+    pull_request:
+        branches: [master]
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: ./.github/actions/setup-node-pnpm
+            - name: Lint
+              run: pnpm lint
+
+    test:
+        needs: lint
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: ./.github/actions/setup-node-pnpm
+            - name: Run tests
+              run: pnpm test
+
+    build:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: ./.github/actions/setup-node-pnpm
+            - name: Build
+              run: pnpm build
