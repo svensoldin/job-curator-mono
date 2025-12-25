@@ -12,7 +12,7 @@ import { defineConfig, devices } from '@playwright/test';
 const PORT = process.env.PORT || 3000;
 
 // Set webServer.url and use.baseURL with the location of the WebServer respecting the correct set port
-const baseURL = `http://localhost:${PORT}`;
+const baseURL = process.env.BASE_URL || `http://localhost:${PORT}`;
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -43,16 +43,6 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-    },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
     },
 
     /* Test against mobile viewports. */
