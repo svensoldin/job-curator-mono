@@ -8,7 +8,6 @@ import { SEARCH_API } from '@/routes';
 import { SearchApiResponse } from './api/route';
 import content from './data';
 import {
-  JobResults,
   StepIndicator,
   StepForm,
   ReviewStep,
@@ -25,7 +24,6 @@ export default function Search() {
     salary: '',
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [taskStarted, setTaskStarted] = useState<{
     searchId: string;
@@ -53,7 +51,6 @@ export default function Search() {
 
   const handleStartOver = () => {
     setCurrentStep(0);
-    setResults(null);
     setError(null);
     setIsLoading(false);
     setTaskStarted(null);
@@ -79,12 +76,7 @@ export default function Search() {
       }
 
       const data: SearchApiResponse = await response.json();
-
-      if (data.pending) {
-        setTaskStarted({ searchId: data.searchId, taskId: data.taskId });
-      } else {
-        setResults(data);
-      }
+      setTaskStarted({ searchId: data.searchId, taskId: data.taskId });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -111,16 +103,6 @@ export default function Search() {
   if (taskStarted) {
     return (
       <TaskStarted taskId={taskStarted.taskId} onStartOver={handleStartOver} />
-    );
-  }
-
-  if (results) {
-    return (
-      <JobResults
-        totalJobs={results.totalJobs}
-        jobs={results.analyzedJobs}
-        onTryAgain={handleStartOver}
-      />
     );
   }
 
