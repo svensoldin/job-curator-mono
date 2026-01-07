@@ -1,9 +1,9 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test('test', async ({ page }) => {
   // Auth
   await page.goto('/');
-  await page.getByRole('link', { name: 'Get Started Free' }).click();
+  await page.getByRole('link', { name: /started/i }).click();
   await page.getByRole('textbox', { name: 'Email address' }).click();
   await page
     .getByRole('textbox', { name: 'Email address' })
