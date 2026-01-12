@@ -20,5 +20,7 @@ jobs:
         run: npm install -g pnpm && pnpm install
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
-      - name: Log the target url
-        run: echo "$BASE_URL"
+      - name: Run Playwright Tests
+        run: echo "BASE_URL=$BASE_URL" && pnpm exec playwright test
+        env:
+          BASE_URL: ${{ github.event.client_payload.url }}
