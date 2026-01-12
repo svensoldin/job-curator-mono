@@ -63,3 +63,5 @@ jobs:
               run: pnpm exec playwright test
               env:
                   BASE_URL: ${{ steps.vercel_url.outputs.deployment_url }}
+                  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+                  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
