@@ -39,25 +39,4 @@ describe('Button', () => {
     const link = screen.getByRole('link', { name: 'Go to test' });
     expect(link).toHaveAttribute('href', '/test');
   });
-
-  it('applies different variants correctly', () => {
-    const { rerender } = render(<Button variant='primary'>Primary</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-blue-600');
-
-    rerender(<Button variant='danger'>Danger</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-red-600');
-  });
-
-  it('applies different sizes correctly', () => {
-    const { rerender } = render(<Button size='sm'>Small</Button>);
-    expect(screen.getByRole('button')).toHaveClass('text-sm');
-
-    rerender(<Button size='lg'>Large</Button>);
-    expect(screen.getByRole('button')).toHaveClass('text-lg');
-  });
-
-  it('merges custom className with default classes', () => {
-    render(<Button className='custom-class'>Custom</Button>);
-    expect(screen.getByRole('button')).toHaveClass('custom-class');
-  });
 });

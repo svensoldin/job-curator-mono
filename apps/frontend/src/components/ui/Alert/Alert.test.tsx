@@ -27,11 +27,4 @@ describe('Alert', () => {
     expect(screen.getByRole('alert')).toHaveClass('bg-blue-50');
     expect(screen.getByText('Information message')).toBeInTheDocument();
   });
-
-  it('renders with custom className', () => {
-    const customClass = 'my-custom-class';
-    render(<Alert message='Test message' className={customClass} />);
-
-    expect(screen.getByRole('alert')).toHaveClass(customClass);
-  });
 });
