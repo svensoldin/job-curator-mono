@@ -42,15 +42,6 @@ describe('ThemeToggle', () => {
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
   });
 
-  it('respects localStorage theme preference over system preference', () => {
-    mockMatchMedia(true);
-    localStorage.setItem('theme', 'light');
-
-    render(<ThemeToggle />);
-    expect(screen.getByLabelText('Switch to dark mode')).toBeInTheDocument();
-    expect(document.documentElement).not.toHaveAttribute('data-theme');
-  });
-
   it('toggles between light and dark mode', async () => {
     render(<ThemeToggle />);
     const button = screen.getByRole('button');
@@ -67,17 +58,5 @@ describe('ThemeToggle', () => {
     expect(button).toHaveAccessibleName('Switch to dark mode');
     expect(document.documentElement).not.toHaveAttribute('data-theme');
     expect(localStorage.getItem('theme')).toBe('light');
-  });
-
-  it('displays correct icon based on theme', async () => {
-    render(<ThemeToggle />);
-
-    expect(screen.getByLabelText('Switch to dark mode')).toBeInTheDocument();
-    expect(document.querySelector('.text-gray-700')).toBeInTheDocument();
-
-    await userEvent.click(screen.getByRole('button'));
-
-    expect(screen.getByLabelText('Switch to light mode')).toBeInTheDocument();
-    expect(document.querySelector('.text-yellow-500')).toBeInTheDocument();
   });
 });

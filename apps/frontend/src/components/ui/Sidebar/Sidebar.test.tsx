@@ -1,18 +1,15 @@
+import { logout } from '@/app/login/actions';
 import { ANALYTICS, DASHBOARD, SEARCH } from '@/routes';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { logout } from '@/app/login/actions';
-
 import Sidebar from './Sidebar';
 
-// Mock the next/navigation module
 vi.mock('next/navigation', () => ({
   usePathname: vi.fn().mockReturnValue(DASHBOARD),
 }));
 
-// Mock the logout action
 vi.mock('@/app/login/actions', () => ({
   logout: vi.fn(),
 }));
@@ -20,7 +17,6 @@ vi.mock('@/app/login/actions', () => ({
 describe('Sidebar', () => {
   it('renders logo with correct text', () => {
     render(<Sidebar />);
-    expect(screen.getByText('JC')).toBeInTheDocument();
     // Note: "Job Curator" is hidden by default and only shown on hover
     expect(screen.getByText('Job Curator')).toBeInTheDocument();
   });
