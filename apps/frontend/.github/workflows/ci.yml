@@ -39,24 +39,8 @@ jobs:
         steps:
             - uses: actions/checkout@v4
             - uses: ./.github/actions/setup-node-pnpm
-            - name: Get Vercel Preview URL
+            - uses: ./.github/actions/vercel-preview-url
               id: vercel_url
-              run: |
-                  # Wait for Vercel deployment and extract preview URL
-                  DEPLOYMENT_URL=$(gh deployment list --repo ${{ github.repository }} --environment preview --json url --jq '.[0].url' 2>/dev/null || echo "")
-                  if [ -z "$DEPLOYMENT_URL" ]; then
-                    echo "Waiting for Vercel deployment..."
-                    for i in {1..30}; do
-                      DEPLOYMENT_URL=$(gh deployment list --repo ${{ github.repository }} --environment preview --json url --jq '.[0].url' 2>/dev/null || echo "")
-                      if [ ! -z "$DEPLOYMENT_URL" ]; then
-                        break
-                      fi
-                      sleep 2
-                    done
-                  fi
-                  echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
-              env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: Install Playwright Browsers
               run: pnpm exec playwright install --with-deps
             - name: Run E2E Tests
