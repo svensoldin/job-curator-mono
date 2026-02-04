@@ -1,0 +1,14 @@
+.env
+.yarn
+
+# IDE
+.vscode/
+
+# Logs
+*.log
+logs/
+
+# macOS
+.DS_Store
+node_modules
+dist
