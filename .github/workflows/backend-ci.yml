@@ -1,0 +1,36 @@
+name: Backend CI
+permissions:
+    contents: read
+
+on:
+    pull_request:
+        branches: [master]
+        paths:
+            - "apps/backend/**"
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: ./.github/actions/setup-node-pnpm
+            - name: Lint
+              run: pnpm --filter apps/backend lint
+
+    test:
+        needs: lint
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: ./.github/actions/setup-node-pnpm
+            - name: Run tests
+              run: pnpm --filter apps/backend test
+
+    build:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: ./.github/actions/setup-node-pnpm
+            - name: Build
+              run: pnpm --filter apps/backend build
