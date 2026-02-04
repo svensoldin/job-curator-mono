@@ -32,5 +32,11 @@ runs:
           ${{ runner.os }}-pnpm-store-
 
     - name: Install dependencies
-      run: pnpm install --frozen-lockfile
       shell: bash
+      run: |
+        # Detect which app directory we're in based on current working directory
+        if [ -f "apps/frontend/pnpm-lock.yaml" ]; then
+          cd apps/frontend && pnpm install --frozen-lockfile
+        elif [ -f "apps/backend/pnpm-lock.yaml" ]; then
+          cd apps/backend && pnpm install --frozen-lockfile
+        fi
