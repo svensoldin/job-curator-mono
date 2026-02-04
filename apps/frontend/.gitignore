@@ -1,0 +1,32 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+
+/.next/
+
+# production
+/build
+public
+
+# misc
+.DS_Store
+jobs.json
+
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/e2e/.cache/
+/e2e/.auth/

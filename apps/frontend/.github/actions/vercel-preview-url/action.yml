@@ -1,0 +1,30 @@
+name: Get Vercel Preview URL
+description: Retrieve the Vercel preview deployment URL
+
+outputs:
+  deployment_url:
+    description: The Vercel preview deployment URL
+    value: ${{ steps.get_url.outputs.deployment_url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Get Vercel Preview URL
+      id: get_url
+      shell: bash
+      run: |
+        # Wait for Vercel deployment and extract preview URL
+        DEPLOYMENT_URL=$(gh deployment list --repo ${{ github.repository }} --environment preview --json url --jq '.[0].url' 2>/dev/null || echo "")
+        if [ -z "$DEPLOYMENT_URL" ]; then
+          echo "Waiting for Vercel deployment..."
+          for i in {1..30}; do
+            DEPLOYMENT_URL=$(gh deployment list --repo ${{ github.repository }} --environment preview --json url --jq '.[0].url' 2>/dev/null || echo "")
+            if [ ! -z "$DEPLOYMENT_URL" ]; then
+              break
+            fi
+            sleep 2
+          done
+        fi
+        echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+      env:
+        GH_TOKEN: ${{ github.token }}
