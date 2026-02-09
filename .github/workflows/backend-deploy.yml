@@ -8,21 +8,28 @@ on:
             - "apps/backend/**"
 
 jobs:
-    build:
+    deploy:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
 
-            - name: Deploy to Heroku
+            - name: Login to Heroku Container Registry
+              run: |
+                  echo ${{ secrets.HEROKU_API_KEY }} | docker login --username=_ --password-stdin registry.heroku.com
+
+            - name: Build and push Docker image
+              run: |
+                  docker build \
+                    --build-arg SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+                    --build-arg SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }} \
+                    -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web:latest \
+                    apps/backend
+
+                  docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web:latest
+
+            - name: Release on Heroku
+              run: |
+                  heroku container:release web --app=${{ secrets.HEROKU_APP_NAME }}
               env:
                   HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-                  HEROKU_APP_NAME: job-searcher
-                  HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
-              run: |
-                  git config user.email "$HEROKU_EMAIL"
-                  git config user.name "Heroku Deploy"
-                  git remote add heroku https://git.heroku.com/$HEROKU_APP_NAME.git || git remote set-url heroku https://git.heroku.com/$HEROKU_APP_NAME.git
-                  git push -f heroku master:master --no-verify
