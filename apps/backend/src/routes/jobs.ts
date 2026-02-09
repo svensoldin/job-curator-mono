@@ -1,6 +1,6 @@
+import { type CreateJobSearchInput, supabase } from '../lib/supabase.js';
 import { searchTaskManager } from '../services/search-task-manager.js';
 import logger from '../utils/logger.js';
-import { supabase, type CreateJobSearchInput } from '../lib/supabase.js';
 import express, { type Router } from 'express';
 
 const router: Router = express.Router();
@@ -43,9 +43,7 @@ router.post('/start', async (req, res) => {
       });
     }
 
-    logger.info(
-      `Created Supabase search record ${search.id} for user ${userId}`
-    );
+    logger.info(`Created Supabase search record ${search.id} for user ${userId}`);
 
     const userCriteria = {
       jobTitle,
@@ -54,11 +52,7 @@ router.post('/start', async (req, res) => {
       salary: salary || '',
     };
 
-    const taskId = searchTaskManager.createTask(
-      userCriteria,
-      userId,
-      search.id
-    );
+    const taskId = searchTaskManager.createTask(userCriteria, userId, search.id);
 
     logger.info(
       `Created search task ${taskId} for "${jobTitle}" in "${location}" (search ID: ${search.id})`
@@ -131,7 +125,6 @@ router.get('/results/:taskId', async (req, res) => {
       });
     }
 
-    // Task is completed - return job offers
     return res.json({
       success: true,
       total_jobs: task.jobOffers?.length || 0,
