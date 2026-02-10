@@ -9,5 +9,9 @@
     "test": "pnpm -r test",
     "build": "pnpm -r build",
     "dev": "pnpm -r dev"
+  },
+  "devDependencies": {
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.4.2"
   }
 }
