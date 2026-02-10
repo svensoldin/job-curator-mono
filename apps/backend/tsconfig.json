@@ -1,13 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "NodeNext",
+    "module": "nodenext",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
     "declaration": true,
     "outDir": "dist",
     "rootDir": "src",
@@ -21,18 +20,12 @@
     "exactOptionalPropertyTypes": true,
     "allowJs": true,
     "moduleDetection": "force",
+    "moduleResolution": "nodenext",
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "baseUrl": "./src"
   },
   "include": ["src/**/*"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "tests",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "**/fixtures/**"
-  ]
+  "exclude": ["node_modules", "dist", "tests", "**/*.test.ts", "**/*.spec.ts", "**/fixtures/**"]
 }

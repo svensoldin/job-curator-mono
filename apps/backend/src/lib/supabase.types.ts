@@ -132,14 +132,14 @@ export type Database = {
           url: string;
         };
         Insert: {
-          company?: string;
+          company: string;
           created_at?: string;
-          description?: string;
+          description: string;
           id?: number;
-          location?: string;
-          source?: string;
-          title?: string;
-          url?: string;
+          location: string;
+          source: string;
+          title: string;
+          url: string;
         };
         Update: {
           company?: string;

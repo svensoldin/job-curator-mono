@@ -11,7 +11,7 @@ export type ScrapeCriteria = Pick<UserCriteria, 'jobTitle' | 'location'>;
 export interface JobPosting {
   title: string;
   company: string;
-  location?: string;
+  location: string;
   url: string;
   description: string;
   source: string;

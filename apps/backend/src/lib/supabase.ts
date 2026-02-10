@@ -42,7 +42,7 @@ export interface CreateJobSearchInput {
   job_title: string;
   location: string;
   skills: string;
-  salary: number;
+  salary: string;
 }
 
 export interface CreateJobResultInput {

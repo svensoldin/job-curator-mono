@@ -8,13 +8,12 @@
     "start": "node dist/index.js",
     "dev": "nodemon --exec \"pnpm build && node dist/index.js\" --watch src --ext ts",
     "build": "tsc",
-    "build:watch": "tsc --watch",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "clean": "rm -rf dist",
-    "install:deps": "pnpm install"
+    "scrape": "node dist/services/scraper/scraper.js"
   },
   "keywords": [
     "job-hunting",

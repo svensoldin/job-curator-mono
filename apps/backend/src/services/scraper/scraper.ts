@@ -1,4 +1,3 @@
-import cron from 'node-cron';
 import dotenv from 'dotenv';
 import { supabase } from 'lib/supabase.js';
 
@@ -9,6 +8,7 @@ import { SCRAPE_JOB_TITLE, SCRAPE_LOCATION } from 'constants/scraper.js';
 import { scrapeLinkedIn } from './linkedin/linkedin.js';
 import { closeBrowser, createBrowser } from './helpers.js';
 import scrapeWelcomeToTheJungle from './wttj/wttj.js';
+import { SUPABASE_SCRAPED_JOBS_TABLE } from 'constants/search-task-manager.js';
 
 dotenv.config();
 
@@ -33,7 +33,9 @@ export default async function scrapeJobs(criteria: ScrapeCriteria) {
 
     logger.info(`✅ Successfully scraped ${uniqueJobs.length} jobs with descriptions`);
 
-    const { error: upsertError } = await supabase.from('scraped_jobs').upsert(uniqueJobs);
+    const { error: upsertError } = await supabase
+      .from(SUPABASE_SCRAPED_JOBS_TABLE)
+      .upsert(uniqueJobs);
 
     if (upsertError) {
       logger.error(`Failed to upsert scraped jobs:`, upsertError);
@@ -47,11 +49,12 @@ export default async function scrapeJobs(criteria: ScrapeCriteria) {
   }
 }
 
-const SCRAPE_CRITERIA: ScrapeCriteria = {
+export const SCRAPE_CRITERIA: ScrapeCriteria = {
   jobTitle: SCRAPE_JOB_TITLE,
   location: SCRAPE_LOCATION,
 };
 
-cron.schedule('0 8 * * *', () => {
+// Enable running from the CMD line
+if (require.main === module) {
   scrapeJobs(SCRAPE_CRITERIA);
-});
+}

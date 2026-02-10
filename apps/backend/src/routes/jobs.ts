@@ -1,3 +1,7 @@
+import {
+  SUPABASE_JOB_RESULTS_TABLE,
+  SUPABASE_JOB_SEARCHES_TABLE,
+} from 'constants/search-task-manager.js';
 import { type CreateJobSearchInput, supabase } from '../lib/supabase.js';
 import { searchTaskManager } from '../services/search-task-manager.js';
 import logger from '../utils/logger.js';
@@ -27,11 +31,11 @@ router.post('/start', async (req, res) => {
       job_title: jobTitle,
       location,
       skills: skills || '',
-      salary: parseInt(salary) || 0,
+      salary: (parseInt(salary) || 0).toString(),
     };
 
     const { data: search, error: dbError } = await supabase
-      .from('job_searches')
+      .from(SUPABASE_JOB_SEARCHES_TABLE)
       .insert(searchInput)
       .select()
       .single();
@@ -110,11 +114,26 @@ router.get('/results/:taskId', async (req, res) => {
     }
 
     if (task.status === 'pending' || task.status === 'processing') {
-      return res.status(400).json({
-        error: 'Search task not completed yet',
-        status: task.status,
-        progress: task.progress,
-        message: task.message,
+      // Stream response
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.flushHeaders();
+
+      //@ts-expect-error Not all code paths return by design
+      const intervalId = setInterval(() => {
+        if (task.status === 'completed')
+          return res.json({
+            success: true,
+            jobs: task.jobOffers || [],
+          });
+        res.write(`Task still in progress: ${task.progress}% done\n\n`);
+      }, 20_000);
+
+      req.on('close', () => {
+        clearInterval(intervalId);
+        res.end();
+        console.log('Client disconnected');
       });
     }
 
@@ -125,28 +144,15 @@ router.get('/results/:taskId', async (req, res) => {
       });
     }
 
+    const { data: jobOffers } = await supabase.from(SUPABASE_JOB_RESULTS_TABLE).select(taskId);
+
     return res.json({
       success: true,
-      total_jobs: task.jobOffers?.length || 0,
-      jobs: task.jobOffers || [],
+      jobs: jobOffers || [],
     });
   } catch (error) {
     logger.error('Error getting task results:', error);
     return res.status(500).json({ error: 'Failed to get task results' });
-  }
-});
-
-/**
- * GET /jobs/stats
- * Get queue statistics (for monitoring/debugging)
- */
-router.get('/stats', async (req, res) => {
-  try {
-    const stats = searchTaskManager.getStats();
-    return res.json(stats);
-  } catch (error) {
-    logger.error('Error getting stats:', error);
-    return res.status(500).json({ error: 'Failed to get stats' });
   }
 });
 
