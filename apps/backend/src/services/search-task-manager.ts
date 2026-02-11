@@ -1,8 +1,13 @@
+import {
+  SUPABASE_JOB_RESULTS_TABLE,
+  SUPABASE_JOB_SEARCHES_TABLE,
+  SUPABASE_SCRAPED_JOBS_TABLE,
+} from 'constants/search-task-manager.js';
 import { type CreateJobResultInput, supabase } from '../lib/supabase.js';
-import type { JobPosting, ScrapeCriteria, UserCriteria } from '../types.js';
+
+import type { JobPosting, UserCriteria } from '../types.js';
 import logger from '../utils/logger.js';
-import { analyzeAndRankJobs } from './ai-analyzer.js';
-import scrapeJobsForAnalysis from './scraping/scraping.js';
+import { analyzeAndRankJobs } from './ai-analyzer/ai-analyzer.js';
 
 /**
  * Represents a search task for job offers
@@ -33,9 +38,7 @@ class SearchTaskManager {
    * Create a new search task
    */
   createTask(criteria: UserCriteria, userId: string, searchId: string): string {
-    const id = `search_${Date.now()}_${Math.random()
-      .toString(36)
-      .substring(2, 11)}`;
+    const id = `search_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
     const task: SearchTask = {
       id,
@@ -79,7 +82,6 @@ class SearchTaskManager {
    * Process tasks in the queue sequentially
    */
   private async processQueue() {
-    // Prevent multiple queue processors
     if (this.isProcessing) {
       logger.info('Queue processor already running');
       return;
@@ -114,92 +116,47 @@ class SearchTaskManager {
 
       task.status = 'processing';
       task.progress = 5;
-      task.message = 'Starting job offer search...';
+      task.message = `Fetching job offers...`;
+      const { data: scrapedJobs } = await supabase.from(SUPABASE_SCRAPED_JOBS_TABLE).select('*');
+      if (!scrapedJobs) throw new Error('Error fetching scraped jobs from Supabase');
+      task.progress = 50;
+      task.message = 'Analyzing job offers with AI...';
+      logger.info(`Task ${task.id}: Analyzing job offers with AI`);
 
-      const scrapeCriteria: ScrapeCriteria = {
-        jobTitle: task.criteria.jobTitle,
-        location: task.criteria.location,
-      };
-
-      task.progress = 10;
-      task.message = 'Scraping job boards (LinkedIn, Welcome to the Jungle)...';
-      logger.info(`Task ${task.id}: Starting to scrape job boards`);
-
-      const scrapedJobOffers = await scrapeJobsForAnalysis(
-        scrapeCriteria,
-        (progress, message) => {
-          task.progress = progress;
-          task.message = message;
-          logger.info(`Task ${task.id}: ${progress}% - ${message}`);
-        }
-      );
-
-      task.progress = 70;
-      task.message = `Scraped ${scrapedJobOffers.length} job offers`;
-
-      if (scrapedJobOffers.length === 0) {
-        task.status = 'completed';
-        task.progress = 100;
-        task.message = 'No job offers found matching your criteria';
-        task.jobOffers = [];
-        task.completedAt = new Date();
-        logger.info(`Task ${task.id} completed with no results`);
-        return;
-      }
-
-      task.progress = 75;
-      task.message = `Analyzing ${scrapedJobOffers.length} job offers with AI...`;
-      logger.info(
-        `Task ${task.id}: Analyzing ${scrapedJobOffers.length} job offers with AI`
-      );
-
-      const rankedJobOffers = await analyzeAndRankJobs(
-        scrapedJobOffers,
-        task.criteria
-      );
+      const rankedJobOffers = await analyzeAndRankJobs(scrapedJobs, task.criteria);
 
       task.progress = 90;
       task.message = 'Saving results to database...';
-      logger.info(
-        `Task ${task.id}: Saving ${rankedJobOffers.length} results to Supabase`
-      );
+      logger.info(`Task ${task.id}: Saving ${rankedJobOffers.length} results to Supabase`);
 
       try {
         const { error: updateError } = await supabase
-          .from('job_searches')
+          .from(SUPABASE_JOB_SEARCHES_TABLE)
           .update({ total_jobs: rankedJobOffers.length })
           .eq('id', task.searchId);
 
         if (updateError) {
-          logger.error(
-            `Task ${task.id}: Failed to update search record:`,
-            updateError
-          );
+          logger.error(`Task ${task.id}: Failed to update search record:`, updateError);
           throw updateError;
         }
 
         if (rankedJobOffers.length > 0) {
-          const jobResults: CreateJobResultInput[] = rankedJobOffers.map(
-            (job) => ({
-              search_id: task.searchId,
-              title: job.title,
-              company: job.company,
-              description: job.description || null,
-              url: job.url,
-              source: job.source,
-              ai_score: job.score || null,
-            })
-          );
+          const jobResults: CreateJobResultInput[] = rankedJobOffers.map((job) => ({
+            search_id: task.searchId,
+            title: job.title,
+            company: job.company,
+            description: job.description || null,
+            url: job.url,
+            source: job.source,
+            ai_score: job.score || null,
+          }));
 
           const { error: insertError } = await supabase
-            .from('job_results')
+            .from(SUPABASE_JOB_RESULTS_TABLE)
             .insert(jobResults);
 
           if (insertError) {
-            logger.error(
-              `Task ${task.id}: Failed to insert job results:`,
-              insertError
-            );
+            logger.error(`Task ${task.id}: Failed to insert job results:`, insertError);
             throw insertError;
           }
         }
@@ -219,22 +176,19 @@ class SearchTaskManager {
       task.jobOffers = rankedJobOffers;
       task.completedAt = new Date();
 
-      logger.info(
-        `Task ${task.id} completed successfully with ${rankedJobOffers.length} results`
-      );
+      logger.info(`Task ${task.id} completed successfully with ${rankedJobOffers.length} results`);
     } catch (error) {
       logger.error(`Task ${task.id} failed:`, error);
 
       task.status = 'failed';
       task.progress = 0;
       task.message = 'Search task failed';
-      task.error =
-        error instanceof Error ? error.message : 'Unknown error occurred';
+      task.error = error instanceof Error ? error.message : 'Unknown error occurred';
       task.completedAt = new Date();
 
       try {
         const { error: failUpdateError } = await supabase
-          .from('job_searches')
+          .from(SUPABASE_JOB_SEARCHES_TABLE)
           .update({ total_jobs: -1 })
           .eq('id', task.searchId);
 
@@ -245,10 +199,7 @@ class SearchTaskManager {
           );
         }
       } catch (statusErr) {
-        logger.warn(
-          `Task ${task.id}: Error while writing failed marker to DB:`,
-          statusErr
-        );
+        logger.warn(`Task ${task.id}: Error while writing failed marker to DB:`, statusErr);
       }
     }
   }
@@ -288,10 +239,11 @@ class SearchTaskManager {
   }
 }
 
-// Singleton instance
 export const searchTaskManager = new SearchTaskManager();
 
-// Cleanup old tasks every 30 minutes
-setInterval(() => {
-  searchTaskManager.cleanup();
-}, 30 * 60 * 1000);
+setInterval(
+  () => {
+    searchTaskManager.cleanup();
+  },
+  30 * 60 * 1000
+);

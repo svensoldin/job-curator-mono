@@ -2,12 +2,7 @@ import puppeteer, { Browser, Page } from 'puppeteer';
 
 import type { JobPosting } from 'types.js';
 import logger from '../../utils/logger.js';
-
-export const MAX_JOBS_PER_BOARD = 15;
-export const MAX_JOBS = 50;
-export const DELAY_BETWEEN_REQUESTS = 1000;
-export const USER_AGENT =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+import { DELAY_BETWEEN_REQUESTS, USER_AGENT } from '../../constants/scraper.js';
 
 export const createBrowser = async (): Promise<Browser> => {
   try {
@@ -67,15 +62,10 @@ export const parseJobDescription = async (
   for (const selector of selectors) {
     try {
       await page.waitForSelector(selector, { timeout: 3000 });
-      const description = await page.$eval(
-        selector,
-        (el) => (el as HTMLElement).innerText || ''
-      );
+      const description = await page.$eval(selector, (el) => (el as HTMLElement).innerText || '');
       if (description) {
         if (description.length < minLength)
-          console.warn(
-            `Description is shorter than minimum length for ${page.url}`
-          );
+          console.warn(`Description is shorter than minimum length for ${page.url}`);
         return cleanDescription(description);
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -87,11 +77,7 @@ export const parseJobDescription = async (
   return '';
 };
 
-export const getJobDescription = async (
-  browser: Browser,
-  job: JobPosting,
-  selectors: string[]
-) => {
+export const getJobDescription = async (browser: Browser, job: JobPosting, selectors: string[]) => {
   if (!job || !job.url) return;
 
   try {

@@ -1,19 +1,18 @@
-import logger from '../utils/logger.js';
 import { Mistral } from '@mistralai/mistralai';
+import { MODEL } from 'constants/ai-analyzer.js';
 import dotenv from 'dotenv';
 
-import type { JobPosting, UserCriteria } from '../types.js';
+import type { UserCriteria, JobPosting } from 'types.js';
+import logger from 'utils/logger.js';
 
 dotenv.config();
 
 const apiKey = process.env.MISTRAL_API_KEY;
-if (!apiKey) throw new Error('Missing MISTRAL_API_KEY');
+if (!apiKey) throw new Error('Missing MISTRAL_API_KEY env var');
 
 const client = new Mistral({
   apiKey,
 });
-
-const MODEL = 'mistral-small-latest';
 
 /**
  * Build AI prompt for job matching
@@ -60,7 +59,7 @@ Score: X/100
 /**
  * Analyze a single job with AI
  */
-async function analyzeJob(
+export async function analyzeSingleJob(
   job: JobPosting,
   userCriteria: UserCriteria
 ): Promise<JobPosting> {
@@ -88,7 +87,6 @@ async function analyzeJob(
 
     logger.info(`📊 Raw AI response for "${job.title}": ${scoreText}`);
 
-    // Extract score from response like "Score: 85/100" or just "85"
     let aiScore: number | null = null;
     if (scoreText) {
       // Try to extract number from various formats
@@ -106,49 +104,3 @@ async function analyzeJob(
     return { ...job, score: 0 };
   }
 }
-
-/**
- * Analyze multiple jobs with AI and return top N sorted by score
- * Uses batching to avoid rate limits
- */
-export async function analyzeAndRankJobs(
-  jobs: JobPosting[],
-  userCriteria: UserCriteria
-): Promise<JobPosting[]> {
-  logger.info(`Analyzing ${jobs.length} jobs with AI (Mistral)`);
-
-  // Process jobs in batches to avoid rate limits
-  const BATCH_SIZE = 5;
-  const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds
-
-  const analyzedJobs: JobPosting[] = [];
-
-  for (let i = 0; i < jobs.length; i += BATCH_SIZE) {
-    const batch = jobs.slice(i, i + BATCH_SIZE);
-    logger.info(
-      `Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(
-        jobs.length / BATCH_SIZE
-      )} (${batch.length} jobs)`
-    );
-
-    const batchResults = await Promise.all(
-      batch.map((job) => analyzeJob(job, userCriteria))
-    );
-
-    analyzedJobs.push(...batchResults);
-
-    // Add delay between batches (except for the last batch)
-    if (i + BATCH_SIZE < jobs.length) {
-      logger.info(`Waiting ${DELAY_BETWEEN_BATCHES}ms before next batch...`);
-      await new Promise((resolve) =>
-        setTimeout(resolve, DELAY_BETWEEN_BATCHES)
-      );
-    }
-  }
-
-  const topJobs = analyzedJobs.sort((a, b) => (b.score || 0) - (a.score || 0));
-
-  return topJobs;
-}
-
-export default { analyzeAndRankJobs };

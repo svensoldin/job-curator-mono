@@ -1,17 +1,14 @@
 import { Browser, Page } from 'puppeteer';
 
 import type { JobPosting, ScrapeCriteria } from 'types.js';
-import logger from '../../utils/logger.js';
-import {
-  getJobDescription,
-  initializePageAndNavigate,
-  MAX_JOBS_PER_BOARD,
-} from './common.js';
+import logger from '../../../utils/logger.js';
+import { getJobDescription, initializePageAndNavigate } from '../helpers.js';
+import { MAX_JOBS_PER_BOARD } from '../../../constants/scraper.js';
 
 const BASE_URL = 'https://www.welcometothejungle.com/fr/jobs';
 const PRIMARY_SELECTOR = '.ais-Hits-list-item';
 
-const extractCompanyFromUrl = (href: string): string => {
+function extractCompanyFromUrl(href: string): string {
   const urlMatch = href.match(/\/companies\/([^/]+)\/jobs\//);
   const companySlug = urlMatch ? urlMatch[1] : '';
 
@@ -21,12 +18,9 @@ const extractCompanyFromUrl = (href: string): string => {
         .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ')
     : 'Unknown Company';
-};
+}
 
-export const getJobs = async (
-  page: Page,
-  limit: number
-): Promise<JobPosting[]> => {
+export const getJobs = async (page: Page, limit: number): Promise<JobPosting[]> => {
   const jobs: JobPosting[] = await page.evaluate((maxJobs) => {
     const jobLinks = Array.from(document.querySelectorAll('a[href*="/jobs/"]'));
     const jobsMap = new Map();
@@ -76,19 +70,12 @@ export default async function scrapeWelcomeToTheJungle(
   const searchQuery = searchTerms.join(' ');
   let url = `${BASE_URL}?query=${encodeURIComponent(searchQuery)}`;
 
-  if (
-    criteria.location &&
-    !criteria.location.toLowerCase().includes('remote')
-  ) {
+  if (criteria.location && !criteria.location.toLowerCase().includes('remote')) {
     url += `&refinementList[offices.country_code][]=FR`;
   }
 
   try {
-    const page = await initializePageAndNavigate(
-      browser,
-      url,
-      PRIMARY_SELECTOR
-    );
+    const page = await initializePageAndNavigate(browser, url, PRIMARY_SELECTOR);
 
     const jobs = await getJobs(page, limit);
 
@@ -96,9 +83,7 @@ export default async function scrapeWelcomeToTheJungle(
 
     logger.info(`Found ${jobs.length} Welcome to the Jungle jobs`);
 
-    logger.info(
-      `Fetching descriptions for ${jobs.length} Welcome to the Jungle jobs...`
-    );
+    logger.info(`Fetching descriptions for ${jobs.length} Welcome to the Jungle jobs...`);
 
     for (const job of jobs) {
       await getJobDescription(browser, job, WTTJ_DESCRIPTION_SELECTORS);

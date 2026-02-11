@@ -1,0 +1,42 @@
+/node_modules
+
+# Turborepo
+.turbo
+dist
+.next
+
+# Build outputs
+apps/*/dist
+apps/*/.next
+
+# Dependencies
+pnpm-lock.yaml
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Testing
+coverage
+.nyc_output

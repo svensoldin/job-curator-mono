@@ -45,6 +45,31 @@ COPY . .
 RUN pnpm run build
 
 ################################################################################
+# Create a development stage with hot-reloading capabilities
+# This stage installs all dependencies (including dev) but does NOT copy source files
+# Source files will be mounted via docker compose watch
+FROM base AS development
+
+# Install ALL dependencies (including devDependencies for tsx)
+RUN --mount=type=bind,source=package.json,target=package.json \
+    --mount=type=bind,source=pnpm-lock.yaml,target=pnpm-lock.yaml \
+    --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
+
+# Copy package.json for runtime
+COPY package.json .
+
+# Set NODE_ENV to development
+ENV NODE_ENV=development
+
+# Expose the port that the application listens on.
+EXPOSE 4000
+
+# Run the application with hot-reloading using tsx watch
+# Source files will be available via the mounted volume from docker compose
+CMD ["pnpm", "run", "dev"]
+
+################################################################################
 # Create a new stage to run the application with minimal runtime dependencies
 # where the necessary files are copied from the build stage.
 FROM base AS final

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import type { Database } from './supabase.types.js';
 
 dotenv.config();
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -11,9 +12,8 @@ if (!supabaseUrl || !supabaseServiceKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseServiceKey);
+export const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey);
 
-// Types for database tables
 export interface JobSearch {
   id: string;
   user_id: string;
@@ -42,7 +42,7 @@ export interface CreateJobSearchInput {
   job_title: string;
   location: string;
   skills: string;
-  salary: number;
+  salary: string;
 }
 
 export interface CreateJobResultInput {

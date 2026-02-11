@@ -47,10 +47,7 @@ app.use(
 
     res.status(err?.status || 500).json({
       error: 'Internal server error',
-      message:
-        process.env.NODE_ENV === 'development'
-          ? err?.message
-          : 'Something went wrong',
+      message: process.env.NODE_ENV === 'development' ? err?.message : 'Something went wrong',
     });
   }
 );

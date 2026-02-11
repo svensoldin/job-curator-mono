@@ -5,3 +5,7 @@ The two apps are inside the root `apps` directory. Inside, there is a `frontend`
 ## CI
 
 For any knowledge regarding the GitHub Actions workflows (i.e CI), use the GitHub Actions MCP server.
+
+## Supabase
+
+For any knowledge regarding the Supabase project, use the provided MCP server in `.vscode/mcp.json`.
