@@ -1,9 +1,9 @@
 import type { Browser } from 'puppeteer';
 import type { JobPosting, ScrapeCriteria } from 'types.js';
-import logger from 'utils/logger.js';
-import { getJobDescription, initializePageAndNavigate } from 'services/scraper/helpers.js';
+import logger from '../../../utils/logger.js';
+import { getJobDescription, initializePageAndNavigate } from '../../scraper/helpers.js';
 import { getJobs } from './helpers.js';
-import { MAX_JOBS_PER_BOARD } from 'constants/scraper.js';
+import { MAX_JOBS_PER_BOARD } from '../../../constants/scraper.js';
 
 const BASE_URL = 'https://www.linkedin.com/jobs/search/';
 const PRIMARY_SELECTOR = '.jobs-search__results-list';

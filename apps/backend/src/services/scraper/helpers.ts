@@ -1,8 +1,8 @@
 import puppeteer, { Browser, Page } from 'puppeteer';
 
 import type { JobPosting } from 'types.js';
-import logger from 'utils/logger.js';
-import { DELAY_BETWEEN_REQUESTS, USER_AGENT } from 'constants/scraper.js';
+import logger from '../../utils/logger.js';
+import { DELAY_BETWEEN_REQUESTS, USER_AGENT } from '../../constants/scraper.js';
 
 export const createBrowser = async (): Promise<Browser> => {
   try {

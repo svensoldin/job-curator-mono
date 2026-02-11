@@ -1,14 +1,14 @@
+import { supabase } from '../../lib/supabase.js';
 import dotenv from 'dotenv';
-import { supabase } from 'lib/supabase.js';
 
 import type { ScrapeCriteria } from 'types.js';
-import logger from 'utils/logger.js';
+import logger from '../../utils/logger.js';
 
-import { SCRAPE_JOB_TITLE, SCRAPE_LOCATION } from 'constants/scraper.js';
+import { SCRAPE_JOB_TITLE, SCRAPE_LOCATION } from '../../constants/scraper.js';
+import { SUPABASE_SCRAPED_JOBS_TABLE } from '../../constants/search-task-manager.js';
 import { scrapeLinkedIn } from './linkedin/linkedin.js';
 import { closeBrowser, createBrowser } from './helpers.js';
 import scrapeWelcomeToTheJungle from './wttj/wttj.js';
-import { SUPABASE_SCRAPED_JOBS_TABLE } from 'constants/search-task-manager.js';
 
 dotenv.config();
 
@@ -41,6 +41,8 @@ export default async function scrapeJobs(criteria: ScrapeCriteria) {
       logger.error(`Failed to upsert scraped jobs:`, upsertError);
       throw upsertError;
     }
+
+    logger.info(`✅ Successfully update db with scraped jobs`);
   } catch (error) {
     logger.error('Error in job scraping:', error);
     throw error;
@@ -54,7 +56,4 @@ export const SCRAPE_CRITERIA: ScrapeCriteria = {
   location: SCRAPE_LOCATION,
 };
 
-// Enable running from the CMD line
-if (require.main === module) {
-  scrapeJobs(SCRAPE_CRITERIA);
-}
+scrapeJobs(SCRAPE_CRITERIA);

@@ -3,10 +3,26 @@ services:
   server:
     build:
       context: .
+      target: development
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       MISTRAL_API_KEY: ${MISTRAL_API_KEY}
     ports:
       - 4000:4000
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./tsconfig.json:/usr/src/app/tsconfig.json
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /usr/src/app/src
+          ignore:
+            - node_modules/
+        - action: sync+restart
+          path: ./tsconfig.json
+          target: /usr/src/app/tsconfig.json
+        - action: rebuild
+          path: package.json

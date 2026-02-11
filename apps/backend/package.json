@@ -6,12 +6,11 @@
   "type": "module",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "nodemon --exec \"pnpm build && node dist/index.js\" --watch src --ext ts",
+    "dev": "tsx watch --clear-screen=false src/index.ts",
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix",
     "clean": "rm -rf dist",
     "scrape": "node dist/services/scraper/scraper.js"
   },

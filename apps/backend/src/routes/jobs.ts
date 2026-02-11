@@ -17,20 +17,21 @@ const router: Router = express.Router();
  */
 router.post('/start', async (req, res) => {
   try {
+    if (!req.body) return res.status(400).json('Missing request body');
+
     const { userId, jobTitle, location, skills, salary } = req.body;
 
-    if (!userId || !jobTitle || !location) {
+    if (!userId || !jobTitle || !location || !skills || !salary) {
       return res.status(400).json({
-        error: 'Missing required parameters: userId, jobTitle, location',
+        error: 'Missing required body params: userId, jobTitle, location, salary, skills',
       });
     }
 
-    // Create job_searches record in Supabase
     const searchInput: CreateJobSearchInput = {
       user_id: userId,
       job_title: jobTitle,
       location,
-      skills: skills || '',
+      skills,
       salary: (parseInt(salary) || 0).toString(),
     };
 
@@ -49,14 +50,16 @@ router.post('/start', async (req, res) => {
 
     logger.info(`Created Supabase search record ${search.id} for user ${userId}`);
 
-    const userCriteria = {
-      jobTitle,
-      location,
-      skills: skills || '',
-      salary: salary || '',
-    };
-
-    const taskId = searchTaskManager.createTask(userCriteria, userId, search.id);
+    const taskId = searchTaskManager.createTask(
+      {
+        jobTitle,
+        location,
+        skills,
+        salary,
+      },
+      userId,
+      search.id
+    );
 
     logger.info(
       `Created search task ${taskId} for "${jobTitle}" in "${location}" (search ID: ${search.id})`
