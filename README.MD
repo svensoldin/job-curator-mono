@@ -4,7 +4,7 @@
 
 This is a project that I made to help my job search. When visiting a job post, I noticed that I would spend a minute or two reading about the company and the position, maybe get excited, only to see at the bottom that the technologies involved were completely irrelevant to me (e.g Angular) or that some other condition was a no-go.
 
-Being at the peak of the A.I wave (2025-2026), and since everyone seems to be more (or less) productive with it, I thought I would give it a go. At the same time, I wanted a sizable project that would be a vessel for learning new technologies/patterns. If you’re a potential employer reading this, hopefully you will be impressed (don’t tell me if not).
+Being at the peak of the A.I wave (2025-2026), and since everyone seems to be more (or less) productive with it, I thought I would give it a go. At the same time, I wanted a sizable project that would be a vessel for learning new technologies/patterns.
 
 ## Architecture
 
@@ -38,7 +38,7 @@ I realized the scope of the scraping was too ambitious and definitely not scalab
 
 Initially, the project was divided into two repos (front and back) but I wanted to get more familiar with a monorepo structure. Obviously, the monorepo becomes relevant as an application scales and this is definitely not the case here.
 
-An interesting note here is that I managed to migrate in less than an hour and while preserving both repos’ history. Kudos to the maintainers of (git-filter-repo)[https://github.com/newren/git-filter-repo], it’s truly an amazing tool!
+An interesting note here is that I managed to migrate in less than an hour and while preserving both repos’ history. Kudos to the maintainers of [git-filter-repo](https://github.com/newren/git-filter-repo), it’s truly an amazing tool!
 
 As much as the monorepo is an artifice here, it does come with its perks, and the full-stack type-safety is much appreciated.
 
