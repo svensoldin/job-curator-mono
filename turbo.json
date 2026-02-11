@@ -1,0 +1,63 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "description": "Build the project for production",
+      "outputs": ["dist/**", ".next/**", "!.next/cache"],
+      "cache": true,
+      "inputs": ["src/**", "package.json", "tsconfig.json", "next.config.ts"],
+      "env": ["NODE_ENV"]
+    },
+    "dev": {
+      "description": "Start development server with hot reload",
+      "cache": false,
+      "interactive": true,
+      "persistent": true
+    },
+    "lint": {
+      "description": "Lint the codebase",
+      "outputs": [],
+      "cache": true,
+      "inputs": ["src/**", ".eslintrc*", "eslint.config.js", "package.json"]
+    },
+    "test": {
+      "description": "Run tests",
+      "outputs": ["coverage/**"],
+      "cache": true,
+      "inputs": ["src/**", "vitest.config.ts", "package.json"]
+    },
+    "test:watch": {
+      "description": "Run tests in watch mode",
+      "cache": false,
+      "interactive": true,
+      "persistent": true
+    },
+    "e2e": {
+      "description": "Run end-to-end tests",
+      "cache": true,
+      "inputs": ["src/**", "e2e/**", "playwright.config.ts", "package.json"]
+    },
+    "start": {
+      "description": "Start production server",
+      "interactive": true,
+      "persistent": true
+    },
+    "scrape": {
+      "description": "Run web scraper task",
+      "cache": false,
+      "interactive": true
+    },
+    "clean": {
+      "description": "Clean build artifacts",
+      "cache": false
+    }
+  },
+  "globalDependencies": ["**/.env.local", "**/.env"],
+  "globalPassThroughEnv": [
+    "NODE_ENV",
+    "SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "MISTRAL_API_KEY"
+  ],
+  "ui": "tui"
+}
