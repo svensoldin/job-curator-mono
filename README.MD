@@ -19,16 +19,11 @@ The Node.js server (`apps/backend`) has a double responsibility:
 - Scrape job boards (Linkedin and Welcome to the Jungle at the moment)
 - Analyze jobs (Mistral API) and send to the client
 
-I had a little back and forth with this service’s role. Initially, the flow was:
-
-- Client sends job criteria to server
-- Server scrapes boards specifically for those criteria and rates them with Mistral API
-- Server puts the results in DB
-- DB (Supabase real time) informs the client that the results are ready
+I had a little back and forth with this service’s role. Initially, the flow was very custom, in the sense that the user had full control over the search: it could be any type of job.
 
 I realized the scope of the scraping was too ambitious and definitely not scalable. Very recently, I decided that instead of allowing any job to be scraped, I would limit it to my use case, and perhaps expand later down the road. The new flow is:
 
-- Scrape job boards with cron
+- Scrape job boards with cron and predetermined criteria (i.e developer jobs)
 - Store them in DB
 - Client sends job criteria to server
 - Server analyzes jobs in the store with the user’s criteria
