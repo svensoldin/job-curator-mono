@@ -19,17 +19,11 @@ export const StepFormNavigation = memo(function StepFormNavigation({
   isValid,
 }: StepFormNavigationProps) {
   return (
-    <div className='flex justify-between space-x-4'>
-      <Button onClick={onBack} disabled={!canGoBack} variant='ghost' size='md'>
+    <div className="flex justify-between space-x-4">
+      <Button onClick={onBack} disabled={!canGoBack} variant="ghost" size="md">
         Back
       </Button>
-      <Button
-        onClick={onNext}
-        disabled={!isValid}
-        variant='primary'
-        size='md'
-        className='px-8'
-      >
+      <Button onClick={onNext} disabled={!isValid} variant="primary" size="md" className="px-8">
         {isLastInput ? 'Complete' : 'Next'}
       </Button>
     </div>

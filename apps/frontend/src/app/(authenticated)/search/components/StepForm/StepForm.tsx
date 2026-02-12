@@ -28,17 +28,15 @@ export const StepForm = memo(function StepForm({
   const stepConfig = content[currentStep];
   const currentStepName = stepConfig.key;
   const isLastInput = currentStepName === 'salary';
-  const helperText = isLastInput
-    ? 'Amount in thousands of euros (k€)'
-    : undefined;
+  const helperText = isLastInput ? 'Amount in thousands of euros (k€)' : undefined;
 
   return (
-    <div className='bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-8'>
-      <h2 className='text-2xl font-semibold text-gray-900 dark:text-white mb-8 text-center'>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+      <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-8 text-center">
         {stepConfig.title}
       </h2>
 
-      <div className='space-y-6'>
+      <div className="space-y-6">
         <StepFormInput
           value={value}
           onChange={callbacks.onChange}

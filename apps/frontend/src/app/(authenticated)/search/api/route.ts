@@ -7,12 +7,9 @@ export async function POST(request: NextRequest) {
     const { jobTitle, location, salary, skills } = body;
 
     if (!jobTitle || !location || !salary || !skills) {
-      return new Response(
-        'Missing required fields: jobTitle, location, salary, skills',
-        {
-          status: 400,
-        }
-      );
+      return new Response('Missing required fields: jobTitle, location, salary, skills', {
+        status: 400,
+      });
     }
 
     const supabase = await createClient();

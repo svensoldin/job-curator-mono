@@ -37,39 +37,32 @@ interface AnalyticsClientProps {
   jobResults: JobResult[];
 }
 
-const COLORS = [
-  '#3b82f6',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#8b5cf6',
-  '#ec4899',
-];
+const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
-export default function AnalyticsClient({
-  searches,
-  jobResults,
-}: AnalyticsClientProps) {
+export default function AnalyticsClient({ searches, jobResults }: AnalyticsClientProps) {
   // Process data for searches over time
   const searchesOverTime = useMemo(() => {
-    const grouped = searches.reduce((acc, search) => {
-      const date = new Date(search.created_at).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      });
-      const existing = acc.find((item) => item.date === date);
-      if (existing) {
-        existing.searches += 1;
-        existing.totalJobs += search.total_jobs;
-      } else {
-        acc.push({
-          date,
-          searches: 1,
-          totalJobs: search.total_jobs,
+    const grouped = searches.reduce(
+      (acc, search) => {
+        const date = new Date(search.created_at).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
         });
-      }
-      return acc;
-    }, [] as { date: string; searches: number; totalJobs: number }[]);
+        const existing = acc.find((item) => item.date === date);
+        if (existing) {
+          existing.searches += 1;
+          existing.totalJobs += search.total_jobs;
+        } else {
+          acc.push({
+            date,
+            searches: 1,
+            totalJobs: search.total_jobs,
+          });
+        }
+        return acc;
+      },
+      [] as { date: string; searches: number; totalJobs: number }[]
+    );
     return grouped;
   }, [searches]);
 
@@ -77,9 +70,7 @@ export default function AnalyticsClient({
   const jobsPerSearch = useMemo(() => {
     return searches.map((search) => ({
       name:
-        search.job_title.length > 20
-          ? search.job_title.substring(0, 20) + '...'
-          : search.job_title,
+        search.job_title.length > 20 ? search.job_title.substring(0, 20) + '...' : search.job_title,
       jobs: search.job_results[0]?.count || 0,
       requested: search.total_jobs,
     }));
@@ -127,69 +118,54 @@ export default function AnalyticsClient({
   }, [searches, jobResults]);
 
   return (
-    <div className='min-h-screen bg-gray-50 p-8 dark:bg-gray-900'>
-      <div className='mx-auto max-w-7xl'>
-        <h1 className='mb-8 text-3xl font-bold text-gray-900 dark:text-white'>
-          Analytics
-        </h1>
+    <div className="min-h-screen bg-gray-50 p-8 dark:bg-gray-900">
+      <div className="mx-auto max-w-7xl">
+        <h1 className="mb-8 text-3xl font-bold text-gray-900 dark:text-white">Analytics</h1>
 
         {/* Summary Stats */}
-        <div className='mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4'>
-          <div className='rounded-lg bg-white p-6 shadow dark:bg-gray-800'>
-            <p className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-              Total Searches
-            </p>
-            <p className='mt-2 text-3xl font-bold text-gray-900 dark:text-white'>
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Searches</p>
+            <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
               {stats.totalSearches}
             </p>
           </div>
-          <div className='rounded-lg bg-white p-6 shadow dark:bg-gray-800'>
-            <p className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-              Total Jobs Found
-            </p>
-            <p className='mt-2 text-3xl font-bold text-gray-900 dark:text-white'>
+          <div className="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Jobs Found</p>
+            <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
               {stats.totalJobs}
             </p>
           </div>
-          <div className='rounded-lg bg-white p-6 shadow dark:bg-gray-800'>
-            <p className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-              Avg Jobs/Search
-            </p>
-            <p className='mt-2 text-3xl font-bold text-gray-900 dark:text-white'>
+          <div className="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Jobs/Search</p>
+            <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
               {stats.avgJobsPerSearch}
             </p>
           </div>
-          <div className='rounded-lg bg-white p-6 shadow dark:bg-gray-800'>
-            <p className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-              Avg AI Score
-            </p>
-            <p className='mt-2 text-3xl font-bold text-gray-900 dark:text-white'>
+          <div className="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg AI Score</p>
+            <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
               {stats.avgScore}
             </p>
           </div>
         </div>
 
         {/* Charts Grid */}
-        <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Searches Over Time */}
           {searchesOverTime.length > 0 && (
-            <div className='rounded-lg bg-white p-6 shadow dark:bg-gray-800'>
-              <h2 className='mb-4 text-xl font-semibold text-gray-900 dark:text-white'>
+            <div className="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
                 Searches Over Time
               </h2>
-              <ResponsiveContainer width='100%' height={300}>
+              <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={searchesOverTime}>
-                  <CartesianGrid strokeDasharray='3 3' />
-                  <XAxis dataKey='date' />
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line
-                    type='monotone'
-                    dataKey='searches'
-                    stroke='#3b82f6'
-                    name='Searches'
-                  />
+                  <Line type="monotone" dataKey="searches" stroke="#3b82f6" name="Searches" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -197,19 +173,19 @@ export default function AnalyticsClient({
 
           {/* Jobs Per Search */}
           {jobsPerSearch.length > 0 && (
-            <div className='rounded-lg bg-white p-6 shadow dark:bg-gray-800'>
-              <h2 className='mb-4 text-xl font-semibold text-gray-900 dark:text-white'>
+            <div className="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
                 Jobs Found per Search
               </h2>
-              <ResponsiveContainer width='100%' height={300}>
+              <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={jobsPerSearch}>
-                  <CartesianGrid strokeDasharray='3 3' />
-                  <XAxis dataKey='name' />
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey='jobs' fill='#10b981' name='Jobs Found' />
-                  <Bar dataKey='requested' fill='#3b82f6' name='Requested' />
+                  <Bar dataKey="jobs" fill="#10b981" name="Jobs Found" />
+                  <Bar dataKey="requested" fill="#3b82f6" name="Requested" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -217,27 +193,24 @@ export default function AnalyticsClient({
 
           {/* AI Score Distribution */}
           {scoreDistribution.length > 0 && (
-            <div className='rounded-lg bg-white p-6 shadow dark:bg-gray-800'>
-              <h2 className='mb-4 text-xl font-semibold text-gray-900 dark:text-white'>
+            <div className="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
                 AI Score Distribution
               </h2>
-              <ResponsiveContainer width='100%' height={300}>
+              <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
                     data={scoreDistribution}
-                    cx='50%'
-                    cy='50%'
+                    cx="50%"
+                    cy="50%"
                     labelLine={false}
                     label={({ range, count }) => `${range}: ${count}`}
                     outerRadius={100}
-                    fill='#8884d8'
-                    dataKey='count'
+                    fill="#8884d8"
+                    dataKey="count"
                   >
                     {scoreDistribution.map((_entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -248,18 +221,18 @@ export default function AnalyticsClient({
 
           {/* Total Jobs Over Time */}
           {searchesOverTime.length > 0 && (
-            <div className='rounded-lg bg-white p-6 shadow dark:bg-gray-800'>
-              <h2 className='mb-4 text-xl font-semibold text-gray-900 dark:text-white'>
+            <div className="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
                 Jobs Requested Over Time
               </h2>
-              <ResponsiveContainer width='100%' height={300}>
+              <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={searchesOverTime}>
-                  <CartesianGrid strokeDasharray='3 3' />
-                  <XAxis dataKey='date' />
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey='totalJobs' fill='#f59e0b' name='Total Jobs' />
+                  <Bar dataKey="totalJobs" fill="#f59e0b" name="Total Jobs" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -268,8 +241,8 @@ export default function AnalyticsClient({
 
         {/* Empty State */}
         {searches.length === 0 && (
-          <div className='rounded-lg bg-white p-12 text-center shadow dark:bg-gray-800'>
-            <p className='text-gray-600 dark:text-gray-400'>
+          <div className="rounded-lg bg-white p-12 text-center shadow dark:bg-gray-800">
+            <p className="text-gray-600 dark:text-gray-400">
               No data available yet. Start by creating your first job search!
             </p>
           </div>

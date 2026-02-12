@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { LOGIN } from '@/routes';
+import { LOGIN } from '@/constants/routes';
 import AnalyticsClient from './AnalyticsClient';
 
 export default async function AnalyticsPage() {
@@ -41,7 +41,5 @@ export default async function AnalyticsPage() {
     .eq('job_searches.user_id', user.id)
     .order('created_at', { ascending: true });
 
-  return (
-    <AnalyticsClient searches={searches || []} jobResults={jobResults || []} />
-  );
+  return <AnalyticsClient searches={searches || []} jobResults={jobResults || []} />;
 }

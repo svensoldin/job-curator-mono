@@ -26,14 +26,14 @@ export const StepFormInput = memo(function StepFormInput({
 
   return (
     <Input
-      type='text'
+      type="text"
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       helperText={helperText}
       onKeyDown={handleKeyDown}
       autoFocus
-      className='text-lg'
+      className="text-lg"
     />
   );
 });

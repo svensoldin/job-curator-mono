@@ -3,17 +3,11 @@
 import { useState } from 'react';
 
 import { UserCriteria } from '@/types/user-criteria';
-import { SEARCH_API } from '@/routes';
+import { SEARCH_API } from '@/constants/routes';
 
 import { SearchApiResponse } from './api/route';
 import content from './data';
-import {
-  StepIndicator,
-  StepForm,
-  ReviewStep,
-  TipCard,
-  TaskStarted,
-} from './components';
+import { StepIndicator, StepForm, ReviewStep, TipCard, TaskStarted } from './components';
 
 export default function Search() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -86,52 +80,48 @@ export default function Search() {
 
   if (isLoading) {
     return (
-      <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4'></div>
-          <h2 className='text-xl font-semibold text-gray-900 dark:text-white mb-2'>
+      <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             Starting Your Job Search...
           </h2>
-          <p className='text-gray-600 dark:text-gray-400'>
-            Setting up your search task
-          </p>
+          <p className="text-gray-600 dark:text-gray-400">Setting up your search task</p>
         </div>
       </div>
     );
   }
 
   if (taskStarted) {
-    return (
-      <TaskStarted taskId={taskStarted.taskId} onStartOver={handleStartOver} />
-    );
+    return <TaskStarted taskId={taskStarted.taskId} onStartOver={handleStartOver} />;
   }
 
   if (error) {
     return (
-      <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors flex items-center justify-center'>
-        <div className='text-center max-w-md mx-auto'>
-          <div className='text-red-600 mb-4'>
+      <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto">
+          <div className="text-red-600 mb-4">
             <svg
-              className='w-12 h-12 mx-auto'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'
+              className="w-12 h-12 mx-auto"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
               <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 strokeWidth={2}
-                d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
           </div>
-          <h2 className='text-xl font-semibold text-gray-900 dark:text-white mb-2'>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             Job Search Failed
           </h2>
-          <p className='text-gray-600 dark:text-gray-400 mb-6'>{error}</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
           <button
             onClick={handleStartOver}
-            className='px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Try Again
           </button>
@@ -141,23 +131,18 @@ export default function Search() {
   }
 
   return (
-    <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors'>
-      <div className='container mx-auto px-4 py-8'>
-        <div className='mb-12'>
-          <h1 className='text-3xl font-bold text-gray-900 dark:text-white mb-2'>
-            AI Job Matcher
-          </h1>
-          <p className='text-gray-600 dark:text-gray-400'>
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors">
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-12">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">AI Job Matcher</h1>
+          <p className="text-gray-600 dark:text-gray-400">
             Tell us what you're looking for and we'll find the perfect matches
           </p>
         </div>
 
-        <StepIndicator
-          currentStep={currentStep + 1}
-          totalSteps={content.length}
-        />
+        <StepIndicator currentStep={currentStep + 1} totalSteps={content.length} />
 
-        <div className='max-w-2xl mx-auto'>
+        <div className="max-w-2xl mx-auto">
           {currentStepName !== 'complete' ? (
             <StepForm
               currentStep={currentStep}
@@ -180,7 +165,7 @@ export default function Search() {
         </div>
 
         {currentStepName !== 'complete' && (
-          <div className='max-w-2xl mx-auto mt-8'>
+          <div className="max-w-2xl mx-auto mt-8">
             <TipCard tip={content[currentStep]?.tip} />
           </div>
         )}

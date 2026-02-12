@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { JobSearchWithStats } from '@/types/database';
 import DashboardClient from './DashboardClient';
-import { LOGIN } from '@/routes';
+import { LOGIN } from '@/constants/routes';
 
 export default async function DashboardPage() {
   const supabase = await createClient();

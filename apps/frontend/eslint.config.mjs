@@ -7,5 +7,14 @@ import tseslint from 'typescript-eslint';
 export default defineConfig(
   eslint.configs.recommended,
   tseslint.configs.recommended,
-  globalIgnores(['.next', 'out/**', 'build/**', 'next-env.d.ts'])
+  globalIgnores(['.next', 'out/**', 'build/**', 'next-env.d.ts']),
+  {
+    plugins: {
+      prettier: require('eslint-plugin-prettier'),
+    },
+    extends: ['plugin:prettier/recommended', 'prettier'],
+    rules: {
+      'prettier/prettier': 'error',
+    },
+  }
 );

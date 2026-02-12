@@ -11,9 +11,9 @@ export function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
   const steps = Array.from({ length: totalSteps }, (_, i) => i + 1);
 
   return (
-    <div className='mb-12'>
-      <div className='flex items-center justify-center mb-4'>
-        <div className='flex items-center space-x-4'>
+    <div className="mb-12">
+      <div className="flex items-center justify-center mb-4">
+        <div className="flex items-center space-x-4">
           {steps.map((step, index) => (
             <Fragment key={step}>
               <div
@@ -28,9 +28,7 @@ export function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
               {index < steps.length - 1 && (
                 <div
                   className={`w-8 h-0.5 mx-2 transition-colors ${
-                    step < currentStep
-                      ? 'bg-blue-600'
-                      : 'bg-gray-200 dark:bg-gray-700'
+                    step < currentStep ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
                   }`}
                 />
               )}
@@ -38,7 +36,7 @@ export function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
           ))}
         </div>
       </div>
-      <p className='text-center text-sm text-gray-500 dark:text-gray-400'>
+      <p className="text-center text-sm text-gray-500 dark:text-gray-400">
         Step {currentStep} of {totalSteps}
       </p>
     </div>
