@@ -1,24 +1,14 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
-import ThemeToggle from '@/components/ui/ThemeToggle';
-import './globals.css';
-import { Provider } from '@/components/ui/provider';
 import { Theme } from '@chakra-ui/react';
-import { ColorModeButton } from '@/components/ui/color-mode';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
+import './globals.css';
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
+import { Provider } from '@/components/ui/ChakraProvider/ChakraProvider';
+import { ColorModeButton } from '@/components/ui/Theme/Theme';
 
 export const metadata: Metadata = {
   title: 'Job Curator',
-  description: 'A website with curated job postings for Sven Soldin',
+  description: 'A website with curated job postings for software engineers.',
 };
 
 export default function RootLayout({
@@ -28,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className="antialiased">
         <Provider>
           <div className="fixed bottom-4 right-4 z-50">
             <ColorModeButton />

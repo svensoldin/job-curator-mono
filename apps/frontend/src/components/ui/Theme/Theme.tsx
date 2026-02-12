@@ -41,7 +41,6 @@ export function useColorModeValue<T>(light: T, dark: T) {
 
 export function ColorModeIcon() {
   const { colorMode } = useColorMode();
-  // Show Sun icon when dark (to indicate you can switch to light), Moon when light (to indicate you can switch to dark)
   return colorMode === 'dark' ? <LuSun /> : <LuMoon />;
 }
 
