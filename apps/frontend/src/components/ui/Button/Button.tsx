@@ -1,9 +1,10 @@
 import clsx from 'clsx';
 import Link from 'next/link';
-import { type ButtonHTMLAttributes } from 'react';
+import React from 'react';
+
 import LoadingIcon from './LoadingIcon';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;

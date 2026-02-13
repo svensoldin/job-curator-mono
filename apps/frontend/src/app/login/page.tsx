@@ -6,6 +6,8 @@ import { login, signup, loginWithGitHub } from './actions';
 import { AuthHeader, SocialLoginButton } from '@/components/forms';
 import Button from '@/components/ui/Button/Button';
 import Input from '@/components/ui/Input/Input';
+import { LuGithub } from 'react-icons/lu';
+import clsx from 'clsx';
 
 export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -58,27 +60,50 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="w-1/2">
-        <div>
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <Input type="email" name="email" placeholder="dom.cobb@dreams-inc.com" />
-          </div>
-
-          <div className="mt-4 space-y-4">
-            <label className="block text-sm font-medium text-gray-700">Password</label>
-            <Input type="password" name="password" placeholder="••••••••" />
-          </div>
-
-          <div className="mt-6 flex gap-3">
-            <Button type="submit">Sign In</Button>
-            <Button onClick={handleGithubLogin} disabled={isLoading} variant="ghost">
-              Or continue with GitHub
-            </Button>
-          </div>
+    <main className="min-h-screen flex items-center justify-center px-4">
+      <div className="p-8 max-w-md w-full">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">
+            {isSignUp ? 'Create your account' : 'Welcome back'}
+          </h1>
+          <p className="text-gray-400">
+            {isSignUp ? 'Sign up to start your job search' : 'Sign in to continue your job search'}
+          </p>
         </div>
-      </form>
-    </div>
+        <form onSubmit={handleSubmit}>
+          <Input type="email" name="email" placeholder="dom.cobb@dreams-inc.com" label="Email" />
+          <Input
+            type="password"
+            name="password"
+            placeholder="••••••••"
+            label="Password"
+            className="mt-4"
+          />
+          <Button type="submit" onClick={() => handleSubmit} className="mt-4 w-full">
+            Sign {isSignUp ? 'Up' : 'In'}
+          </Button>
+          <hr className="my-4 border-t border-gray-600" aria-hidden />
+        </form>
+        <Button
+          onClick={handleGithubLogin}
+          disabled={isLoading}
+          variant="secondary"
+          className="w-full"
+        >
+          <LuGithub className="mr-2" size="20px" />
+          Continue with GitHub
+        </Button>
+        <hr className="my-4 border-t border-gray-600" aria-hidden />
+        <p>
+          {isSignUp ? 'Already' : "Don't"} have an account?{' '}
+          <button
+            onClick={() => setIsSignUp((prev) => !prev)}
+            className="text-blue-500 cursor-pointer"
+          >
+            Sign {isSignUp ? 'in' : 'up'}
+          </button>
+        </p>
+      </div>
+    </main>
   );
 }
