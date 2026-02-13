@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { JobSearchWithStats } from '@/types/database';
 import DashboardClient from './DashboardClient';
 import { LOGIN } from '@/constants/routes';
+import { getAllSearches } from '@/lib/api/queries';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -13,20 +14,7 @@ export default async function DashboardPage() {
 
   if (!user) redirect(LOGIN);
 
-  const { data, error: searchesError } = await supabase
-    .from('job_searches_with_stats')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  const searches = await getAllSearches(user.id);
 
-  if (searchesError) {
-    console.error('Error fetching searches:', searchesError);
-  }
-
-  return (
-    <DashboardClient
-      data={(data as unknown as JobSearchWithStats[]) || []}
-      userEmail={user.email || 'User'}
-    />
-  );
+  return <DashboardClient data={searches} userEmail={user.email!} />;
 }

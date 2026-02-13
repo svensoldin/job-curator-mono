@@ -104,6 +104,29 @@ router.get('/status/:taskId', async (req, res) => {
 });
 
 /**
+ * POST /jobs/results
+ * Get all the user's job searches
+ */
+router.post('/results', async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) return res.status(400).json('Missing user information');
+
+    const { data } = await supabase
+      .from(SUPABASE_JOB_SEARCHES_TABLE)
+      .select()
+      .eq('user_id', userId);
+
+    return res.status(200).json({
+      data,
+    });
+  } catch (error) {
+    logger.error('Error getting task results:', error);
+    return res.status(500).json({ error: 'Failed to get task results' });
+  }
+});
+
+/**
  * GET /jobs/results/:taskId
  * Get the results of a completed search task
  */

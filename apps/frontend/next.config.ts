@@ -1,8 +1,9 @@
 import type { NextConfig } from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
-  experimental: {
-    optimizePackageImports: ['@chakra-ui/react'],
+  turbopack: {
+    root: path.join(__dirname, '../..'),
   },
 };
 

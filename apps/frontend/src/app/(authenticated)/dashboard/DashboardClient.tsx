@@ -22,7 +22,7 @@ export default function DashboardClient({ data: initialData, userEmail }: Dashbo
   useEffect(() => {
     setSearches(initialData);
   }, [initialData]);
-
+  console.log(searches);
   const pendingSearchIds = searches
     .filter((search) => search.total_jobs === 0)
     .map((search) => search.id);
