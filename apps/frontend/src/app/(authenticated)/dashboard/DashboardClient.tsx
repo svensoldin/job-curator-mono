@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { JobSearchWithStats } from '@/types/database';
+import type { JobSearch } from '@repo/types';
+
 import { createClient } from '@/lib/supabase/client';
 import PendingTasksSection from './components/PendingTasksSection';
 import SearchCard from './components/SearchCard';
@@ -10,14 +11,14 @@ import EmptyState from './components/EmptyState';
 import { SEARCH } from '@/constants/routes';
 
 interface DashboardClientProps {
-  data: JobSearchWithStats[];
+  data: JobSearch[];
   userEmail: string;
 }
 
 export default function DashboardClient({ data: initialData, userEmail }: DashboardClientProps) {
   const router = useRouter();
   const supabase = createClient();
-  const [searches, setSearches] = useState<JobSearchWithStats[]>(initialData);
+  const [searches, setSearches] = useState(initialData);
 
   useEffect(() => {
     setSearches(initialData);
