@@ -1,9 +1,9 @@
-import { Box, Button, Container, Heading, HStack, Stack, Text } from '@chakra-ui/react';
 import styles from './page.module.css';
 import { redirect } from 'next/navigation';
 
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
+import Button from '@/components/ui/Button/Button';
 import { DASHBOARD, LOGIN } from '@/constants/routes';
 
 export default async function Home() {
@@ -17,39 +17,33 @@ export default async function Home() {
   }
 
   return (
-    <Box
-      as="main"
-      minH="100vh"
-      pos="relative"
-      overflow="hidden"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-    >
+    <main className="min-h-screen relative flex items-center justify-center overflow-hidden">
       <div className={styles.spotlightAnim} />
-      <Container maxW="6xl" py={{ base: 12, md: 24 }} zIndex={2} pos="relative">
-        <Stack gap={12} textAlign="center" align="center">
-          <Heading as="h1" size="6xl" lineHeight="short" fontWeight="extrabold">
+      <div className="max-w-6xl w-full py-12 md:py-24 z-10 relative">
+        <div className="flex flex-col gap-12 text-center items-center">
+          <h1 className="text-6xl leading-short font-extrabold">
             The Job Hunting App for Software Engineers
-          </Heading>
+          </h1>
 
-          <Text fontSize="xl" maxW="3xl">
+          <p className="text-xl max-w-3xl">
             Stop wasting hours scanning job posts. Leverage LLMs to surface offers that match your
             skills and preferences.
-          </Text>
+          </p>
 
-          <HStack gap={4} justify="center">
-            <Link href={LOGIN}>
-              <Button colorScheme="teal" size="lg" px={8} py={6} borderRadius="md">
-                Get Started
-              </Button>
-            </Link>
-            <Button variant="ghost" size="lg" px={6} py={6} borderRadius="md">
+          <div className="flex gap-4 justify-center">
+            <Button size="lg" href={LOGIN}>
+              Get Started
+            </Button>
+            <Button
+              variant="secondary"
+              size="lg"
+              href="https://github.com/svensoldin/job-curator-mono"
+            >
               See GitHub
             </Button>
-          </HStack>
-        </Stack>
-      </Container>
-    </Box>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }

@@ -1,10 +1,6 @@
 import type { Metadata } from 'next';
-import { Theme } from '@chakra-ui/react';
 
 import './globals.css';
-
-import { Provider } from '@/components/ui/ChakraProvider/ChakraProvider';
-import { ColorModeButton } from '@/components/ui/Theme/Theme';
 
 export const metadata: Metadata = {
   title: 'Job Curator',
@@ -18,14 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased">
-        <Provider>
-          <div className="fixed bottom-4 right-4 z-50">
-            <ColorModeButton />
-          </div>
-          <Theme>{children}</Theme>
-        </Provider>
-      </body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

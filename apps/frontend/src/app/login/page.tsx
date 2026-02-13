@@ -4,8 +4,8 @@ import { type SubmitEvent, useState } from 'react';
 import Link from 'next/link';
 import { login, signup, loginWithGitHub } from './actions';
 import { AuthHeader, SocialLoginButton } from '@/components/forms';
-import { Box, Button, Container, Field, Fieldset, Input, Stack } from '@chakra-ui/react';
-import { LuGithub } from 'react-icons/lu';
+import Button from '@/components/ui/Button/Button';
+import Input from '@/components/ui/Input/Input';
 
 export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -58,35 +58,27 @@ export default function LoginPage() {
   };
 
   return (
-    <Container
-      alignItems="center"
-      justifyContent="center"
-      minH="100vh"
-      flexDirection="column"
-      display="flex"
-    >
+    <div className="min-h-screen flex items-center justify-center">
       <form onSubmit={handleSubmit} className="w-1/2">
-        <Fieldset.Root>
-          <Fieldset.Content>
-            <Stack>
-              <Field.Root>
-                <Field.Label>Email</Field.Label>
-                <Input type="email" name="email" placeholder="dom.cobb@dreams-inc.com" />
-              </Field.Root>
+        <div>
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <Input type="email" name="email" placeholder="dom.cobb@dreams-inc.com" />
+          </div>
 
-              <Field.Root>
-                <Field.Label>Password</Field.Label>
-                <Input type="password" name="password" placeholder="••••••••" />
-              </Field.Root>
-              <Button>Sign In</Button>
-              <Button onClick={handleGithubLogin} disabled={isLoading} variant="ghost">
-                <LuGithub />
-                Or continue with GitHub
-              </Button>
-            </Stack>
-          </Fieldset.Content>
-        </Fieldset.Root>
+          <div className="mt-4 space-y-4">
+            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <Input type="password" name="password" placeholder="••••••••" />
+          </div>
+
+          <div className="mt-6 flex gap-3">
+            <Button type="submit">Sign In</Button>
+            <Button onClick={handleGithubLogin} disabled={isLoading} variant="ghost">
+              Or continue with GitHub
+            </Button>
+          </div>
+        </div>
       </form>
-    </Container>
+    </div>
   );
 }

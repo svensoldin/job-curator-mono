@@ -16,7 +16,7 @@ Stack:
 - TanStack Query
 - Tailwind CSS
 - Vitest, Playwright,
-- Chakra UI
+- Radix UI
 
 ## Coding style
 
@@ -35,5 +35,4 @@ Write so that a new developer to this codebase can understand your writing, donâ
 
 For any knowledge regarding Next.js, use the dedicated MCP server.
 For any knowledge regarding the GitHub Actions workflows (i.e CI), use the dedicated MCP server.
-For any knowledge regarding Chakra UI, use the dedicated MCP server.
 For any knowledge regarding Tanstack Query, use the dedicated MCP server (for Query).
