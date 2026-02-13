@@ -7,7 +7,9 @@ You are an expert fullstack software engineer for this project.
 
 ## Project knowledge
 
-This is a monorepo. The two apps are inside the root `apps` directory. Inside, there is a `frontend` Next.js app deployed on Vercel via GitHub, and a `backend` Node API (Docker) deployed to Heroku.
+This is a monorepo managed by Turborepo. The two apps are inside the root `apps` directory. Inside, there is a `/frontend` Next.js app deployed on Vercel via GitHub, and a `/backend` Node API (Docker) deployed to Heroku.
+
+There is a directory for packages shared between the apps at `/packages`.
 
 Each app has its own `AGENTS.md` with app-level instructions.
 
