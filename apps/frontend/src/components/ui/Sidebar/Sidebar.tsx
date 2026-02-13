@@ -1,27 +1,9 @@
-'use client';
-
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Home, Search, BarChart3, LogOut } from 'lucide-react';
-import cx from 'classnames';
-
-import { logout } from '@/app/login/actions';
-import { ANALYTICS, DASHBOARD, SEARCH } from '@/constants/routes';
+import cx from 'clsx';
 import Image from 'next/image';
 
-const navigation = [
-  { name: 'Home', href: DASHBOARD, icon: Home },
-  { name: 'Search', href: SEARCH, icon: Search },
-  { name: 'Analytics', href: ANALYTICS, icon: BarChart3 },
-];
+import SidebarNavigation from './SidebarNavigation';
 
 export default function Sidebar() {
-  const pathname = usePathname();
-
-  const handleLogout = async () => {
-    await logout();
-  };
-
   return (
     <div
       className={cx(
@@ -40,49 +22,7 @@ export default function Sidebar() {
           Job Curator
         </h1>
       </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-2 py-4 group-hover:px-3">
-        {navigation.map((item) => {
-          const isActive = pathname === item.href;
-          const Icon = item.icon;
-
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`
-                flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors
-                ${
-                  isActive
-                    ? 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-white'
-                }
-              `}
-              title={item.name}
-            >
-              <Icon className="h-5 w-5 shrink-0" />
-              <span className="overflow-hidden whitespace-nowrap opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                {item.name}
-              </span>
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Logout Button */}
-      <div className="border-t border-gray-200 px-2 py-4 dark:border-gray-800 group-hover:px-3">
-        <button
-          onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-white"
-          title="Logout"
-        >
-          <LogOut className="h-5 w-5 shrink-0" />
-          <span className="overflow-hidden whitespace-nowrap opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-            Logout
-          </span>
-        </button>
-      </div>
+      <SidebarNavigation />
     </div>
   );
 }

@@ -16,7 +16,7 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
   return (
     <>
       <Sidebar />
-      <div className="bg-white dark:bg-gray-900 transition-colors px-16">{children}</div>
+      <div className="bg-neutral-900 transition-colors px-16">{children}</div>
     </>
   );
 }

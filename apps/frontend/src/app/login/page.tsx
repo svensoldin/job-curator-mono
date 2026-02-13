@@ -1,13 +1,10 @@
 'use client';
-
+import { LuGithub } from 'react-icons/lu';
 import { type SubmitEvent, useState } from 'react';
-import Link from 'next/link';
-import { login, signup, loginWithGitHub } from './actions';
-import { AuthHeader, SocialLoginButton } from '@/components/forms';
+
 import Button from '@/components/ui/Button/Button';
 import Input from '@/components/ui/Input/Input';
-import { LuGithub } from 'react-icons/lu';
-import clsx from 'clsx';
+import { login, signup, loginWithGitHub } from './actions';
 
 export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -30,7 +27,7 @@ export default function LoginPage() {
           setError(result.error);
           setIsLoading(false);
         } else if (result?.requiresEmailConfirmation) {
-          setSuccessMessage(result.message || 'Please check your email to confirm your account.');
+          setSuccessMessage('Please check your email to confirm your account.');
           setIsLoading(false);
         }
       } else {
@@ -103,6 +100,8 @@ export default function LoginPage() {
             Sign {isSignUp ? 'in' : 'up'}
           </button>
         </p>
+        {error && <p className="text-red-500 mt-2">There was an error: {error}</p>}
+        {successMessage && <p className="text-gray-400 mt-2">{successMessage}</p>}
       </div>
     </main>
   );
