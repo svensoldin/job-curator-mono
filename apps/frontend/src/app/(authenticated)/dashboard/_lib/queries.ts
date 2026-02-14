@@ -2,14 +2,14 @@ import type { JobSearch } from '@repo/types';
 import { useQuery, type QueryClient } from '@tanstack/react-query';
 
 const QueryKeys = {
-  allSearches: 'allSearches',
+  allTasks: 'allTasks',
 };
 
 /**
- * POST request to fetch all of the user's searches
+ * POST request to fetch all of the user's search tasks
  * @param id the user's id in database
  */
-const fetchAllUserSearches = async (id: string): Promise<JobSearch[]> => {
+const fetchAllUserTasks = async (id: string): Promise<JobSearch[]> => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_JOB_SCRAPER_URL}/jobs/results`, {
     method: 'POST',
     body: JSON.stringify({
@@ -23,14 +23,14 @@ const fetchAllUserSearches = async (id: string): Promise<JobSearch[]> => {
   return json;
 };
 
-export const prefetchAllUserSearches = async (queryClient: QueryClient, id: string) =>
+export const prefetchAllUserTasks = async (queryClient: QueryClient, id: string) =>
   await queryClient.prefetchQuery({
-    queryKey: [QueryKeys.allSearches, id],
-    queryFn: () => fetchAllUserSearches(id),
+    queryKey: [QueryKeys.allTasks, id],
+    queryFn: () => fetchAllUserTasks(id),
   });
 
-export const useAllSearches = (userId: string) =>
+export const useallUserTasks = (userId: string) =>
   useQuery({
-    queryKey: [QueryKeys.allSearches, userId],
-    queryFn: () => fetchAllUserSearches(userId),
+    queryKey: [QueryKeys.allTasks, userId],
+    queryFn: () => fetchAllUserTasks(userId),
   });

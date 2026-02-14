@@ -2,8 +2,8 @@ import { LOGIN } from '@/constants/routes';
 import { getUser } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
-import DashboardClient from './DashboardClient';
-import { prefetchAllUserSearches, useAllSearches } from './lib/queries';
+import DashboardClient from './_components/DashboardClient';
+import { prefetchAllUserTasks } from './_lib/queries';
 import { queryClient } from '../layout';
 
 export default async function DashboardPage() {
@@ -11,7 +11,7 @@ export default async function DashboardPage() {
 
   if (!user) redirect(LOGIN);
 
-  const searches = await prefetchAllUserSearches(queryClient, user.id);
+  await prefetchAllUserTasks(queryClient, user.id);
 
-  return <DashboardClient email={user.email!} />;
+  return <DashboardClient user={user} />;
 }

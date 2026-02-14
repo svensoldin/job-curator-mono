@@ -17,7 +17,11 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
     <>
       <Sidebar />
       <div className="bg-neutral-900 transition-colors px-16">
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <div className="min-h-screen">
+          <main className="container mx-auto pl-32 py-16">
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+          </main>
+        </div>
       </div>
     </>
   );

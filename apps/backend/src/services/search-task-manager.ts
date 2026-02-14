@@ -2,7 +2,7 @@ import {
   SUPABASE_JOB_RESULTS_TABLE,
   SUPABASE_JOB_SEARCHES_TABLE,
   SUPABASE_SCRAPED_JOBS_TABLE,
-} from 'constants/search-task-manager.js';
+} from 'constants/supabase.js';
 import { type CreateJobResultInput, supabase } from '../lib/supabase.js';
 
 import type { JobPosting, UserCriteria } from '../types.js';

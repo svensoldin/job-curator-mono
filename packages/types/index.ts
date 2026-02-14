@@ -1,4 +1,4 @@
-export interface JobSearch {
+export interface SearchTask {
   created_at: string;
   id: string;
   job_title: string;

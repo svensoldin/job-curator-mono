@@ -1,8 +1,4 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import type { SearchTask } from '@repo/types';
 
 interface PendingSearch {
   id: string;
@@ -12,74 +8,12 @@ interface PendingSearch {
 }
 
 interface PendingTasksSectionProps {
-  searchIds: string[];
+  tasks: SearchTask[];
   onSearchComplete?: (searchId: string) => void;
 }
 
-export default function PendingTasksSection({
-  searchIds,
-  onSearchComplete,
-}: PendingTasksSectionProps) {
-  const router = useRouter();
-  const [pendingSearches, setPendingSearches] = useState<PendingSearch[]>([]);
-  const supabase = createClient();
-
-  useEffect(() => {
-    if (searchIds.length === 0) {
-      setPendingSearches([]);
-      return;
-    }
-
-    // Fetch pending search details from database
-    const fetchPendingSearches = async () => {
-      const { data, error } = await supabase
-        .from('job_searches')
-        .select('id, job_title, location, created_at')
-        .in('id', searchIds);
-
-      if (error) {
-        console.error('Error fetching pending searches:', error);
-        return;
-      }
-
-      setPendingSearches(data || []);
-    };
-
-    fetchPendingSearches();
-
-    const channel = supabase
-      .channel('pending-searches')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'job_searches',
-          filter: `id=in.(${searchIds.join(',')})`,
-        },
-        (payload) => {
-          const updatedSearch = payload.new as {
-            id: string;
-            total_jobs: number;
-          };
-
-          // If total_jobs changed from 0 to something, the search is complete
-          if (updatedSearch.total_jobs > 0) {
-            setPendingSearches((prev) => prev.filter((search) => search.id !== updatedSearch.id));
-
-            if (onSearchComplete) {
-              onSearchComplete(updatedSearch.id);
-            }
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [searchIds, router, supabase, onSearchComplete]);
-  if (pendingSearches.length === 0) {
+export default function PendingTasksSection({ tasks }: PendingTasksSectionProps) {
+  if (tasks.length === 0) {
     return null;
   }
 
@@ -89,7 +23,7 @@ export default function PendingTasksSection({
         Processing Searches 🔄
       </h2>
       <div className="space-y-4">
-        {pendingSearches.map((search) => (
+        {tasks.map((search) => (
           <PendingTaskCard key={search.id} search={search} />
         ))}
       </div>
