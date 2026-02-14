@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { JobResult } from '@/types/database';
-import JobResultCard from '@/app/(authenticated)/dashboard/_components/JobResultCard';
+import JobResultCard from '@/app/(authenticated)/search/[id]/_components/JobResultCard';
 import { DASHBOARD } from '@/constants/routes';
 
 interface SearchDetailPageProps {

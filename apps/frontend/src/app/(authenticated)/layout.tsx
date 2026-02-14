@@ -1,13 +1,11 @@
 import Sidebar from '@/components/ui/Sidebar';
 import { LOGIN } from '@/constants/routes';
-import { getUser } from '@/lib/supabase/server';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { getUserClient } from '@/lib/supabase/client';
+import QueryProviderWrapper from '@/lib/tanstack-query/QueryProviderWrapper';
 import { redirect } from 'next/navigation';
 
-export const queryClient = new QueryClient();
-
-export default async function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
-  const user = getUser();
+export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+  const user = getUserClient();
 
   if (!user) {
     redirect(LOGIN);
@@ -19,7 +17,7 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
       <div className="bg-neutral-900 transition-colors px-16">
         <div className="min-h-screen">
           <main className="container mx-auto pl-32 py-16">
-            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+            <QueryProviderWrapper>{children}</QueryProviderWrapper>
           </main>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import type { JobSearch } from '@repo/types';
+import type { SearchTask } from '@repo/types';
 import { useQuery, type QueryClient } from '@tanstack/react-query';
 
 const QueryKeys = {
@@ -9,8 +9,8 @@ const QueryKeys = {
  * POST request to fetch all of the user's search tasks
  * @param id the user's id in database
  */
-const fetchAllUserTasks = async (id: string): Promise<JobSearch[]> => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_JOB_SCRAPER_URL}/jobs/results`, {
+const fetchAllUserTasks = async (id: string): Promise<SearchTask[]> => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_JOB_SCRAPER_URL}/tasks`, {
     method: 'POST',
     body: JSON.stringify({
       userId: id,
@@ -20,7 +20,7 @@ const fetchAllUserTasks = async (id: string): Promise<JobSearch[]> => {
 
   const json = await res.json();
 
-  return json;
+  return json.data;
 };
 
 export const prefetchAllUserTasks = async (queryClient: QueryClient, id: string) =>

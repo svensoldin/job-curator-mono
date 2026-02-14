@@ -7,7 +7,7 @@ import { SEARCH_API } from '@/constants/routes';
 
 import { SearchApiResponse } from './api/route';
 import content from './data';
-import { StepIndicator, StepForm, ReviewStep, TipCard, TaskStarted } from './components';
+import { StepIndicator, StepForm, ReviewStep, TipCard, TaskStarted } from './_components';
 
 export default function Search() {
   const [currentStep, setCurrentStep] = useState(0);

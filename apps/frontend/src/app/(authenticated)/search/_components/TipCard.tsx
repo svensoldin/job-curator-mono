@@ -10,7 +10,7 @@ export const TipCard = memo(function TipCard({ tip }: TipCardProps) {
   return (
     <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
       <div className="flex items-start space-x-3">
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <svg
             className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5"
             fill="currentColor"
