@@ -1,7 +1,7 @@
 'use client';
 
 import { useallUserTasks } from '../_lib/queries';
-import { getUser } from '@/lib/supabase/server';
+import { type getUser } from '@/lib/supabase/server';
 import TasksList from './TasksList/TasksList';
 
 interface DashboardClientProps {

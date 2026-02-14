@@ -1,11 +1,11 @@
 import Sidebar from '@/components/ui/Sidebar';
 import { LOGIN } from '@/constants/routes';
-import { getUserClient } from '@/lib/supabase/client';
+import { getUser } from '@/lib/supabase/server';
 import QueryProviderWrapper from '@/lib/tanstack-query/QueryProviderWrapper';
 import { redirect } from 'next/navigation';
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
-  const user = getUserClient();
+  const user = getUser();
 
   if (!user) {
     redirect(LOGIN);
