@@ -1,51 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { JobSearch } from '@repo/types';
 
-import { createClient } from '@/lib/supabase/client';
 import PendingTasksSection from './components/PendingTasksSection';
 import SearchCard from './components/SearchCard';
 import EmptyState from './components/EmptyState';
 import { SEARCH } from '@/constants/routes';
+import { useAllSearches } from './lib/queries';
+import { getUser } from '@/lib/supabase/server';
 
 interface DashboardClientProps {
-  data: JobSearch[];
-  userEmail: string;
+  user: NonNullable<Awaited<ReturnType<typeof getUser>>>;
 }
 
-export default function DashboardClient({ data: initialData, userEmail }: DashboardClientProps) {
+export default function DashboardClient({ user }: DashboardClientProps) {
+  const { data } = useAllSearches(user.id);
+
   const router = useRouter();
-  const supabase = createClient();
-  const [searches, setSearches] = useState(initialData);
-
-  useEffect(() => {
-    setSearches(initialData);
-  }, [initialData]);
-  console.log(searches);
-  const pendingSearchIds = searches
-    .filter((search) => search.total_jobs === 0)
-    .map((search) => search.id);
-
-  const handleDeleteSearch = async (searchId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    if (!confirm('Are you sure you want to delete this search and all its results?')) {
-      return;
-    }
-
-    setSearches((prev) => prev.filter((search) => search.id !== searchId));
-
-    const { error } = await supabase.from('job_searches').delete().eq('id', searchId);
-
-    if (error) {
-      console.error('Error deleting search:', error);
-      alert('Failed to delete search');
-      // Rollback optimistic update
-      setSearches(initialData);
-    }
-  };
 
   const handleSearchComplete = () => {
     router.refresh();
@@ -54,27 +25,21 @@ export default function DashboardClient({ data: initialData, userEmail }: Dashbo
   return (
     <div className="min-h-screen">
       <div className="container mx-auto pl-32 py-16">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div>
+          <header>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               My Job Searches
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">Welcome back, {userEmail}</p>
-          </div>
+            <p className="text-gray-600 dark:text-gray-400">Welcome back, {user.email}</p>
+          </header>
         </div>
 
-        {pendingSearchIds.length > 0 ? (
-          <PendingTasksSection
-            searchIds={pendingSearchIds}
-            onSearchComplete={handleSearchComplete}
-          />
-        ) : null}
+        <PendingTasksSection searchIds={pendingSearchIds} onSearchComplete={handleSearchComplete} />
 
         {searches.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {searches.map((search) => (
               <SearchCard
                 key={search.id}

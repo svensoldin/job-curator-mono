@@ -1,13 +1,13 @@
-import { redirect } from 'next/navigation';
 import Sidebar from '@/components/ui/Sidebar';
-import { createClient } from '@/lib/supabase/server';
 import { LOGIN } from '@/constants/routes';
+import { getUser } from '@/lib/supabase/server';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { redirect } from 'next/navigation';
+
+export const queryClient = new QueryClient();
 
 export default async function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = getUser();
 
   if (!user) {
     redirect(LOGIN);
@@ -16,7 +16,9 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
   return (
     <>
       <Sidebar />
-      <div className="bg-neutral-900 transition-colors px-16">{children}</div>
+      <div className="bg-neutral-900 transition-colors px-16">
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </div>
     </>
   );
 }
