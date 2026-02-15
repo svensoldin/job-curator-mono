@@ -67,17 +67,14 @@ This project demonstrates a modern, scalable full-stack architecture designed to
 **Key Architectural Decisions:**
 
 1. **Asynchronous Task Processing**
-
    - Job searches can take 5-10 minutes (scraping + AI analysis)
    - Backend uses a task queue system to prevent HTTP timeouts
    - Frontend receives instant acknowledgment with a `taskId`
 
 2. **Real-time Updates via Supabase**
-
    - Replaced traditional polling with WebSocket subscriptions
 
 3. **Backend-Owned Business Logic**
-
    - All database writes happen server-side (security & data integrity)
    - Service role key bypasses RLS for administrative operations
    - Client uses anon key with RLS for user-specific data access

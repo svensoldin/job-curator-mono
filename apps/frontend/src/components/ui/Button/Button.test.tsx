@@ -7,9 +7,7 @@ import Button from './Button';
 describe('Button', () => {
   it('renders button with text', () => {
     render(<Button>Click me</Button>);
-    expect(
-      screen.getByRole('button', { name: 'Click me' })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();
   });
 
   it('calls onClick when clicked', async () => {
@@ -34,7 +32,7 @@ describe('Button', () => {
   });
 
   it('renders as a link when href is provided', () => {
-    render(<Button href='/test'>Go to test</Button>);
+    render(<Button href="/test">Go to test</Button>);
 
     const link = screen.getByRole('link', { name: 'Go to test' });
     expect(link).toHaveAttribute('href', '/test');

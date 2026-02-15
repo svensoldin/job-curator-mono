@@ -1,0 +1,8 @@
+# .prettierignore for frontend
+.next/
+build/
+out/
+node_modules/
+coverage/
+logs/
+AGENTS.md

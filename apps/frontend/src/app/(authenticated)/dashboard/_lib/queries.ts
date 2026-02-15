@@ -1,0 +1,40 @@
+import type { SearchTask } from '@repo/types';
+import { useQuery, type QueryClient } from '@tanstack/react-query';
+
+export const QueryKeys = {
+  allTasks: 'allTasks',
+};
+
+/**
+ * POST request to fetch all of the user's search tasks
+ * @param id the user's id in database
+ */
+const fetchAllUserTasks = async (id: string): Promise<SearchTask[]> => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_JOB_SCRAPER_URL}/tasks`, {
+    method: 'POST',
+    body: JSON.stringify({
+      userId: id,
+    }),
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch user tasks');
+  }
+
+  const json = await res.json();
+
+  return json.data;
+};
+
+export const prefetchAllUserTasks = async (queryClient: QueryClient, id: string) =>
+  await queryClient.prefetchQuery({
+    queryKey: [QueryKeys.allTasks, id],
+    queryFn: () => fetchAllUserTasks(id),
+  });
+
+export const useallUserTasks = (userId: string) =>
+  useQuery({
+    queryKey: [QueryKeys.allTasks, userId],
+    queryFn: () => fetchAllUserTasks(userId),
+  });
