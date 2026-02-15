@@ -1,7 +1,7 @@
 import type { SearchTask } from '@repo/types';
 import { useQuery, type QueryClient } from '@tanstack/react-query';
 
-const QueryKeys = {
+export const QueryKeys = {
   allTasks: 'allTasks',
 };
 
@@ -17,6 +17,10 @@ const fetchAllUserTasks = async (id: string): Promise<SearchTask[]> => {
     }),
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
   });
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch user tasks');
+  }
 
   const json = await res.json();
 

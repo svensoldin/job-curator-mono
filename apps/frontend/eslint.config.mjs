@@ -17,6 +17,7 @@ export default defineConfig(
     extends: ['plugin:prettier/recommended', 'prettier'],
     rules: {
       'prettier/prettier': 'error',
+      '@typescript-eslint/no-unused-vars': ['error'],
     },
   }
 );
