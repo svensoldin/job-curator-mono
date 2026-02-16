@@ -1,6 +1,5 @@
 'use client';
 
-import { memo } from 'react';
 import { StepFormInput } from './StepFormInput';
 import { StepFormNavigation } from './StepFormNavigation';
 import content from '../../data';
@@ -18,12 +17,7 @@ interface StepFormProps {
   canGoBack: boolean;
 }
 
-export const StepForm = memo(function StepForm({
-  currentStep,
-  value,
-  callbacks,
-  canGoBack,
-}: StepFormProps) {
+export const StepForm = ({ currentStep, value, callbacks, canGoBack }: StepFormProps) => {
   const isValid = value.trim().length > 0;
   const stepConfig = content[currentStep];
   const currentStepName = stepConfig.key;
@@ -53,4 +47,4 @@ export const StepForm = memo(function StepForm({
       </div>
     </div>
   );
-});
+};

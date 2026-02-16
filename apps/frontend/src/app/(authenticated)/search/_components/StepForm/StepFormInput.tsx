@@ -1,6 +1,5 @@
 'use client';
 
-import { memo } from 'react';
 import { Input } from '@/components/ui';
 
 interface StepFormInputProps {
@@ -11,13 +10,13 @@ interface StepFormInputProps {
   onNext: () => void;
 }
 
-export const StepFormInput = memo(function StepFormInput({
+export const StepFormInput = ({
   value,
   onChange,
   placeholder,
   helperText,
   onNext,
-}: StepFormInputProps) {
+}: StepFormInputProps) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && value.trim().length > 0) {
       onNext();
@@ -26,14 +25,14 @@ export const StepFormInput = memo(function StepFormInput({
 
   return (
     <Input
-      type="text"
+      type='text'
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       helperText={helperText}
       onKeyDown={handleKeyDown}
       autoFocus
-      className="text-lg"
+      className='text-lg'
     />
   );
-});
+};
