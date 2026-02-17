@@ -1,6 +1,7 @@
+import { redirect } from 'next/navigation';
+
 import { LOGIN } from '@/constants/routes';
 import { getUser } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
 
 import Dashboard from './_components/Dashboard';
 import { prefetchSearchTasksByUser } from './_lib/queries';

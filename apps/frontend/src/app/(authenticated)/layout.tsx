@@ -1,9 +1,10 @@
-import Sidebar from '@/components/ui/Sidebar';
+import { redirect } from 'next/navigation';
+
 import { LOGIN } from '@/constants/routes';
 import { UserContextProvider } from '@/context/UserContext';
 import { getUser } from '@/lib/supabase/server';
 import QueryProviderWrapper from '@/lib/tanstack-query/QueryProviderWrapper';
-import { redirect } from 'next/navigation';
+import Sidebar from '@/components/ui/Sidebar';
 
 const AuthenticatedLayout = async ({ children }: { children: React.ReactNode }) => {
   const user = await getUser();

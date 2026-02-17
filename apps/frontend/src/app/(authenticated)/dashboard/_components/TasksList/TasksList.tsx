@@ -1,10 +1,11 @@
 import clsx from 'clsx';
+import Link from 'next/link';
 import type { SearchTask } from '@repo/types';
 
 import { SEARCH } from '@/constants/routes';
+
 import EmptyState from './EmptyState';
 import SearchCard from './SearchCard';
-import Link from 'next/link';
 
 interface TasksListProps {
   tasks: SearchTask[];

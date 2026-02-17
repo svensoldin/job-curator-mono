@@ -1,7 +1,7 @@
 'use client';
+import { useEffect } from 'react';
 
 import { Button } from '@/components/ui';
-import { useEffect } from 'react';
 
 interface ErrorBoundaryProps {
   error: Error;

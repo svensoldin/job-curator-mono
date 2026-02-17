@@ -1,9 +1,10 @@
-import styles from './page.module.css';
 import { redirect } from 'next/navigation';
 
+import styles from './page.module.css';
+
+import { DASHBOARD, LOGIN } from '@/constants/routes';
 import { getUser } from '@/lib/supabase/server';
 import Button from '@/components/ui/Button/Button';
-import { DASHBOARD, LOGIN } from '@/constants/routes';
 
 const Home = async () => {
   const user = await getUser();

@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import Link from 'next/link';
+
 import { formatDate } from '@/helpers';
 
 interface SearchCardProps {
@@ -13,10 +13,10 @@ interface SearchCardProps {
 const SearchCard = ({ title, location, salary, createdAt, isPending = false }: SearchCardProps) => (
   <div
     className={clsx(
-      'rounded-lg shadow-lg p-6 transition-all relative',
+      'rounded-lg shadow-sm p-6 transition-all relative shadow-gray-800 hover:-translate-y-1',
       isPending
         ? 'bg-blue-900/10 border-2 border-blue-500 animate-pulse-slow'
-        : 'bg-gray-800 border border-gray-700 hover:shadow-xl hover:border-blue-400'
+        : 'bg-neutral-950 border border-gray-800 hover:shadow-sm hover:border-blue-400'
     )}
   >
     {isPending && (
@@ -45,7 +45,7 @@ const SearchCard = ({ title, location, salary, createdAt, isPending = false }: S
     </div>
 
     <div className='space-y-2 mb-4'>
-      <div className='flex items-center text-sm text-gray-400'>
+      <div className='flex items-center text-sm text-blue-400'>
         <svg className='w-4 h-4 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
           <path
             strokeLinecap='round'
