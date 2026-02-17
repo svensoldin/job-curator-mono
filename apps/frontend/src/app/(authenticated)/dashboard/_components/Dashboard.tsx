@@ -1,6 +1,6 @@
 'use client';
 
-import { useallUserTasks } from '../_lib/queries';
+import { useSearchTasksByUser } from '../_lib/queries';
 import { type getUser } from '@/lib/supabase/server';
 import TasksList from './TasksList/TasksList';
 import TasksListSkeleton from './TasksList/TasksListSkeleton';
@@ -10,7 +10,7 @@ interface DashboardClientProps {
 }
 
 export default function Dashboard({ user }: DashboardClientProps) {
-  const { data, isPending, isError, error } = useallUserTasks(user.id);
+  const { data, isPending, isError, error } = useSearchTasksByUser(user.id);
 
   if (isError) throw new Error(error.message);
 

@@ -9,11 +9,11 @@ export const QueryKeys = {
  * POST request to fetch all of the user's search tasks
  * @param id the user's id in database
  */
-const fetchAllUserTasks = async (id: string): Promise<SearchTask[]> => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_JOB_SCRAPER_URL}/tasks`, {
+const fetchSearchTasksByUser = async (userId: string): Promise<SearchTask[]> => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_JOB_SCRAPER_URL}/searches`, {
     method: 'POST',
     body: JSON.stringify({
-      userId: id,
+      userId,
     }),
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
   });
@@ -27,14 +27,14 @@ const fetchAllUserTasks = async (id: string): Promise<SearchTask[]> => {
   return json.data;
 };
 
-export const prefetchAllUserTasks = async (queryClient: QueryClient, id: string) =>
+export const prefetchSearchTasksByUser = async (queryClient: QueryClient, userId: string) =>
   await queryClient.prefetchQuery({
-    queryKey: [QueryKeys.allTasks, id],
-    queryFn: () => fetchAllUserTasks(id),
+    queryKey: [QueryKeys.allTasks, userId],
+    queryFn: () => fetchSearchTasksByUser(userId),
   });
 
-export const useallUserTasks = (userId: string) =>
+export const useSearchTasksByUser = (userId: string) =>
   useQuery({
     queryKey: [QueryKeys.allTasks, userId],
-    queryFn: () => fetchAllUserTasks(userId),
+    queryFn: () => fetchSearchTasksByUser(userId),
   });

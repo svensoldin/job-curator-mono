@@ -1,5 +1,5 @@
-import jobRoutes from './routes/jobs.js';
-import tasksRoutes from './routes/tasks.js';
+import resultsRoutes from './routes/results.js';
+import tasksRoutes from './routes/searches.js';
 import logger from './utils/logger.js';
 import cors from 'cors';
 import express, { type Express } from 'express';
@@ -25,8 +25,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/jobs', jobRoutes);
-app.use('/tasks', tasksRoutes);
+app.use('/results', resultsRoutes);
+app.use('/searches', tasksRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

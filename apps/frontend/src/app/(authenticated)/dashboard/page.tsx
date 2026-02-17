@@ -3,7 +3,7 @@ import { getUser } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
 import Dashboard from './_components/Dashboard';
-import { prefetchAllUserTasks } from './_lib/queries';
+import { prefetchSearchTasksByUser } from './_lib/queries';
 import { queryClientSingleton } from '@/lib/tanstack-query/client';
 
 export default async function DashboardPage() {
@@ -11,7 +11,7 @@ export default async function DashboardPage() {
 
   if (!user) redirect(LOGIN);
 
-  await prefetchAllUserTasks(queryClientSingleton, user.id);
+  await prefetchSearchTasksByUser(queryClientSingleton, user.id);
 
   return <Dashboard user={user} />;
 }

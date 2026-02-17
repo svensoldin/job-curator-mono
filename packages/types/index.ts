@@ -16,3 +16,15 @@ export interface UserCriteria {
   skills: string;
   salary: string;
 }
+
+export interface JobPost {
+  id: string;
+  search_id: string;
+  title: string;
+  company: string;
+  description: string | null;
+  url: string;
+  source: string;
+  ai_score: number | null;
+  created_at: string;
+}
