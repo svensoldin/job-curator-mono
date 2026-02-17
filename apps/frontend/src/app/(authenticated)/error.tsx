@@ -3,7 +3,12 @@
 import { Button } from '@/components/ui';
 import { useEffect } from 'react';
 
-export default function Error({ error, reset }: { error: Error; reset: () => void }) {
+interface ErrorBoundaryProps {
+  error: Error;
+  reset: () => void;
+}
+
+const Error = ({ error, reset }: ErrorBoundaryProps) => {
   useEffect(() => {
     // Surface the error to developer logs
     // eslint-disable-next-line no-console
@@ -32,4 +37,6 @@ export default function Error({ error, reset }: { error: Error; reset: () => voi
       </div>
     </div>
   );
-}
+};
+
+export default Error;

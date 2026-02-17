@@ -11,7 +11,7 @@ import { Button } from '@/components/ui';
 import Text from '@/components/ui/Text/Text';
 import { useUser } from '@/context/UserContext';
 
-export default function Search() {
+const SearchPage = () => {
   const user = useUser();
   const [currentStep, setCurrentStep] = useState(0);
   const [criteria, setCriteria] = useState<UserCriteria>({
@@ -136,4 +136,6 @@ export default function Search() {
       )}
     </div>
   );
-}
+};
+
+export default SearchPage;

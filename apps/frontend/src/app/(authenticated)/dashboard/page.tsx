@@ -6,7 +6,7 @@ import Dashboard from './_components/Dashboard';
 import { prefetchSearchTasksByUser } from './_lib/queries';
 import { queryClientSingleton } from '@/lib/tanstack-query/client';
 
-export default async function DashboardPage() {
+const DashboardPage = async () => {
   const user = await getUser();
 
   if (!user) redirect(LOGIN);
@@ -14,4 +14,6 @@ export default async function DashboardPage() {
   await prefetchSearchTasksByUser(queryClientSingleton, user.id);
 
   return <Dashboard user={user} />;
-}
+};
+
+export default DashboardPage;

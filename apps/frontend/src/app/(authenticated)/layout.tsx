@@ -5,7 +5,7 @@ import { getUser } from '@/lib/supabase/server';
 import QueryProviderWrapper from '@/lib/tanstack-query/QueryProviderWrapper';
 import { redirect } from 'next/navigation';
 
-export default async function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+const AuthenticatedLayout = async ({ children }: { children: React.ReactNode }) => {
   const user = await getUser();
 
   if (!user) {
@@ -26,4 +26,6 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
       </div>
     </>
   );
-}
+};
+
+export default AuthenticatedLayout;

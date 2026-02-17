@@ -5,7 +5,7 @@ import { getUser } from '@/lib/supabase/server';
 import Button from '@/components/ui/Button/Button';
 import { DASHBOARD, LOGIN } from '@/constants/routes';
 
-export default async function Home() {
+const Home = async () => {
   const user = await getUser();
 
   if (user) {
@@ -42,4 +42,6 @@ export default async function Home() {
       </div>
     </main>
   );
-}
+};
+
+export default Home;
