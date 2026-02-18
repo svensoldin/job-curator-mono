@@ -17,7 +17,7 @@ const SearchSummary = ({
   createdAt,
   resultCount,
 }: SearchSummaryProps) => (
-  <div className='bg-gray-800 rounded-lg shadow-lg border border-gray-700 p-6 mb-6'>
+  <div className='bg-gray-950 rounded-lg shadow-lg border border-gray-700 p-6 mb-6'>
     <h1 className='text-2xl font-bold text-white mb-4'>{title}</h1>
 
     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4'>

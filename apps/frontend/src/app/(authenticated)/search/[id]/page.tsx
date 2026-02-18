@@ -2,6 +2,7 @@ import JobResultCard from '@/app/(authenticated)/search/[id]/_components/JobResu
 import SearchSummary from '@/app/(authenticated)/search/[id]/_components/SearchSummary';
 
 import { fetchAllSearchTasks, fetchSearchResultsById, fetchSingleSearchById } from './_lib/queries';
+import Text from '@/components/ui/Text/Text';
 
 interface SearchDetailPageProps {
   params: Promise<{
@@ -26,7 +27,7 @@ export default async function SearchDetailPage({ params }: SearchDetailPageProps
 
       {results.length === 0 ? (
         <div className='text-center py-12 bg-gray-800 rounded-lg border border-gray-700'>
-          <p className='text-gray-400'>No results found for this search</p>
+          <Text>No results found for this search</Text>
         </div>
       ) : (
         <div className='space-y-4'>

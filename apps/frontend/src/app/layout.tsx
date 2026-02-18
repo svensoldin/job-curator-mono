@@ -40,7 +40,7 @@ const RootLayout = ({
 }>) => {
   return (
     <html lang='en' suppressHydrationWarning>
-      <body className='antialiased'>{children}</body>
+      <body className='antialiased bg-black'>{children}</body>
     </html>
   );
 };

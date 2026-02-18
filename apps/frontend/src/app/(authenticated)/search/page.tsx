@@ -57,7 +57,7 @@ const SearchPage = () => {
 
   if (isPending) {
     return (
-      <div className='min-h-screen bg-gray-900 transition-colors flex items-center justify-center'>
+      <div className='flex items-center justify-center'>
         <div className='text-center'>
           <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4'></div>
           <h2 className='text-xl font-semibold text-white mb-2'>Starting Your Job Search...</h2>
@@ -69,27 +69,20 @@ const SearchPage = () => {
 
   if (isError) {
     return (
-      <div className='min-h-screen bg-gray-900 transition-colors flex items-center justify-center'>
-        <div className='text-center max-w-md mx-auto'>
-          <div className='text-red-600 mb-4'>
-            <svg
-              className='w-12 h-12 mx-auto'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-              />
-            </svg>
-          </div>
-          <h2 className='text-xl font-semibold text-white mb-2'>Job Search Failed</h2>
-          <Text className='mb-6'>{error.message}</Text>
-          <Button onClick={handleStartOver}>Try Again</Button>
+      <div className='text-center max-w-md mx-auto'>
+        <div className='text-red-600 mb-4'>
+          <svg className='w-12 h-12 mx-auto' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+            />
+          </svg>
         </div>
+        <h2 className='text-xl font-semibold text-white mb-2'>Job Search Failed</h2>
+        <Text className='mb-6'>{error.message}</Text>
+        <Button onClick={handleStartOver}>Try Again</Button>
       </div>
     );
   }

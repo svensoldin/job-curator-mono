@@ -16,15 +16,11 @@ const AuthenticatedLayout = async ({ children }: { children: React.ReactNode }) 
   return (
     <>
       <Sidebar />
-      <div className='bg-black transition-colors px-16'>
-        <div className='min-h-screen'>
-          <main className='container mx-auto pl-32 py-16'>
-            <UserContextProvider initialUser={user}>
-              <QueryProviderWrapper>{children}</QueryProviderWrapper>
-            </UserContextProvider>
-          </main>
-        </div>
-      </div>
+      <main className='flex justify-center items-center container min-h-screen mx-auto pl-32 py-16'>
+        <UserContextProvider initialUser={user}>
+          <QueryProviderWrapper>{children}</QueryProviderWrapper>
+        </UserContextProvider>
+      </main>
     </>
   );
 };

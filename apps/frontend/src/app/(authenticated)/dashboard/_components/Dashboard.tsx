@@ -15,7 +15,7 @@ export default function Dashboard({ user }: DashboardClientProps) {
   if (isError) throw new Error(error.message);
 
   return (
-    <>
+    <div>
       <div className='flex items-center justify-between mb-8'>
         <header>
           <h1 className='text-3xl font-bold text-white mb-2'>My Job Searches</h1>
@@ -23,6 +23,6 @@ export default function Dashboard({ user }: DashboardClientProps) {
         </header>
       </div>
       {isPending ? <TasksListSkeleton /> : <TasksList tasks={data} />}
-    </>
+    </div>
   );
 }

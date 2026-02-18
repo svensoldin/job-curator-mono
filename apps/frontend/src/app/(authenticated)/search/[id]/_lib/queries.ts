@@ -62,6 +62,10 @@ export const fetchAllSearchTasks = async (): Promise<SearchTask[]> => {
     },
   });
 
+  if (!res.ok) {
+    throw new Error('Failed to fetch all search tasks');
+  }
+
   const json = await res.json();
 
   return json.data;
