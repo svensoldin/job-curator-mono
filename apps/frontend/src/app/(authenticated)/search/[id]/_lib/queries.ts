@@ -6,6 +6,7 @@ const GET_SEARCH_TASK_ENDPOINT = `${process.env.NEXT_PUBLIC_JOB_SCRAPER_URL}/sea
 
 const QueryKeys = {
   searchResults: 'searchResults',
+  searchTask: 'searchTask',
 };
 
 /**
@@ -39,7 +40,12 @@ export const useSearchResultsById = (id: string) =>
     queryFn: () => fetchSearchResultsById(id),
   });
 
-export const fetchSingleSearchById = async (id: string): Promise<SearchTask> => {
+/**
+ * GET a search task by id
+ * @param id the id of the SearchTask
+ * @returns a promise of a SearchTask
+ */
+export const fetchSearchTaskById = async (id: string): Promise<SearchTask> => {
   const res = await fetch(`${GET_SEARCH_TASK_ENDPOINT}/${id}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -54,19 +60,14 @@ export const fetchSingleSearchById = async (id: string): Promise<SearchTask> => 
   return json.data[0];
 };
 
-export const fetchAllSearchTasks = async (): Promise<SearchTask[]> => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_JOB_SCRAPER_URL}/searches`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+export const prefetchSearchTaskById = async (queryClient: QueryClient, id: string) =>
+  await queryClient.prefetchQuery({
+    queryKey: [QueryKeys.searchTask, id],
+    queryFn: () => fetchSearchTaskById(id),
   });
 
-  if (!res.ok) {
-    throw new Error('Failed to fetch all search tasks');
-  }
-
-  const json = await res.json();
-
-  return json.data;
-};
+export const useSearchTaskById = (id: string) =>
+  useQuery({
+    queryKey: [QueryKeys.searchTask, id],
+    queryFn: () => fetchSearchTaskById(id),
+  });

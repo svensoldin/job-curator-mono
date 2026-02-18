@@ -9,7 +9,7 @@ function makeQueryClient() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60 * 1000,
+        staleTime: 60 * 1000 * 2, // 2 mins
       },
       dehydrate: {
         // include pending queries in dehydration
@@ -31,7 +31,7 @@ function makeQueryClient() {
 
 let browserQueryClient: QueryClient | undefined = undefined;
 
-function getQueryClient() {
+export function getQueryClient() {
   if (isServer) {
     // Server: always make a new query client
     return makeQueryClient();
@@ -44,5 +44,3 @@ function getQueryClient() {
     return browserQueryClient;
   }
 }
-
-export const queryClientSingleton = getQueryClient();

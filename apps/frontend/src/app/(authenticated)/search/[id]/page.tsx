@@ -1,8 +1,13 @@
-import JobResultCard from '@/app/(authenticated)/search/[id]/_components/JobResultCard';
 import SearchSummary from '@/app/(authenticated)/search/[id]/_components/SearchSummary';
-
-import { fetchAllSearchTasks, fetchSearchResultsById, fetchSingleSearchById } from './_lib/queries';
-import Text from '@/components/ui/Text/Text';
+import {
+  fetchSearchResultsById,
+  prefetchSearchResultsById,
+  prefetchSearchTaskById,
+} from './_lib/queries';
+import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
+import { getQueryClient } from '@/lib/tanstack-query/client';
+import SearchDetailsClient from './_components/SearchDetailsClient';
+import type { JobPost, SearchTask } from '@repo/types';
 
 interface SearchDetailPageProps {
   params: Promise<{
@@ -12,47 +17,16 @@ interface SearchDetailPageProps {
 
 export default async function SearchDetailPage({ params }: SearchDetailPageProps) {
   const searchId = (await params).id;
-  const results = await fetchSearchResultsById(searchId);
-  const searchTask = await fetchSingleSearchById(searchId);
+  const queryClient = getQueryClient();
+
+  await Promise.all([
+    prefetchSearchResultsById(queryClient, searchId),
+    prefetchSearchTaskById(queryClient, searchId),
+  ]);
+
   return (
-    <div className='container mx-auto px-4 py-8'>
-      <SearchSummary
-        title={searchTask.job_title}
-        location={searchTask.location}
-        skills={searchTask.skills}
-        salary={searchTask.salary}
-        createdAt={searchTask.created_at}
-        resultCount={results.length}
-      />
-
-      {results.length === 0 ? (
-        <div className='text-center py-12 bg-gray-800 rounded-lg border border-gray-700'>
-          <Text>No results found for this search</Text>
-        </div>
-      ) : (
-        <div className='space-y-4'>
-          {results.map((job) => (
-            <JobResultCard
-              key={job.id}
-              id={job.id}
-              title={job.title}
-              company={job.company}
-              source={job.source}
-              aiScore={job.ai_score}
-              description={job.description}
-              url={job.url}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <SearchDetailsClient searchId={searchId} />
+    </HydrationBoundary>
   );
-}
-
-export async function generateStaticParams() {
-  const searchTasks = await fetchAllSearchTasks();
-
-  return searchTasks.map((task) => ({
-    id: task.id,
-  }));
 }
