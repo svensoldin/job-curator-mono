@@ -5,7 +5,7 @@ export const MutationKeys = {
   createNewTask: 'createNewTask',
 };
 
-const CREATE_TASK_URL = `${process.env.NEXT_PUBLIC_JOB_SCRAPER_URL}/tasks/create`;
+const CREATE_TASK_URL = `${process.env.NEXT_PUBLIC_JOB_SCRAPER_URL}/searches/create`;
 
 const createNewTask = async (criteria: UserCriteria) => {
   const res = await fetch(CREATE_TASK_URL, {

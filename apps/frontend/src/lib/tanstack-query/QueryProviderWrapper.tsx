@@ -2,10 +2,10 @@
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import { type ReactNode, useState } from 'react';
-import { queryClientSingleton } from './client';
+import { getQueryClient } from './client';
 
 const QueryProviderWrapper = ({ children }: { children: ReactNode }) => {
-  const [queryClient] = useState(queryClientSingleton);
+  const [queryClient] = useState(getQueryClient());
 
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };

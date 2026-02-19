@@ -40,9 +40,9 @@ export const ReviewStep = ({ preferences, onBack, onStartOver, onSubmit }: Revie
 
 function ReviewField({ label, value }: { label: string; value: string }) {
   return (
-    <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg'>
-      <div className='text-sm font-medium text-gray-500 dark:text-gray-400 mb-1'>{label}</div>
-      <div className='text-lg font-semibold text-gray-900 dark:text-white'>{value}</div>
+    <div className='bg-gray-700 p-4 rounded-lg'>
+      <div className='text-sm font-medium text-gray-400 mb-1'>{label}</div>
+      <div className='text-lg font-semibold text-white'>{value}</div>
     </div>
   );
 }
