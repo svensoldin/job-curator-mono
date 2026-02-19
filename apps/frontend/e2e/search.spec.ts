@@ -5,18 +5,14 @@ test('test', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('link', { name: /started/i }).click();
   await page.getByRole('textbox', { name: 'Email address' }).click();
-  await page
-    .getByRole('textbox', { name: 'Email address' })
-    .fill('test@gmail.com');
+  await page.getByRole('textbox', { name: 'Email address' }).fill('test@gmail.com');
   await page.getByRole('textbox', { name: 'Password' }).click();
   await page.getByRole('textbox', { name: 'Password' }).fill('123456');
   await page.getByRole('button', { name: 'Sign in' }).click();
 
   // Search
   await page.getByRole('link', { name: 'Search', exact: true }).click();
-  await page
-    .getByRole('textbox', { name: /developer/i })
-    .fill('frontend developer');
+  await page.getByRole('textbox', { name: /developer/i }).fill('frontend developer');
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   const location = page.getByRole('textbox', { name: /remote/i });
   await location.click();

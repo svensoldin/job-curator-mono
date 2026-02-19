@@ -1,17 +1,13 @@
 import { redirect } from 'next/navigation';
-import Sidebar from '@/components/ui/Sidebar';
-import { createClient } from '@/lib/supabase/server';
-import { LOGIN } from '@/routes';
 
-export default async function AuthenticatedLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+import { LOGIN } from '@/constants/routes';
+import { UserContextProvider } from '@/context/UserContext';
+import { getUser } from '@/lib/supabase/server';
+import QueryProviderWrapper from '@/lib/tanstack-query/QueryProviderWrapper';
+import Sidebar from '@/components/ui/Sidebar';
+
+const AuthenticatedLayout = async ({ children }: { children: React.ReactNode }) => {
+  const user = await getUser();
 
   if (!user) {
     redirect(LOGIN);
@@ -20,9 +16,13 @@ export default async function AuthenticatedLayout({
   return (
     <>
       <Sidebar />
-      <div className='bg-white dark:bg-gray-900 transition-colors px-16'>
-        {children}
-      </div>
+      <main className='flex justify-center items-center container min-h-screen mx-auto pl-32 py-16'>
+        <UserContextProvider initialUser={user}>
+          <QueryProviderWrapper>{children}</QueryProviderWrapper>
+        </UserContextProvider>
+      </main>
     </>
   );
-}
+};
+
+export default AuthenticatedLayout;

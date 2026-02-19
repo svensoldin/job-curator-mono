@@ -9,7 +9,8 @@
     "test": "turbo test",
     "build": "turbo build",
     "dev": "turbo dev",
-    "clean": "turbo clean && rm -rf node_modules apps/*/node_modules apps/*/.next apps/*/dist"
+    "clean": "turbo clean && rm -rf node_modules apps/*/node_modules apps/*/.next apps/*/dist",
+    "frontend": "pnpm --filter ./apps/frontend dev"
   },
   "devDependencies": {
     "eslint-config-prettier": "^10.1.8",

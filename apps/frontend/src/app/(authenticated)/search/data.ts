@@ -6,8 +6,7 @@ const content = [
   {
     key: 'jobTitle' as const,
     title: 'What job title are you looking for?',
-    placeholder:
-      'e.g., Fullstack Developer, Data Scientist, Product Manager...',
+    placeholder: 'e.g., Fullstack Developer, Data Scientist, Product Manager...',
     tip: 'Be specific about your role: "Senior React Developer" works better than just "Developer"',
   },
   {

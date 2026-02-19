@@ -1,10 +1,10 @@
 'use client';
+import { LuGithub } from 'react-icons/lu';
+import { type SubmitEvent, useState } from 'react';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import Button from '@/components/ui/Button/Button';
+import Input from '@/components/ui/Input/Input';
 import { login, signup, loginWithGitHub } from './actions';
-import { Input, Button, Alert, Card } from '@/components/ui';
-import { AuthHeader, SocialLoginButton } from '@/components/forms';
 
 export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
@@ -27,9 +27,7 @@ export default function LoginPage() {
           setError(result.error);
           setIsLoading(false);
         } else if (result?.requiresEmailConfirmation) {
-          setSuccessMessage(
-            result.message || 'Please check your email to confirm your account.'
-          );
+          setSuccessMessage('Please check your email to confirm your account.');
           setIsLoading(false);
         }
       } else {
@@ -59,124 +57,52 @@ export default function LoginPage() {
   };
 
   return (
-    <div className='min-h-screen bg-white dark:bg-gray-900 transition-colors flex items-center justify-center px-4'>
-      <div className='w-full max-w-md'>
-        <AuthHeader isSignUp={isSignUp} />
-
-        <Card padding='lg'>
-          <form onSubmit={handleSubmit} className='space-y-6'>
-            <Input
-              id='email'
-              name='email'
-              type='email'
-              label='Email address'
-              autoComplete='email'
-              placeholder='you@example.com'
-              required
-              disabled={isLoading}
-            />
-
-            <Input
-              id='password'
-              name='password'
-              type='password'
-              label='Password'
-              autoComplete={isSignUp ? 'new-password' : 'current-password'}
-              placeholder='••••••••'
-              required
-              disabled={isLoading}
-            />
-
-            {error && <Alert type='error' message={error} />}
-
-            {successMessage && (
-              <Alert
-                type='success'
-                title='Account created successfully!'
-                message={successMessage}
-              />
-            )}
-
-            <Button
-              type='submit'
-              variant='primary'
-              size='lg'
-              isLoading={isLoading}
-              disabled={isLoading}
-              className='w-full'
-            >
-              {isSignUp ? 'Sign up' : 'Sign in'}
-            </Button>
-          </form>
-
-          <div className='relative my-6'>
-            <div className='absolute inset-0 flex items-center'>
-              <div className='w-full border-t border-gray-200 dark:border-gray-700'></div>
-            </div>
-            <div className='relative flex justify-center text-sm'>
-              <span className='px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400'>
-                Or continue with
-              </span>
-            </div>
-          </div>
-
-          <SocialLoginButton
-            provider='github'
-            isLoading={isLoading}
-            onClick={handleGithubLogin}
-          />
-
-          <div className='mt-6 pt-6 border-t border-gray-200 dark:border-gray-700'>
-            <button
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                setError(null);
-                setSuccessMessage(null);
-              }}
-              disabled={isLoading}
-              className='w-full text-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-            >
-              {isSignUp ? (
-                <>
-                  Already have an account?{' '}
-                  <span className='font-medium text-blue-600 dark:text-blue-400'>
-                    Sign in
-                  </span>
-                </>
-              ) : (
-                <>
-                  Don't have an account?{' '}
-                  <span className='font-medium text-blue-600 dark:text-blue-400'>
-                    Sign up
-                  </span>
-                </>
-              )}
-            </button>
-          </div>
-        </Card>
-
-        <div className='text-center mt-6'>
-          <Link
-            href='/'
-            className='text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors inline-flex items-center'
-          >
-            <svg
-              className='w-4 h-4 mr-1'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M10 19l-7-7m0 0l7-7m-7 7h18'
-              />
-            </svg>
-            Back to home
-          </Link>
+    <main className="min-h-screen flex items-center justify-center px-4">
+      <div className="p-8 max-w-md w-full">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">
+            {isSignUp ? 'Create your account' : 'Welcome back'}
+          </h1>
+          <p className="text-gray-400">
+            {isSignUp ? 'Sign up to start your job search' : 'Sign in to continue your job search'}
+          </p>
         </div>
+        <form onSubmit={handleSubmit}>
+          <Input type="email" name="email" placeholder="dom.cobb@dreams-inc.com" label="Email" />
+          <Input
+            type="password"
+            name="password"
+            placeholder="••••••••"
+            label="Password"
+            className="mt-4"
+          />
+          <Button type="submit" onClick={() => handleSubmit} className="mt-4 w-full">
+            Sign {isSignUp ? 'Up' : 'In'}
+          </Button>
+          <hr className="my-4 border-t border-gray-600" aria-hidden />
+        </form>
+        <Button
+          onClick={handleGithubLogin}
+          disabled={isLoading}
+          variant="secondary"
+          className="w-full"
+        >
+          <LuGithub className="mr-2" size="20px" />
+          Continue with GitHub
+        </Button>
+        <hr className="my-4 border-t border-gray-600" aria-hidden />
+        <p>
+          {isSignUp ? 'Already' : "Don't"} have an account?{' '}
+          <button
+            onClick={() => setIsSignUp((prev) => !prev)}
+            className="text-blue-500 cursor-pointer"
+          >
+            Sign {isSignUp ? 'in' : 'up'}
+          </button>
+        </p>
+        {error && <p className="text-red-500 mt-2">There was an error: {error}</p>}
+        {successMessage && <p className="text-gray-400 mt-2">{successMessage}</p>}
       </div>
-    </div>
+    </main>
   );
 }

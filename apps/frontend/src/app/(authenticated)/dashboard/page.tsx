@@ -1,32 +1,22 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
-import { JobSearchWithStats } from '@/types/database';
-import DashboardClient from './DashboardClient';
-import { LOGIN } from '@/routes';
 
-export default async function DashboardPage() {
-  const supabase = await createClient();
+import { LOGIN } from '@/constants/routes';
+import { getUser } from '@/lib/supabase/server';
+import { getQueryClient } from '@/lib/tanstack-query/client';
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+import Dashboard from './_components/Dashboard';
+import { prefetchSearchTasksByUser } from './_lib/queries';
+
+const DashboardPage = async () => {
+  const user = await getUser();
 
   if (!user) redirect(LOGIN);
 
-  const { data, error: searchesError } = await supabase
-    .from('job_searches_with_stats')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  const queryClient = getQueryClient();
 
-  if (searchesError) {
-    console.error('Error fetching searches:', searchesError);
-  }
+  await prefetchSearchTasksByUser(queryClient, user.id);
 
-  return (
-    <DashboardClient
-      data={(data as unknown as JobSearchWithStats[]) || []}
-      userEmail={user.email || 'User'}
-    />
-  );
-}
+  return <Dashboard user={user} />;
+};
+
+export default DashboardPage;

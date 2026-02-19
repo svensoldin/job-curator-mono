@@ -1,38 +1,48 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
-import ThemeToggle from '@/components/ui/ThemeToggle';
+
 import './globals.css';
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
   title: 'Job Curator',
-  description: 'A website with curated job postings for Sven Soldin',
+  description: 'A website with curated job postings for software engineers.',
+  viewport: 'width=device-width, initial-scale=1',
+  keywords: ['jobs', 'software engineer', 'developer', 'careers', 'curated jobs'],
+  authors: [{ name: 'Job Curator' }],
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+  },
+  manifest: '/site.webmanifest',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    title: 'Job Curator',
+    description: 'A website with curated job postings for software engineers.',
+    url: 'https://your-domain.example/',
+    siteName: 'Job Curator',
+    images: ['/og-image.png'],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Job Curator',
+    description: 'A website with curated job postings for software engineers.',
+    images: ['/og-image.png'],
+  },
 };
 
-export default function RootLayout({
+const RootLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) => {
   return (
-    <html lang='en'>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <div className='fixed bottom-4 right-4 z-50'>
-          <ThemeToggle />
-        </div>
-        {children}
-      </body>
+    <html lang='en' suppressHydrationWarning>
+      <body className='antialiased bg-black'>{children}</body>
     </html>
   );
-}
+};
+
+export default RootLayout;
