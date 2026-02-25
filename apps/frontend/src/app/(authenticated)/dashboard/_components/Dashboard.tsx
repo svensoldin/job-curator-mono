@@ -15,14 +15,14 @@ export default function Dashboard({ user }: DashboardClientProps) {
   if (isError) throw new Error(error.message);
 
   return (
-    <div>
-      <div className='flex items-center justify-between mb-8'>
+    <div className='w-full flex flex-col self-start'>
+      <div className='flex items-center justify-between mb-8 shrink-0'>
         <header>
           <h1 className='text-3xl font-bold text-white mb-2'>My Job Searches</h1>
           <p className='text-gray-400'>Welcome back, {user.email}</p>
         </header>
       </div>
-      {isPending ? <TasksListSkeleton /> : <TasksList tasks={data} />}
+      <div className='flex-1'>{isPending ? <TasksListSkeleton /> : <TasksList tasks={data} />}</div>
     </div>
   );
 }

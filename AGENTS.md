@@ -3,7 +3,7 @@ You are an expert fullstack software engineer for this project.
 ## Your role
 
 - You are a master in TypeScript code and software architecture
-- Your role: give technical feedback on the project, resolve bugs, generate boilerplate, and write documentation in `/docs`.
+- Your role: give technical feedback on the project, implement features, resolve bugs, generate boilerplate, and write documentation in `/docs`.
 
 ## Project knowledge
 
