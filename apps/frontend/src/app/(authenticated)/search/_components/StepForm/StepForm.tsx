@@ -1,0 +1,50 @@
+'use client';
+
+import { StepFormInput } from './StepFormInput';
+import { StepFormNavigation } from './StepFormNavigation';
+import content from '../../data';
+
+export interface StepFormCallbacks {
+  onChange: (value: string) => void;
+  onNext: () => void;
+  onBack: () => void;
+}
+
+interface StepFormProps {
+  currentStep: number;
+  value: string;
+  callbacks: StepFormCallbacks;
+  canGoBack: boolean;
+}
+
+export const StepForm = ({ currentStep, value, callbacks, canGoBack }: StepFormProps) => {
+  const isValid = value.trim().length > 0;
+  const stepConfig = content[currentStep];
+  const currentStepName = stepConfig.key;
+  const isLastInput = currentStepName === 'salary';
+  const helperText = isLastInput ? 'Amount in thousands of euros (k€)' : undefined;
+
+  return (
+    <div className='rounded-lg shadow-lg border border-gray-700 p-8'>
+      <h2 className='text-2xl font-semibold text-white mb-8 text-center'>{stepConfig.title}</h2>
+
+      <div className='space-y-6'>
+        <StepFormInput
+          value={value}
+          onChange={callbacks.onChange}
+          placeholder={stepConfig.placeholder}
+          helperText={helperText}
+          onNext={callbacks.onNext}
+        />
+
+        <StepFormNavigation
+          onBack={callbacks.onBack}
+          onNext={callbacks.onNext}
+          canGoBack={canGoBack}
+          isLastInput={isLastInput}
+          isValid={isValid}
+        />
+      </div>
+    </div>
+  );
+};

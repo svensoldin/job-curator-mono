@@ -1,4 +1,5 @@
-import React from 'react';
+import clsx from 'clsx';
+import { Label } from 'radix-ui';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -17,34 +18,25 @@ export default function Input({
   const inputId = id || `input-${Math.random().toString(36).substring(7)}`;
 
   return (
-    <div className='w-full'>
+    <div className={clsx('w-full', className)}>
       {label && (
-        <label
-          htmlFor={inputId}
-          className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'
-        >
+        <Label.Root htmlFor={inputId} className="block text-sm font-medium text-gray-100 mb-2">
           {label}
-        </label>
+        </Label.Root>
       )}
       <input
         id={inputId}
-        className={`w-full px-4 py-3 border ${
-          error
-            ? 'border-red-300 dark:border-red-600 focus:ring-red-600'
-            : 'border-gray-300 dark:border-gray-600 focus:ring-blue-600'
-        } rounded-lg focus:ring-2 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${className}`}
+        className={clsx(
+          'w-full px-4 py-3 border rounded-lg bg-black text-gray-200 placeholder-gray-400 transition-colors',
+          'focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed',
+          error ? 'border-red-300 focus:ring-red-600' : 'border-gray-300 focus:ring-gray-100'
+        )}
         {...props}
       />
       {helperText && !error && (
-        <p className='text-sm text-gray-500 dark:text-gray-400 mt-2 ml-2'>
-          {helperText}
-        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 ml-2">{helperText}</p>
       )}
-      {error && (
-        <p className='text-sm text-red-600 dark:text-red-400 mt-2 ml-2'>
-          {error}
-        </p>
-      )}
+      {error && <p className="text-sm text-red-600 dark:text-red-400 mt-2 ml-2">{error}</p>}
     </div>
   );
 }

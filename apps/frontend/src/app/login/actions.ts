@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { createClient } from '@/lib/supabase/server';
-import { CALLBACK_API, HOME, LOGIN } from '@/routes';
+import { CALLBACK_API, HOME, LOGIN } from '@/constants/routes';
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
@@ -40,12 +40,10 @@ export async function signup(formData: FormData) {
     return { error: error.message };
   }
 
-  // Check if email confirmation is required
   if (signUpData?.user && !signUpData.session) {
     return {
       success: true,
-      message:
-        'Please check your email to confirm your account before signing in.',
+      message: 'Please check your email to confirm your account before signing in.',
       requiresEmailConfirmation: true,
     };
   }
