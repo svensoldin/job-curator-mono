@@ -1,97 +1,78 @@
 # syntax=docker/dockerfile:1
+#
+# Build context: monorepo root (not apps/backend/).
+# Usage:
+#   docker build -f apps/backend/Dockerfile --target final .
+#   docker build -f apps/backend/Dockerfile --target development .
 
 ARG NODE_VERSION=22.14.0
 ARG PNPM_VERSION=10.17.1
-ARG NODE_ENV=development
 
 ################################################################################
-# Use node image for base image for all stages.
+# Base image with Node.js and pnpm.
 FROM node:${NODE_VERSION}-alpine AS base
 
-# Set working directory for all build stages.
 WORKDIR /usr/src/app
 
-# Install pnpm.
 RUN --mount=type=cache,target=/root/.npm \
     npm install -g pnpm@${PNPM_VERSION}
 
 ################################################################################
-# Create a stage for installing production dependencies.
-FROM base AS deps
+# Install all dependencies and build the backend.
+# Uses pnpm's workspace-aware --filter to install only what the backend needs.
+FROM base AS build
 
-# Download dependencies as a separate step to take advantage of Docker's caching.
-# Leverage a cache mount to /root/.local/share/pnpm/store to speed up subsequent builds.
-# Leverage bind mounts to package.json and pnpm-lock.yaml to avoid having to copy them
-# into this layer.
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=pnpm-lock.yaml,target=pnpm-lock.yaml \
-    --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install --prod --frozen-lockfile
+# Copy workspace configuration so pnpm can resolve the lockfile
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/backend/package.json ./apps/backend/
+COPY packages/types/package.json ./packages/types/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
 
-################################################################################
-# Create a stage for building the application.
-FROM deps AS build
+# Install all dependencies (including devDependencies for tsc)
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile --filter ai-job-hunter
 
-# Download additional development dependencies before building, as some projects require
-# "devDependencies" to be installed to build.
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=pnpm-lock.yaml,target=pnpm-lock.yaml \
-    --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile
-
-# Copy the rest of the source files into the image.
-COPY . .
-# Run the build script.
+# Copy backend source code and compile
+COPY apps/backend/ ./apps/backend/
+WORKDIR /usr/src/app/apps/backend
 RUN pnpm run build
 
+# Create a standalone production bundle with only prod dependencies.
+# pnpm deploy flattens the workspace into a self-contained directory.
+# --legacy is required for pnpm v10 when workspace packages are not injected.
+WORKDIR /usr/src/app
+RUN pnpm --filter ai-job-hunter deploy --prod --legacy /prod/backend
+
 ################################################################################
-# Create a development stage with hot-reloading capabilities
-# This stage installs all dependencies (including dev) but does NOT copy source files
-# Source files will be mounted via docker compose watch
+# Development stage — source files are volume-mounted via docker compose.
 FROM base AS development
 
-# Install ALL dependencies (including devDependencies for tsx)
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=pnpm-lock.yaml,target=pnpm-lock.yaml \
-    --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/backend/package.json ./apps/backend/
+COPY packages/types/package.json ./packages/types/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
 
-# Copy package.json for runtime
-COPY package.json .
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile --filter ai-job-hunter
 
-# Set NODE_ENV to development
+WORKDIR /usr/src/app/apps/backend
+
 ENV NODE_ENV=development
-
-# Expose the port that the application listens on.
 EXPOSE 4000
-
-# Run the application with hot-reloading using tsx watch
-# Source files will be available via the mounted volume from docker compose
 CMD ["pnpm", "run", "dev"]
 
 ################################################################################
-# Create a new stage to run the application with minimal runtime dependencies
-# where the necessary files are copied from the build stage.
-FROM base AS final
+# Minimal production image.
+FROM node:${NODE_VERSION}-alpine AS final
 
-ENV NODE_ENV=${NODE_ENV}
+ENV NODE_ENV=production
+WORKDIR /usr/src/app
 
-# Copy package.json so that package manager commands can be used.
-COPY package.json .
+# Copy the self-contained deployment bundle from the build stage
+COPY --from=build /prod/backend ./
 
-# Copy the production dependencies from the deps stage and also
-# the built application from the build stage into the image.
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/dist ./dist
-
-# Change ownership of the app directory to the node user
 RUN chown -R node:node /usr/src/app
-
-# Run the application as a non-root user.
 USER node
-
-# Expose the port that the application listens on.
 EXPOSE 4000
 
-# Run the application.
-CMD ["pnpm", "start"]
+CMD ["node", "dist/index.js"]
