@@ -23,10 +23,10 @@ jobs:
             - name: Build and push Docker image
               run: |
                   docker build \
-                    --build-arg SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
-                    --build-arg SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }} \
+                    -f apps/backend/Dockerfile \
+                    --target final \
                     -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web:latest \
-                    apps/backend
+                    .
 
                   docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web:latest
 

@@ -3,6 +3,7 @@
     "module": "nodenext",
     "outDir": "dist",
     "rootDir": "src",
+    "skipLibCheck": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "noImplicitReturns": true,
