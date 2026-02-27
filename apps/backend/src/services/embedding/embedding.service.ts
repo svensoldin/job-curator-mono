@@ -9,8 +9,13 @@ dotenv.config();
 const EMBED_CHUNK_SIZE = 20;
 const EMBED_CHUNK_DELAY_MS = 1000;
 
+const client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY });
+
+/**
+ * Embeds a single text string using the Mistral embedding model.
+ * Returns a 1024-dimensional vector.
+ */
 export async function embedText(text: string): Promise<number[]> {
-  const client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY });
   const response = await client.embeddings.create({
     model: 'mistral-embed',
     inputs: [text],
@@ -20,8 +25,11 @@ export async function embedText(text: string): Promise<number[]> {
   return embedding;
 }
 
+/**
+ * Embeds multiple texts in chunks of `EMBED_CHUNK_SIZE`, with a delay between
+ * chunks to respect rate limits. Returns one embedding vector per input text.
+ */
 export async function embedBatch(texts: string[]): Promise<number[][]> {
-  const client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY });
   const results: number[][] = [];
 
   for (let i = 0; i < texts.length; i += EMBED_CHUNK_SIZE) {
@@ -45,6 +53,12 @@ export async function embedBatch(texts: string[]): Promise<number[][]> {
   return results;
 }
 
+/**
+ * Fetches up to `batchSize` jobs where `embedded_at` is null, embeds all their
+ * descriptions in a single batched API call, and writes the resulting vectors
+ * back to the database. Per-job failures are logged and skipped so the rest of
+ * the batch still completes.
+ */
 export async function processUnembeddedJobs(batchSize = 50): Promise<void> {
   const { data: jobs, error } = await supabase
     .from(SUPABASE_SCRAPED_JOBS_TABLE)
@@ -61,13 +75,15 @@ export async function processUnembeddedJobs(batchSize = 50): Promise<void> {
 
   logger.info(`Processing ${jobs.length} unembedded jobs`);
 
-  for (const job of jobs) {
+  const embeddings = await embedBatch(jobs.map((j) => j.description));
+
+  for (let i = 0; i < jobs.length; i++) {
+    const job = jobs[i]!;
     try {
-      const embedding = await embedText(job.description);
       const { error: updateError } = await supabase
         .from(SUPABASE_SCRAPED_JOBS_TABLE)
         .update({
-          embedding: embedding as unknown as string,
+          embedding: embeddings[i]! as unknown as string,
           embedded_at: new Date().toISOString(),
         })
         .eq('id', job.id);

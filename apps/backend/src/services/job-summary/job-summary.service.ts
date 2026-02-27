@@ -16,11 +16,16 @@ const SYSTEM_PROMPT = `You are a job analyst. Extract key information from the j
 
 Return only the JSON object, no additional text.`;
 
+const client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY });
+
+/**
+ * Calls the Mistral chat API to extract a structured summary from a job description.
+ * Parses and validates the JSON response, throwing if the shape is incorrect.
+ */
 export async function summarizeJob(job: {
   id: number;
   description: string;
 }): Promise<StructuredSummary> {
-  const client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY });
   const response = await client.chat.complete({
     model: 'mistral-small-latest',
     responseFormat: { type: 'json_object' },
@@ -55,6 +60,11 @@ export async function summarizeJob(job: {
   return parsed as StructuredSummary;
 }
 
+/**
+ * Fetches up to `batchSize` jobs where `summarized_at` is null, calls `summarizeJob`
+ * for each, and writes the structured summary back to the database. Per-job failures
+ * are logged and skipped so the rest of the batch still completes.
+ */
 export async function processPendingSummaries(batchSize = 50): Promise<void> {
   const { data: jobs, error } = await supabase
     .from(SUPABASE_SCRAPED_JOBS_TABLE)
@@ -77,7 +87,7 @@ export async function processPendingSummaries(batchSize = 50): Promise<void> {
       const { error: updateError } = await supabase
         .from(SUPABASE_SCRAPED_JOBS_TABLE)
         .update({
-          structured_summary: structured_summary as unknown as null,
+          structured_summary: structured_summary as unknown as string,
           summarized_at: new Date().toISOString(),
         })
         .eq('id', job.id);

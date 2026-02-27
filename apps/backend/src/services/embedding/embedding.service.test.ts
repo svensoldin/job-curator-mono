@@ -17,7 +17,7 @@ const { mockEmbeddingsCreate, mockUpdateEq, mockFrom } = vi.hoisted(() => {
     update: mockUpdate,
   });
   const mockEmbeddingsCreate = vi.fn().mockResolvedValue({
-    data: [{ embedding: Array(1024).fill(0.1) }],
+    data: [{ embedding: Array(1024).fill(0.1) }, { embedding: Array(1024).fill(0.2) }],
   });
   return { mockEmbeddingsCreate, mockUpdateEq, mockFrom };
 });
@@ -38,13 +38,16 @@ describe('EmbeddingService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockEmbeddingsCreate.mockResolvedValue({
-      data: [{ embedding: Array(1024).fill(0.1) }],
+      data: [{ embedding: Array(1024).fill(0.1) }, { embedding: Array(1024).fill(0.2) }],
     });
     mockUpdateEq.mockResolvedValue({ error: null });
   });
 
   describe('embedText', () => {
     it('returns a number[] of length 1024', async () => {
+      mockEmbeddingsCreate.mockResolvedValueOnce({
+        data: [{ embedding: Array(1024).fill(0.1) }],
+      });
       const result = await embedText('some job description');
       expect(Array.isArray(result)).toBe(true);
       expect(result).toHaveLength(1024);
@@ -52,6 +55,9 @@ describe('EmbeddingService', () => {
     });
 
     it('calls Mistral embeddings API with the input text', async () => {
+      mockEmbeddingsCreate.mockResolvedValueOnce({
+        data: [{ embedding: Array(1024).fill(0.1) }],
+      });
       await embedText('my text');
       expect(mockEmbeddingsCreate).toHaveBeenCalledWith({
         model: 'mistral-embed',
@@ -68,12 +74,21 @@ describe('EmbeddingService', () => {
       expect(mockUpdateEq).toHaveBeenCalledWith('id', 2);
     });
 
+    it('embeds all job descriptions in a single batch API call', async () => {
+      await processUnembeddedJobs(50);
+      expect(mockEmbeddingsCreate).toHaveBeenCalledTimes(1);
+      expect(mockEmbeddingsCreate).toHaveBeenCalledWith({
+        model: 'mistral-embed',
+        inputs: ['First job description', 'Second job description'],
+      });
+    });
+
     it('queries scraped_jobs where embedded_at is null', async () => {
       await processUnembeddedJobs(10);
       expect(mockFrom).toHaveBeenCalledWith('scraped_jobs');
     });
 
-    it('continues processing remaining jobs on per-job error', async () => {
+    it('continues processing remaining jobs on per-job DB error', async () => {
       mockUpdateEq
         .mockResolvedValueOnce({ error: new Error('DB error') })
         .mockResolvedValueOnce({ error: null });
