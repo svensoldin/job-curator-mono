@@ -9,11 +9,11 @@
     "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
+    "@repo/logger": "workspace:*",
     "@repo/pipeline": "workspace:*",
     "@repo/types": "workspace:*",
     "dotenv": "^16.3.1",
-    "puppeteer": "^22.0.0",
-    "winston": "^3.11.0"
+    "puppeteer": "^22.0.0"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
