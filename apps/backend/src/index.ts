@@ -3,7 +3,6 @@ import tasksRoutes from './routes/searches.js';
 import profilesRoutes from './routes/profiles.js';
 import matchesRoutes from './routes/matches.js';
 import jobsRoutes from './routes/jobs.js';
-import cronRoutes from './routes/cron.js';
 import logger from './utils/logger.js';
 import cors from 'cors';
 import express, { type Express } from 'express';
@@ -34,7 +33,6 @@ app.use('/searches', tasksRoutes);
 app.use('/profiles', profilesRoutes);
 app.use('/matches', matchesRoutes);
 app.use('/jobs', jobsRoutes);
-app.use('/cron', cronRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
@@ -71,7 +69,6 @@ function validateEnv() {
     'SUPABASE_URL',
     'SUPABASE_SERVICE_ROLE_KEY',
     'MISTRAL_API_KEY',
-    'CRON_SECRET',
     'CORS_ORIGIN',
   ] as const;
   const missing = required.filter((key) => !process.env[key]);

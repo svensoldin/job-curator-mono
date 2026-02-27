@@ -2,7 +2,7 @@ import express, { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import * as CacheService from '../services/cache/cache.service.js';
 import type { GetMatchesOptions } from '../services/cache/cache.service.js';
-import { runForUser } from '../services/matching/matching.pipeline.js';
+import { runForUser } from '@repo/pipeline';
 import logger from '../utils/logger.js';
 
 const router: Router = express.Router();
@@ -17,7 +17,8 @@ router.get('/:userId', requireAuth, async (req, res) => {
     const { limit, minScore, hiddenGemsOnly } = req.query;
     const options: GetMatchesOptions = {};
     if (limit !== undefined) options.limit = Math.max(1, Math.min(200, Number(limit) || 50));
-    if (minScore !== undefined) options.minScore = Math.max(0, Math.min(100, Number(minScore) || 0));
+    if (minScore !== undefined)
+      options.minScore = Math.max(0, Math.min(100, Number(minScore) || 0));
     if (hiddenGemsOnly !== undefined) options.hiddenGemsOnly = hiddenGemsOnly === 'true';
     const matches = await CacheService.getMatchesForUser(req.params.userId, options);
 
@@ -35,10 +36,7 @@ router.get('/:userId/job/:jobId', requireAuth, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
-    const match = await CacheService.getMatchDetail(
-      req.params.userId,
-      Number(req.params.jobId)
-    );
+    const match = await CacheService.getMatchDetail(req.params.userId, Number(req.params.jobId));
 
     if (!match) return res.status(404).json({ error: 'Match not found' });
     return res.json({ data: match });

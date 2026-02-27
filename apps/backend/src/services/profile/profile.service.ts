@@ -1,8 +1,5 @@
 import type { HardConstraints, UserProfile } from '@repo/types';
-import { supabase } from '../../lib/supabase.js';
-import type { Json } from '../../lib/supabase.types.js';
-import { SUPABASE_USER_PROFILES_TABLE } from '../../constants/supabase.js';
-import { embedText } from '../embedding/embedding.service.js';
+import { supabase, type Json, SUPABASE_USER_PROFILES_TABLE, embedText } from '@repo/pipeline';
 
 interface ProfileInput {
   hardConstraints?: HardConstraints;

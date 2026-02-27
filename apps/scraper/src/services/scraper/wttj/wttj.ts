@@ -2,10 +2,7 @@ import { Browser, Page } from 'puppeteer';
 
 import type { JobPosting, ScrapeCriteria } from '../../../types.js';
 import logger from '../../../utils/logger.js';
-import {
-  getJobDescriptions,
-  initializePageAndNavigate,
-} from '../helpers.js';
+import { getJobDescriptions, initializePageAndNavigate } from '../helpers.js';
 import {
   DELAY_BETWEEN_REQUESTS,
   MAX_JOBS_PER_BOARD,

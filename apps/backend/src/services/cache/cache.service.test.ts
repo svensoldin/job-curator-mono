@@ -27,7 +27,7 @@ const { mockQuery, fixtureRow } = vi.hoisted(() => {
     select: vi.fn(),
     eq: vi.fn(),
     order: vi.fn(),
-    limit: vi.fn(),   // terminal for getMatchesForUser
+    limit: vi.fn(), // terminal for getMatchesForUser
     gte: vi.fn(),
     maybeSingle: vi.fn(), // terminal for getMatchDetail
   };
@@ -42,14 +42,15 @@ const { mockQuery, fixtureRow } = vi.hoisted(() => {
   return { mockQuery, fixtureRow };
 });
 
-vi.mock('../../lib/supabase.js', () => ({
+vi.mock('@repo/pipeline', () => ({
   supabase: {
     from: vi.fn().mockReturnValue(mockQuery),
   },
+  SUPABASE_MATCH_CACHE_TABLE: 'match_cache',
 }));
 
 import { getMatchesForUser, getMatchDetail } from './cache.service.js';
-import { supabase } from '../../lib/supabase.js';
+import { supabase } from '@repo/pipeline';
 
 describe('CacheService', () => {
   beforeEach(() => {
@@ -62,7 +63,9 @@ describe('CacheService', () => {
     mockQuery.limit.mockResolvedValue({ data: [fixtureRow], error: null });
     mockQuery.maybeSingle.mockResolvedValue({ data: fixtureRow, error: null });
 
-    vi.mocked(supabase.from).mockReturnValue(mockQuery as unknown as ReturnType<typeof supabase.from>);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockQuery as unknown as ReturnType<typeof supabase.from>
+    );
   });
 
   describe('getMatchesForUser', () => {

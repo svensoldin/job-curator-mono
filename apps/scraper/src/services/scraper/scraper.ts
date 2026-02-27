@@ -1,11 +1,10 @@
-import { supabase } from '../../lib/supabase.js';
+import { supabase, SUPABASE_SCRAPED_JOBS_TABLE } from '@repo/pipeline';
 import dotenv from 'dotenv';
 
 import type { ScrapeCriteria } from '../../types.js';
 import logger from '../../utils/logger.js';
 
 import { SCRAPE_JOB_TITLE, SCRAPE_LOCATION } from '../../constants/scraper.js';
-import { SUPABASE_SCRAPED_JOBS_TABLE } from '../../constants/supabase.js';
 import { scrapeLinkedIn } from './linkedin/linkedin.js';
 import { closeBrowser, createBrowser } from './helpers.js';
 import scrapeWelcomeToTheJungle from './wttj/wttj.js';

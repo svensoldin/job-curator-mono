@@ -15,6 +15,11 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*",
+    "../../packages/pipeline/src/services/matching/matching.pipeline.test.ts",
+    "../../packages/pipeline/src/services/embedding/embedding.service.test.ts",
+    "../../packages/pipeline/src/services/job-summary/job-summary.service.test.ts"
+  ],
   "exclude": ["node_modules", "dist", "tests", "**/*.test.ts", "**/*.spec.ts", "**/fixtures/**"]
 }

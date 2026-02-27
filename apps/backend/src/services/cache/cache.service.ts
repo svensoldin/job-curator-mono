@@ -1,6 +1,5 @@
 import type { MatchWithJob } from '@repo/types';
-import { supabase } from '../../lib/supabase.js';
-import { SUPABASE_MATCH_CACHE_TABLE } from '../../constants/supabase.js';
+import { supabase, SUPABASE_MATCH_CACHE_TABLE } from '@repo/pipeline';
 
 export interface GetMatchesOptions {
   limit?: number;
@@ -36,7 +35,9 @@ export async function getMatchesForUser(
   if (error) throw error;
 
   return (data ?? []).map((row) => {
-    const { scraped_jobs, ...matchFields } = row as typeof row & { scraped_jobs: MatchWithJob['job'] };
+    const { scraped_jobs, ...matchFields } = row as typeof row & {
+      scraped_jobs: MatchWithJob['job'];
+    };
     return { ...matchFields, job: scraped_jobs } as MatchWithJob;
   });
 }
@@ -45,10 +46,7 @@ export async function getMatchesForUser(
  * Returns the full match detail for a single (user, job) pair, or null if no
  * cached result exists.
  */
-export async function getMatchDetail(
-  userId: string,
-  jobId: number
-): Promise<MatchWithJob | null> {
+export async function getMatchDetail(userId: string, jobId: number): Promise<MatchWithJob | null> {
   const { data, error } = await supabase
     .from(SUPABASE_MATCH_CACHE_TABLE)
     .select('*, scraped_jobs(id,title,company,location,url,source,structured_summary)')
@@ -59,6 +57,8 @@ export async function getMatchDetail(
   if (error) throw error;
   if (!data) return null;
 
-  const { scraped_jobs, ...matchFields } = data as typeof data & { scraped_jobs: MatchWithJob['job'] };
+  const { scraped_jobs, ...matchFields } = data as typeof data & {
+    scraped_jobs: MatchWithJob['job'];
+  };
   return { ...matchFields, job: scraped_jobs } as MatchWithJob;
 }

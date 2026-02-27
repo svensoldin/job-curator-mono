@@ -28,7 +28,13 @@ const {
       url: 'https://example.com/1',
       source: 'linkedin',
       similarity: 0.82,
-      structured_summary: { stack: ['Vue', 'Python'], seniority: 'senior', culture: 'startup', responsibilities: '...', salary: '60k' },
+      structured_summary: {
+        stack: ['Vue', 'Python'],
+        seniority: 'senior',
+        culture: 'startup',
+        responsibilities: '...',
+        salary: '60k',
+      },
     },
     {
       id: 2,
@@ -39,14 +45,32 @@ const {
       url: 'https://example.com/2',
       source: 'wttj',
       similarity: 0.76,
-      structured_summary: { stack: ['React', 'Node.js'], seniority: 'mid', culture: 'scale-up', responsibilities: '...', salary: '55k' },
+      structured_summary: {
+        stack: ['React', 'Node.js'],
+        seniority: 'mid',
+        culture: 'scale-up',
+        responsibilities: '...',
+        salary: '55k',
+      },
     },
   ];
 
   const fixtureLlmResponse = {
     results: [
-      { job_id: 1, score: 85, reasoning: 'Good match', missing_skills: ['Python'], salary_alignment: 'ok' },
-      { job_id: 2, score: 72, reasoning: 'Decent match', missing_skills: [], salary_alignment: 'low' },
+      {
+        job_id: 1,
+        score: 85,
+        reasoning: 'Good match',
+        missing_skills: ['Python'],
+        salary_alignment: 'ok',
+      },
+      {
+        job_id: 2,
+        score: 72,
+        reasoning: 'Decent match',
+        missing_skills: [],
+        salary_alignment: 'low',
+      },
     ],
   };
 
@@ -56,7 +80,9 @@ const {
   // Profile select chain: .select().eq().maybeSingle()
   const mockProfilesSelect = vi.fn().mockReturnValue({
     eq: vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle }),
-    not: vi.fn().mockResolvedValue({ data: [{ user_id: 'user-1' }, { user_id: 'user-2' }], error: null }),
+    not: vi
+      .fn()
+      .mockResolvedValue({ data: [{ user_id: 'user-1' }, { user_id: 'user-2' }], error: null }),
   });
 
   const mockRpc = vi.fn().mockResolvedValue({ data: fixtureRpcJobs, error: null });
@@ -101,7 +127,13 @@ import { runForUser, runForAllUsers, _computeIsHiddenGem } from './matching.pipe
 import { supabase } from '../../lib/supabase.js';
 
 describe('computeIsHiddenGem', () => {
-  const summary = { stack: ['Vue', 'Python'], seniority: 'senior', culture: 'startup', responsibilities: '...', salary: '60k' };
+  const summary = {
+    stack: ['Vue', 'Python'],
+    seniority: 'senior',
+    culture: 'startup',
+    responsibilities: '...',
+    salary: '60k',
+  };
   const skillGraph = { React: 5, 'Node.js': 3, TypeScript: 4 }; // 3 keys, none in stack → 0% overlap
 
   it('returns false when similarity < 0.75', () => {
@@ -116,7 +148,7 @@ describe('computeIsHiddenGem', () => {
     // 1 of 4 keys matches → 25% overlap
     const sg = { React: 5, 'Node.js': 3, TypeScript: 4, Angular: 2 };
     const s = { ...summary, stack: ['React'] }; // 1/4 = 25%
-    expect(_computeIsHiddenGem(0.80, sg, s)).toBe(true);
+    expect(_computeIsHiddenGem(0.8, sg, s)).toBe(true);
   });
 
   it('returns false when similarity >= 0.75 but overlap is exactly 30%', () => {
@@ -124,15 +156,15 @@ describe('computeIsHiddenGem', () => {
     const keys = Array.from({ length: 10 }, (_, i) => `Skill${i}`);
     const sg = Object.fromEntries(keys.map((k) => [k, 1]));
     const s = { ...summary, stack: ['Skill0', 'Skill1', 'Skill2'] }; // 3/10 = 30%
-    expect(_computeIsHiddenGem(0.80, sg, s)).toBe(false);
+    expect(_computeIsHiddenGem(0.8, sg, s)).toBe(false);
   });
 
   it('returns false when skillGraph is null', () => {
-    expect(_computeIsHiddenGem(0.80, null, summary)).toBe(false);
+    expect(_computeIsHiddenGem(0.8, null, summary)).toBe(false);
   });
 
   it('returns false when summary is null', () => {
-    expect(_computeIsHiddenGem(0.80, skillGraph, null)).toBe(false);
+    expect(_computeIsHiddenGem(0.8, skillGraph, null)).toBe(false);
   });
 });
 
@@ -180,7 +212,8 @@ describe('runForUser', () => {
   it('sets is_hidden_gem=true for job 1 (high similarity, low overlap) and false for job 2 (React in stack)', async () => {
     await runForUser('user-1');
 
-    const upsertArg: Array<{ job_id: number; is_hidden_gem: boolean }> = mockUpsert.mock.calls[0][0];
+    const upsertArg: Array<{ job_id: number; is_hidden_gem: boolean }> =
+      mockUpsert.mock.calls[0][0];
     const job1 = upsertArg.find((r) => r.job_id === 1);
     const job2 = upsertArg.find((r) => r.job_id === 2);
 
@@ -214,7 +247,8 @@ describe('runForAllUsers', () => {
           select: vi.fn().mockReturnValue({
             not: vi.fn().mockResolvedValue({ data: profiles, error: null }),
             eq: vi.fn().mockReturnValue({
-              maybeSingle: vi.fn()
+              maybeSingle: vi
+                .fn()
                 .mockResolvedValueOnce({ data: fixtureProfile, error: null })
                 .mockResolvedValueOnce({ data: fixtureProfile, error: null }),
             }),
@@ -239,9 +273,13 @@ describe('runForAllUsers', () => {
           select: vi.fn().mockReturnValue({
             not: vi.fn().mockResolvedValue({ data: profiles, error: null }),
             eq: vi.fn().mockReturnValue({
-              maybeSingle: vi.fn()
+              maybeSingle: vi
+                .fn()
                 // user-1: missing embedding → runForUser will throw
-                .mockResolvedValueOnce({ data: { ...fixtureProfile, embedding: null }, error: null })
+                .mockResolvedValueOnce({
+                  data: { ...fixtureProfile, embedding: null },
+                  error: null,
+                })
                 // user-2: valid profile → should still be processed
                 .mockResolvedValueOnce({ data: fixtureProfile, error: null }),
             }),

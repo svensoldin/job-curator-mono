@@ -31,7 +31,7 @@ const { mockEmbedText, mockSingle, mockMaybeSingle, mockUpsert, mockDelete, fixt
     return { mockEmbedText, mockSingle, mockMaybeSingle, mockUpsert, mockDelete, fixtureProfile };
   });
 
-vi.mock('../../lib/supabase.js', () => ({
+vi.mock('@repo/pipeline', () => ({
   supabase: {
     from: vi.fn().mockImplementation(() => ({
       upsert: mockUpsert,
@@ -41,14 +41,17 @@ vi.mock('../../lib/supabase.js', () => ({
       delete: mockDelete,
     })),
   },
-}));
-
-vi.mock('../embedding/embedding.service.js', () => ({
   embedText: mockEmbedText,
+  SUPABASE_USER_PROFILES_TABLE: 'user_profiles',
 }));
 
-import { buildProfileText, createOrUpdate, getByUserId, deleteByUserId } from './profile.service.js';
-import { supabase } from '../../lib/supabase.js';
+import {
+  buildProfileText,
+  createOrUpdate,
+  getByUserId,
+  deleteByUserId,
+} from './profile.service.js';
+import { supabase } from '@repo/pipeline';
 
 describe('ProfileService', () => {
   beforeEach(() => {
