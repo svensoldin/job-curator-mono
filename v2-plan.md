@@ -27,6 +27,8 @@ Add columns:
 
 Add partial indexes for efficient unprocessed-job queries (`WHERE embedded_at IS NULL`, `WHERE summarized_at IS NULL`).
 
+Add a `UNIQUE` constraint on `scraped_jobs.url` — required for idempotent upserts (see Scraper Improvements below).
+
 > **Note:** Create the IVFFlat vector index **after** the backfill, not before. An index on an empty table is useless and must be rebuilt.
 
 ### New `user_profiles` table
@@ -151,6 +153,135 @@ apps/backend/src/
 - `getMatchesForUser(userId, options?: { limit, minScore, hiddenGemsOnly }): Promise<MatchWithJob[]>` — joins `match_cache` with `scraped_jobs`, ordered by `score DESC`
 - `getMatchDetail(userId, jobId): Promise<MatchWithJob | null>`
 
+### Scraper Improvements
+
+The existing scraper has several bugs and scalability limits that need to be addressed as part of v2. **Scope note:** the product is intentionally limited to one country (France) at launch — multi-country support is out of scope.
+
+#### Bug fixes (blocking correctness)
+
+**1. Remove auto-execution on import (`scraper.ts:59`)**
+
+```typescript
+scrapeJobs(SCRAPE_CRITERIA); // ← DELETE this line
+```
+
+This runs a full scrape on every import. The cron endpoint already calls `scrapeJobs()` explicitly. For `pnpm scrape`, create a thin entry-point script `scripts/scrape.ts` that imports and calls it.
+
+**2. Add `onConflict: 'url'` to the upsert**
+
+```typescript
+// before
+await supabase.from('scraped_jobs').upsert(uniqueJobs);
+// after
+await supabase.from('scraped_jobs').upsert(uniqueJobs, { onConflict: 'url' });
+```
+
+Without this, the same job scraped on different days creates duplicate rows. Requires the new UNIQUE index on `url` (see DB section above).
+
+**3. Fix WTTJ runtime crash — `extractCompanyFromUrl` called inside `page.evaluate`**
+
+`page.evaluate` runs in the browser context and has no access to Node-scope functions. `extractCompanyFromUrl` is currently called inside the `page.evaluate` callback in `wttj.ts`, which will throw `extractCompanyFromUrl is not defined` at runtime. Fix: inline the regex + string transform inside the callback.
+
+**4. Fix page memory leak in `getJobDescription`**
+
+If `page.goto()` or `parseJobDescription()` throws, the newly created page is never closed. Fix: wrap in `try/finally`:
+
+```typescript
+const descPage = await browser.newPage();
+try {
+  // ... navigate, parse
+} finally {
+  await descPage.close();
+}
+```
+
+**5. Replace stray `console.warn` with `logger.warn`** (`helpers.ts:68`)
+
+#### Scalability improvements
+
+**6. Increase `MAX_JOBS_PER_BOARD` from 17 → 50**
+
+With vector search selecting top 30 candidates per user, a pool of ~34 total jobs is too shallow for any meaningful diversity. Bump to 50 per source (~100 total).
+
+**7. Concurrent description fetching (pool of 3)**
+
+Each description fetch is sequential with a 1s delay — at 17 jobs per source this is already ~34s, and it doesn't scale. Replace with a small concurrency pool using `Promise.all` over chunks of 3:
+
+```typescript
+// process descriptions in chunks of 3 concurrent requests
+for (let i = 0; i < jobs.length; i += 3) {
+  const chunk = jobs.slice(i, i + 3);
+  await Promise.all(chunk.map((job) => getJobDescription(browser, job, selectors)));
+  await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
+}
+```
+
+Keep the 1s delay between *chunks* (not individual jobs) to stay under rate limits while cutting fetch time by ~60%.
+
+**9. Pagination — scrape multiple pages per source**
+
+LinkedIn returns 25 jobs per page, WTTJ ~30. Currently both scrapers load a single URL and slice to `MAX_JOBS_PER_BOARD`. To reliably reach the 50-job target, each scraper must iterate over multiple pages.
+
+**LinkedIn** — use `&start=N` (multiples of 25):
+
+```typescript
+// In scrapeLinkedIn: loop over pages, collecting all jobs
+const allJobs: JobPosting[] = [];
+for (let page = 0; page < MAX_PAGES_PER_BOARD; page++) {
+  const pagedUrl = `${url}&start=${page * 25}`;
+  const listingPage = await initializePageAndNavigate(browser, pagedUrl, PRIMARY_SELECTOR);
+  const jobs = await getJobs(listingPage, 25); // always fetch full page
+  await listingPage.close();
+  if (jobs.length === 0) break; // end of results
+  allJobs.push(...jobs);
+  if (allJobs.length >= limit) break;
+  await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
+}
+const jobs = allJobs.slice(0, limit);
+```
+
+**WTTJ** — use `&page=N` (0-indexed):
+
+```typescript
+// In scrapeWelcomeToTheJungle: loop over pages
+const allJobs: JobPosting[] = [];
+for (let page = 0; page < MAX_PAGES_PER_BOARD; page++) {
+  const pagedUrl = `${baseUrl}&page=${page}`;
+  const listingPage = await initializePageAndNavigate(browser, pagedUrl, PRIMARY_SELECTOR);
+  const jobs = await getJobs(listingPage, 50); // fetch up to full page
+  await listingPage.close();
+  if (jobs.length === 0) break;
+  allJobs.push(...jobs);
+  if (allJobs.length >= limit) break;
+  await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
+}
+const jobs = allJobs.slice(0, limit);
+```
+
+Add `MAX_PAGES_PER_BOARD = 2` to `constants/scraper.ts`. Two pages gives a safe ceiling of 50 (LinkedIn: 25×2, WTTJ: ~30×2), without over-fetching. Stop early when a page returns 0 results so the loop is safe if fewer jobs exist.
+
+**8. Post-scrape sanity check**
+
+After scraping, log an error-level alert if either source returns 0 jobs or if >50% of descriptions are empty. These are silent failures today (CSS selectors break when LinkedIn/WTTJ update their HTML). Turn them into detectable incidents:
+
+```typescript
+const emptyDescriptions = uniqueJobs.filter((j) => !j.description).length;
+if (uniqueJobs.length === 0 || emptyDescriptions / uniqueJobs.length > 0.5) {
+  logger.error(`Scraper health check failed: ${uniqueJobs.length} jobs, ${emptyDescriptions} empty descriptions`);
+}
+```
+
+#### Files to modify
+
+- `apps/backend/src/services/scraper/scraper.ts` — remove auto-exec, fix upsert conflict key, add sanity check
+- `apps/backend/src/services/scraper/helpers.ts` — fix page leak, replace console.warn, add concurrency pool
+- `apps/backend/src/services/scraper/wttj/wttj.ts` — fix `extractCompanyFromUrl` inside evaluate; add page loop using `&page=N`
+- `apps/backend/src/services/scraper/linkedin/linkedin.ts` — add page loop using `&start=N`
+- `apps/backend/src/constants/scraper.ts` — bump `MAX_JOBS_PER_BOARD` to 50, add `MAX_PAGES_PER_BOARD = 2`
+- `apps/backend/scripts/scrape.ts` — new thin entry-point script (replaces top-level call)
+
+---
+
 ### Cron via Heroku Scheduler
 
 The backend runs on a basic $5 Heroku dyno with Heroku Scheduler triggering jobs externally. Rather than using `node-cron` embedded in the Express server, each scheduled task is exposed as a protected HTTP endpoint called by Heroku Scheduler.
@@ -246,16 +377,17 @@ Add: `UserProfile`, `HardConstraints`, `MatchResult`, `StructuredSummary`.
 
 ## 5. Implementation Order
 
-| Sprint | Work                                                                                                                           | App still working?                                          |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------- |
-| 1      | DB migrations (Steps 1–7 above). Regenerate types.                                                                             | Yes — all new columns are nullable, old code is unaffected. |
-| 2      | Backend: `EmbeddingService` + `JobSummaryService` + unit tests                                                                 | Yes — services standalone                                   |
-| 3      | Backend: `ProfileService` + `routes/profiles.ts`                                                                               | Yes — new routes additive                                   |
-| 4      | Backend: `MatchingPipeline` + `CacheService` + `routes/matches.ts` + `routes/jobs.ts` + updated cron                           | Yes — old routes still mounted                              |
-| 5      | Data backfill scripts (`scripts/backfill-summaries.ts`, `scripts/backfill-embeddings.ts`) + create IVFFlat index post-backfill | Yes                                                         |
-| 6      | Frontend: `/profile` page + shared types + sidebar link                                                                        | Yes — old dashboard unchanged                               |
-| 7      | Frontend: updated `/dashboard` + `/matches/[jobId]` detail page                                                                | Yes — old `/search` can be removed here                     |
-| 8      | Remove old routes (`/searches`, `/results`) and old frontend `/search` wizard. Add auth middleware.                            | v2 complete                                                 |
+| Sprint | Work                                                                                                                                                           | App still working?                                          |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| 1      | DB migrations (Steps 1–7 above) + UNIQUE index on `scraped_jobs.url`. Regenerate types.                                                                        | Yes — all new columns are nullable, old code is unaffected. |
+| 2      | Scraper bug fixes (auto-exec, upsert conflict key, WTTJ evaluate crash, page leak, console.warn) + scalability tweaks (concurrency, bump cap, sanity check).   | Yes — scraper is a standalone cron job                      |
+| 3      | Backend: `EmbeddingService` + `JobSummaryService` + unit tests                                                                                                 | Yes — services standalone                                   |
+| 4      | Backend: `ProfileService` + `routes/profiles.ts`                                                                                                               | Yes — new routes additive                                   |
+| 5      | Backend: `MatchingPipeline` + `CacheService` + `routes/matches.ts` + `routes/jobs.ts` + updated cron                                                           | Yes — old routes still mounted                              |
+| 6      | Data backfill scripts (`scripts/backfill-summaries.ts`, `scripts/backfill-embeddings.ts`) + create IVFFlat index post-backfill                                 | Yes                                                         |
+| 7      | Frontend: `/profile` page + shared types + sidebar link                                                                                                        | Yes — old dashboard unchanged                               |
+| 8      | Frontend: updated `/dashboard` + `/matches/[jobId]` detail page                                                                                                | Yes — old `/search` can be removed here                     |
+| 9      | Remove old routes (`/searches`, `/results`) and old frontend `/search` wizard. Add auth middleware.                                                             | v2 complete                                                 |
 
 ---
 
@@ -269,6 +401,8 @@ Add: `UserProfile`, `HardConstraints`, `MatchResult`, `StructuredSummary`.
 | No auth middleware on backend routes          | Implement JWT validation middleware in Sprint 4/8. All mutating routes must verify user identity before production launch.                                                                                 |
 | Heroku Scheduler timing                       | Scheduler runs in separate one-off dynos, so the basic dyno doesn't need to stay alive for crons. HTTP cron endpoints handle each task independently. Add the `CRON_SECRET` env var to Heroku config vars. |
 | `scraped_jobs.id` is `integer`, not `uuid`    | Be explicit: `job_id: number` in all TypeScript interfaces for `match_cache`. Type generator enforces this post-migration.                                                                                 |
+| LinkedIn/WTTJ HTML changes break selectors    | Post-scrape sanity check logs error-level alert when 0 jobs or >50% empty descriptions. Monitor logs after each daily scrape to catch regressions early.                                                   |
+| Concurrency on Heroku $5 dyno (512MB RAM)     | 3 concurrent Puppeteer pages is safe within memory limits (~50MB per page). Do not increase beyond 5 without measuring memory usage first.                                                                 |
 
 ---
 
@@ -291,3 +425,7 @@ Add: `UserProfile`, `HardConstraints`, `MatchResult`, `StructuredSummary`.
 - [supabase.ts](apps/backend/src/lib/supabase.ts) — add new TS interfaces
 - [packages/types/index.ts](packages/types/index.ts) — add `UserProfile`, `MatchResult`, `StructuredSummary`
 - [dashboard/\_lib/queries.ts](<apps/frontend/src/app/(authenticated)/dashboard/_lib/queries.ts>) — switch from searches to matches query
+- [scraper.ts](apps/backend/src/services/scraper/scraper.ts) — remove auto-exec, fix upsert conflict key, add sanity check
+- [helpers.ts](apps/backend/src/services/scraper/helpers.ts) — fix page leak, replace console.warn, add concurrency pool
+- [wttj.ts](apps/backend/src/services/scraper/wttj/wttj.ts) — fix `extractCompanyFromUrl` inside `page.evaluate`
+- [constants/scraper.ts](apps/backend/src/constants/scraper.ts) — bump `MAX_JOBS_PER_BOARD` to 50

@@ -9,6 +9,7 @@ Express/TypeScript backend. ESM modules — all local imports must use `.js` ext
 - **LLM**: Mistral AI (`@mistralai/mistralai`) — model constants in `src/constants/ai-analyzer.ts`
 - **DB**: Supabase (`@supabase/supabase-js`) — typed client in `src/lib/supabase.ts`
 - **Logging**: Winston — shared instance in `src/utils/logger.ts`
+- **Scraping**: Puppeteer scraping, divided between Linkedin and Welcome to the Jungle
 - **Tests**: Vitest
 
 ## Commands
@@ -27,3 +28,7 @@ Express/TypeScript backend. ESM modules — all local imports must use `.js` ext
 ## Documentation
 
 When writing services, write descriptions above the function definitions (JSDoc style). The description should briefly explain what the function does and how.
+
+## Edits
+
+When editing files (features, bugs, refactors), remove the unused code/files from the previous implementation.

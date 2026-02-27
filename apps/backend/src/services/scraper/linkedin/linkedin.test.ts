@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import type { Browser, Page } from 'puppeteer';
 import { extractJobDataFromElements } from './helpers.js';
-import { parseJobDescription } from '../common.js';
+import { parseJobDescription } from '../helpers.js';
 import { LINKEDIN_DESCRIPTION_SELECTORS, scrapeLinkedIn } from './linkedin.js';
 
 const MOCK_DESC_1 = `This is the first description`;
@@ -48,6 +48,7 @@ describe('Linkedin scraper tests', () => {
     const dom = new JSDOM(html);
     const mockPage = {
       waitForSelector: vi.fn().mockResolvedValue(true),
+      url: vi.fn().mockReturnValue('https://linkedin.com/jobs/view/123'),
       $eval: vi
         .fn()
         .mockImplementation((selector: string, fn: (el: Element) => string) => {
@@ -80,6 +81,7 @@ describe('Linkedin scraper tests', () => {
   });
 
   it('scrapes LinkedIn jobs end-to-end', async () => {
+    // Page 0 of the listing — returns 2 jobs, hits the limit so the loop exits early
     const mockListPage = {
       setUserAgent: vi.fn().mockResolvedValue(undefined),
       goto: vi.fn().mockResolvedValue(undefined),
@@ -109,6 +111,7 @@ describe('Linkedin scraper tests', () => {
       setUserAgent: vi.fn().mockResolvedValue(undefined),
       goto: vi.fn().mockResolvedValue(undefined),
       waitForSelector: vi.fn().mockResolvedValue(true),
+      url: vi.fn().mockReturnValue('https://linkedin.com/jobs/view/123'),
       $eval: vi.fn().mockResolvedValue(MOCK_DESC_1),
       close: vi.fn().mockResolvedValue(undefined),
     } as unknown as Page;
@@ -117,6 +120,7 @@ describe('Linkedin scraper tests', () => {
       setUserAgent: vi.fn().mockResolvedValue(undefined),
       goto: vi.fn().mockResolvedValue(undefined),
       waitForSelector: vi.fn().mockResolvedValue(true),
+      url: vi.fn().mockReturnValue('https://linkedin.com/jobs/view/456'),
       $eval: vi.fn().mockResolvedValue(MOCK_DESC_2),
       close: vi.fn().mockResolvedValue(undefined),
     } as unknown as Page;
@@ -124,7 +128,9 @@ describe('Linkedin scraper tests', () => {
     const mockBrowser = {
       newPage: vi
         .fn()
+        // 1st call: listing page (page 0); limit reached so no page 1 is fetched
         .mockResolvedValueOnce(mockListPage)
+        // 2nd & 3rd calls: description pages (fetched concurrently in one chunk)
         .mockResolvedValueOnce(mockDescPage1)
         .mockResolvedValueOnce(mockDescPage2),
     } as unknown as Browser;
@@ -145,6 +151,7 @@ describe('Linkedin scraper tests', () => {
     expect(results[0]?.description).toContain('first description');
     expect(results[1]?.description).toContain('second description');
 
+    // 1 listing page + 2 description pages (fetched concurrently in one chunk)
     expect(mockBrowser.newPage).toHaveBeenCalledTimes(3);
   });
 });

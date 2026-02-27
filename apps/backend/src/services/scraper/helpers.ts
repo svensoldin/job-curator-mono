@@ -65,7 +65,7 @@ export const parseJobDescription = async (
       const description = await page.$eval(selector, (el) => (el as HTMLElement).innerText || '');
       if (description) {
         if (description.length < minLength)
-          console.warn(`Description is shorter than minimum length for ${page.url}`);
+          logger.warn(`Description is shorter than minimum length for ${page.url()}`);
         return cleanDescription(description);
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -77,11 +77,15 @@ export const parseJobDescription = async (
   return '';
 };
 
+/**
+ * Fetches the description for a single job posting by navigating to its URL and parsing the page.
+ * Uses try/finally to ensure the page is always closed even if navigation or parsing fails.
+ */
 export const getJobDescription = async (browser: Browser, job: JobPosting, selectors: string[]) => {
   if (!job || !job.url) return;
 
+  const descPage = await browser.newPage();
   try {
-    const descPage = await browser.newPage();
     await descPage.setUserAgent(USER_AGENT);
 
     await descPage.goto(job.url, {
@@ -90,13 +94,27 @@ export const getJobDescription = async (browser: Browser, job: JobPosting, selec
     });
 
     const description = await parseJobDescription(descPage, selectors);
-
     job.description = description;
-
-    await descPage.close();
-
-    await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
   } catch (error) {
     logger.error(`❌ Error fetching description for ${job.title}:`, error);
+  } finally {
+    await descPage.close();
+  }
+};
+
+/**
+ * Fetches descriptions for a list of job postings using a concurrency pool of 3.
+ * A 1-second delay is applied between each chunk to avoid rate limits.
+ */
+export const getJobDescriptions = async (
+  browser: Browser,
+  jobs: JobPosting[],
+  selectors: string[]
+): Promise<void> => {
+  const CHUNK_SIZE = 3;
+  for (let i = 0; i < jobs.length; i += CHUNK_SIZE) {
+    const chunk = jobs.slice(i, i + CHUNK_SIZE);
+    await Promise.all(chunk.map((job) => getJobDescription(browser, job, selectors)));
+    await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
   }
 };

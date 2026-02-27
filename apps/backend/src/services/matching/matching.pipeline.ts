@@ -2,7 +2,10 @@ import { Mistral } from '@mistralai/mistralai';
 import type { HardConstraints, StructuredSummary } from '@repo/types';
 import type { Json } from '../../lib/supabase.types.js';
 import { supabase } from '../../lib/supabase.js';
-import { SUPABASE_USER_PROFILES_TABLE, SUPABASE_MATCH_CACHE_TABLE } from '../../constants/supabase.js';
+import {
+  SUPABASE_USER_PROFILES_TABLE,
+  SUPABASE_MATCH_CACHE_TABLE,
+} from '../../constants/supabase.js';
 import logger from '../../utils/logger.js';
 
 const client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY });
@@ -61,7 +64,8 @@ async function fetchProfile(userId: string): Promise<{
 
   if (error) throw error;
   if (!profile) throw new Error(`Profile not found for user ${userId}`);
-  if (!profile.embedding) throw new Error(`Profile embedding is null for user ${userId} — run ProfileService first`);
+  if (!profile.embedding)
+    throw new Error(`Profile embedding is null for user ${userId} — run ProfileService first`);
 
   return { ...profile, embedding: profile.embedding as string };
 }
@@ -79,7 +83,12 @@ async function fetchCandidateJobs(
   const locationFilter = constraints?.location;
   const salaryMin = constraints?.salary_min;
 
-  const rpcArgs: { query_embedding: string; match_count: number; location_filter?: string; salary_min?: number } = {
+  const rpcArgs: {
+    query_embedding: string;
+    match_count: number;
+    location_filter?: string;
+    salary_min?: number;
+  } = {
     // pgvector stores embeddings as strings in the Supabase JS client
     query_embedding: profile.embedding,
     match_count: 30,
@@ -228,4 +237,5 @@ export async function runForAllUsers(): Promise<void> {
   }
 }
 
+// Testing purposes only
 export { computeIsHiddenGem as _computeIsHiddenGem };

@@ -33,9 +33,16 @@ export default async function scrapeJobs(criteria: ScrapeCriteria) {
 
     logger.info(`✅ Successfully scraped ${uniqueJobs.length} jobs with descriptions`);
 
+    const emptyDescriptions = uniqueJobs.filter((j) => !j.description).length;
+    if (uniqueJobs.length === 0 || emptyDescriptions / uniqueJobs.length > 0.5) {
+      logger.error(
+        `Scraper health check failed: ${uniqueJobs.length} jobs, ${emptyDescriptions} empty descriptions`
+      );
+    }
+
     const { error: upsertError } = await supabase
       .from(SUPABASE_SCRAPED_JOBS_TABLE)
-      .upsert(uniqueJobs);
+      .upsert(uniqueJobs, { onConflict: 'url' });
 
     if (upsertError) {
       logger.error(`Failed to upsert scraped jobs:`, upsertError);
@@ -55,5 +62,3 @@ export const SCRAPE_CRITERIA: ScrapeCriteria = {
   jobTitle: SCRAPE_JOB_TITLE,
   location: SCRAPE_LOCATION,
 };
-
-scrapeJobs(SCRAPE_CRITERIA);
