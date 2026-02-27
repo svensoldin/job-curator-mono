@@ -8,7 +8,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "vitest"
   },
   "dependencies": {
     "@repo/types": "workspace:*",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^20.10.0",
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "vitest": "^4.0.15"
   }
 }
