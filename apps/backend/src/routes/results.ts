@@ -1,7 +1,7 @@
-import { SUPABASE_JOB_RESULTS_TABLE } from 'constants/supabase.js';
+import { SUPABASE_JOB_RESULTS_TABLE } from '../constants/supabase.js';
 import express, { type Router } from 'express';
-import { supabase } from 'lib/supabase.js';
-import logger from 'utils/logger.js';
+import { supabase } from '../lib/supabase.js';
+import logger from '../utils/logger.js';
 
 const router: Router = express.Router();
 

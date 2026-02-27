@@ -1,5 +1,5 @@
 import type { Page } from 'puppeteer';
-import type { JobPosting } from 'types.js';
+import type { JobPosting } from '../../../types.js';
 
 export const extractJobDataFromElements = (
   elements: Element[]
