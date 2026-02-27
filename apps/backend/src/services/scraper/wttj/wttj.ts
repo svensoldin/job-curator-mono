@@ -1,6 +1,6 @@
 import { Browser, Page } from 'puppeteer';
 
-import type { JobPosting, ScrapeCriteria } from 'types.js';
+import type { JobPosting, ScrapeCriteria } from '../../../types.js';
 import logger from '../../../utils/logger.js';
 import { getJobDescription, initializePageAndNavigate } from '../helpers.js';
 import { MAX_JOBS_PER_BOARD } from '../../../constants/scraper.js';

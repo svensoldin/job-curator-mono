@@ -1,0 +1,41 @@
+# Docker build context: monorepo root.
+# Only the backend needs to be built — exclude everything else.
+
+# Frontend app (not needed for backend builds)
+apps/frontend
+
+# Dependencies (installed inside Docker)
+**/node_modules
+
+# Build outputs
+**/dist
+**/.next
+**/build
+**/.turbo
+
+# Environment & secrets
+**/.env
+**/.env.*
+
+# Version control
+.git
+.gitignore
+
+# IDE & editor
+**/.vscode
+**/.idea
+**/.vs
+
+# Docker files (no need to copy into context)
+**/.dockerignore
+**/compose.y*ml
+**/docker-compose*
+
+# CI/CD
+.github
+
+# Misc
+**/*.md
+**/LICENSE
+**/logs
+**/.cache

@@ -3,6 +3,7 @@
     "module": "nodenext",
     "outDir": "dist",
     "rootDir": "src",
+    "skipLibCheck": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "noImplicitReturns": true,
@@ -12,8 +13,7 @@
     "moduleDetection": "force",
     "moduleResolution": "nodenext",
     "isolatedModules": true,
-    "verbatimModuleSyntax": true,
-    "baseUrl": "./src"
+    "verbatimModuleSyntax": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "tests", "**/*.test.ts", "**/*.spec.ts", "**/fixtures/**"]
