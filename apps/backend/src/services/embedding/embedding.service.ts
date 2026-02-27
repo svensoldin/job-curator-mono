@@ -1,10 +1,7 @@
 import { Mistral } from '@mistralai/mistralai';
-import dotenv from 'dotenv';
 import { supabase } from '../../lib/supabase.js';
 import { SUPABASE_SCRAPED_JOBS_TABLE } from '../../constants/supabase.js';
 import logger from '../../utils/logger.js';
-
-dotenv.config();
 
 const EMBED_CHUNK_SIZE = 20;
 const EMBED_CHUNK_DELAY_MS = 1000;
@@ -34,6 +31,9 @@ export async function embedBatch(texts: string[]): Promise<number[][]> {
 
   for (let i = 0; i < texts.length; i += EMBED_CHUNK_SIZE) {
     const chunk = texts.slice(i, i + EMBED_CHUNK_SIZE);
+
+    // Mistral's API takes an array of texts, and returns an array of embeddings in the same order
+    // See https://docs.mistral.ai/capabilities/embeddings/text_embeddings
     const response = await client.embeddings.create({
       model: 'mistral-embed',
       inputs: chunk,
@@ -83,6 +83,7 @@ export async function processUnembeddedJobs(batchSize = 50): Promise<void> {
       const { error: updateError } = await supabase
         .from(SUPABASE_SCRAPED_JOBS_TABLE)
         .update({
+          // pgvector stores embeddings as strings in the Supabase JS client
           embedding: embeddings[i]! as unknown as string,
           embedded_at: new Date().toISOString(),
         })

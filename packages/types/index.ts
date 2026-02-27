@@ -70,3 +70,15 @@ export interface MatchResult {
   is_hidden_gem: boolean;
   cached_at: string;
 }
+
+export interface MatchWithJob extends MatchResult {
+  job: {
+    id: number;
+    title: string;
+    company: string;
+    location: string;
+    url: string;
+    source: string;
+    structured_summary: StructuredSummary | null;
+  };
+}
