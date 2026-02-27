@@ -23,3 +23,7 @@ Express/TypeScript backend. ESM modules — all local imports must use `.js` ext
 - Use the shared `logger` (not `console`) for all logging
 - Supabase table names are in `src/constants/supabase.ts`
 - Env vars: `MISTRAL_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
+
+## Documentation
+
+When writing services, write descriptions above the function definitions (JSDoc style). The description should briefly explain what the function does and how.

@@ -1,5 +1,6 @@
 import resultsRoutes from './routes/results.js';
 import tasksRoutes from './routes/searches.js';
+import profilesRoutes from './routes/profiles.js';
 import logger from './utils/logger.js';
 import cors from 'cors';
 import express, { type Express } from 'express';
@@ -27,6 +28,7 @@ app.use((req, res, next) => {
 
 app.use('/results', resultsRoutes);
 app.use('/searches', tasksRoutes);
+app.use('/profiles', profilesRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
