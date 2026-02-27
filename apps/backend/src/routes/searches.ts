@@ -1,8 +1,8 @@
-import { SUPABASE_JOB_SEARCHES_TABLE } from 'constants/supabase.js';
+import { SUPABASE_JOB_SEARCHES_TABLE } from '../constants/supabase.js';
 import express, { type Router } from 'express';
-import { type CreateJobSearchInput, supabase } from 'lib/supabase.js';
-import { searchTaskManager } from 'services/search-task-manager.js';
-import logger from 'utils/logger.js';
+import { type CreateJobSearchInput, supabase } from '../lib/supabase.js';
+import { searchTaskManager } from '../services/search-task-manager.js';
+import logger from '../utils/logger.js';
 
 const router: Router = express.Router();
 

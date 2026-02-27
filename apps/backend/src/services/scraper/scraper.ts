@@ -1,7 +1,7 @@
 import { supabase } from '../../lib/supabase.js';
 import dotenv from 'dotenv';
 
-import type { ScrapeCriteria } from 'types.js';
+import type { ScrapeCriteria } from '../../types.js';
 import logger from '../../utils/logger.js';
 
 import { SCRAPE_JOB_TITLE, SCRAPE_LOCATION } from '../../constants/scraper.js';

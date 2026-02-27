@@ -1,5 +1,5 @@
 import type { Browser } from 'puppeteer';
-import type { JobPosting, ScrapeCriteria } from 'types.js';
+import type { JobPosting, ScrapeCriteria } from '../../../types.js';
 import logger from '../../../utils/logger.js';
 import { getJobDescription, initializePageAndNavigate } from '../../scraper/helpers.js';
 import { getJobs } from './helpers.js';

@@ -1,9 +1,9 @@
 import { Mistral } from '@mistralai/mistralai';
-import { MODEL } from 'constants/ai-analyzer.js';
+import { MODEL } from '../../constants/ai-analyzer.js';
 import dotenv from 'dotenv';
 
-import type { UserCriteria, JobPosting } from 'types.js';
-import logger from 'utils/logger.js';
+import type { UserCriteria, JobPosting } from '../../types.js';
+import logger from '../../utils/logger.js';
 
 dotenv.config();
 
