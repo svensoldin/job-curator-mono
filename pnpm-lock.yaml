@@ -23,6 +23,9 @@ importers:
       '@mistralai/mistralai':
         specifier: ^1.10.0
         version: 1.14.0
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@supabase/supabase-js':
         specifier: ^2.58.0
         version: 2.95.3
