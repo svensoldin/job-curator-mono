@@ -1,5 +1,3 @@
-import resultsRoutes from './routes/results.js';
-import tasksRoutes from './routes/searches.js';
 import profilesRoutes from './routes/profiles.js';
 import matchesRoutes from './routes/matches.js';
 import jobsRoutes from './routes/jobs.js';
@@ -28,8 +26,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/results', resultsRoutes);
-app.use('/searches', tasksRoutes);
 app.use('/profiles', profilesRoutes);
 app.use('/matches', matchesRoutes);
 app.use('/jobs', jobsRoutes);

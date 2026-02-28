@@ -10,8 +10,6 @@ export {
   SUPABASE_SCRAPED_JOBS_TABLE,
   SUPABASE_USER_PROFILES_TABLE,
   SUPABASE_MATCH_CACHE_TABLE,
-  SUPABASE_JOB_RESULTS_TABLE,
-  SUPABASE_JOB_SEARCHES_TABLE,
 } from './constants/supabase.js';
 export type { Json } from './lib/supabase.types.js';
 import logger from './utils/logger.js';
