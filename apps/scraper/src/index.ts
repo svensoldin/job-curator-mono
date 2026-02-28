@@ -2,14 +2,15 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import logger from './utils/logger.js';
-import scrapeJobs, { SCRAPE_CRITERIA } from './services/scraper/scraper.js';
+import scrapeJobs from './services/scraper/scraper.js';
+import { SCRAPE_TARGETS } from './constants/scraper.js';
 import { processPendingSummaries, processUnembeddedJobs, runForAllUsers } from '@repo/pipeline';
 
 async function main() {
   logger.info('🚀 Starting scraper pipeline...');
 
   logger.info('📡 Step 1: Scraping jobs...');
-  await scrapeJobs(SCRAPE_CRITERIA);
+  await scrapeJobs(SCRAPE_TARGETS);
 
   logger.info('📝 Step 2: Processing pending summaries...');
   await processPendingSummaries();

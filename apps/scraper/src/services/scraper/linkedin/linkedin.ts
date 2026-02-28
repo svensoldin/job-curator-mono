@@ -30,8 +30,7 @@ export const scrapeLinkedIn = async (
   limit: number = MAX_JOBS_PER_BOARD
 ): Promise<JobPosting[]> => {
   const keywords = criteria.jobTitle;
-  const location = criteria.location || '';
-  const baseUrl = `${BASE_URL}?keywords=${encodeURIComponent(keywords)}&location=${encodeURIComponent(location)}`;
+  const baseUrl = `${BASE_URL}?keywords=${encodeURIComponent(keywords)}`;
 
   try {
     const allJobs: JobPosting[] = [];

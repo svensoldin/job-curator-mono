@@ -4,27 +4,24 @@ import dotenv from 'dotenv';
 import type { ScrapeCriteria } from '../../types.js';
 import logger from '../../utils/logger.js';
 
-import { SCRAPE_JOB_TITLE, SCRAPE_LOCATION } from '../../constants/scraper.js';
 import { scrapeLinkedIn } from './linkedin/linkedin.js';
 import { closeBrowser, createBrowser } from './helpers.js';
 import scrapeWelcomeToTheJungle from './wttj/wttj.js';
 
 dotenv.config();
 
-if (!SCRAPE_JOB_TITLE || !SCRAPE_LOCATION)
-  throw new Error('Missing SCRAPE_CRITERIA_JOB_TITLE or SCRAPE_CRITERIA_LOCATION env vars');
-
-export default async function scrapeJobs(criteria: ScrapeCriteria) {
+export default async function scrapeJobs(targets: ScrapeCriteria[]) {
   const browser = await createBrowser();
 
   try {
-    logger.info(`Starting job scraping for: ${criteria.jobTitle}`);
+    const allJobs = [];
 
-    const welcomeToTheJungleJobs = await scrapeWelcomeToTheJungle(browser, criteria);
-
-    const linkedInJobs = await scrapeLinkedIn(browser, criteria);
-
-    const allJobs = [...welcomeToTheJungleJobs, ...linkedInJobs];
+    for (const target of targets) {
+      logger.info(`Starting job scraping for: ${target.jobTitle}`);
+      const wttjJobs = await scrapeWelcomeToTheJungle(browser, target);
+      const linkedInJobs = await scrapeLinkedIn(browser, target);
+      allJobs.push(...wttjJobs, ...linkedInJobs);
+    }
 
     const uniqueJobs = allJobs.filter(
       (job, index, self) => index === self.findIndex((j) => j.url === job.url)
@@ -56,8 +53,3 @@ export default async function scrapeJobs(criteria: ScrapeCriteria) {
     await closeBrowser(browser);
   }
 }
-
-export const SCRAPE_CRITERIA: ScrapeCriteria = {
-  jobTitle: SCRAPE_JOB_TITLE,
-  location: SCRAPE_LOCATION,
-};

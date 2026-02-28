@@ -1,5 +1,9 @@
 {
   "extends": "@repo/typescript-config/base.json",
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "incremental": false
+  },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts", "**/fixtures/**"]
 }

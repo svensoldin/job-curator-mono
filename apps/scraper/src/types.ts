@@ -6,7 +6,7 @@ export interface UserCriteria {
   salary: string;
 }
 
-export type ScrapeCriteria = Pick<UserCriteria, 'jobTitle' | 'location'>;
+export type ScrapeCriteria = { jobTitle: string };
 
 export interface JobPosting {
   title: string;

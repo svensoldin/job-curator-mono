@@ -1,5 +1,13 @@
-export const SCRAPE_JOB_TITLE = process.env.SCRAPE_CRITERIA_JOB_TITLE;
-export const SCRAPE_LOCATION = process.env.SCRAPE_CRITERIA_LOCATION;
+import type { ScrapeCriteria } from '../types.js';
+
+export const SCRAPE_TARGETS: ScrapeCriteria[] = [
+  { jobTitle: 'Software Engineer' },
+  { jobTitle: 'Frontend Developer' },
+  { jobTitle: 'Backend Developer' },
+  { jobTitle: 'Fullstack Developer' },
+  { jobTitle: 'React Developer' },
+];
+
 export const MAX_JOBS_PER_BOARD = 50;
 export const MAX_PAGES_PER_BOARD = 2;
 export const MAX_JOBS = 100;

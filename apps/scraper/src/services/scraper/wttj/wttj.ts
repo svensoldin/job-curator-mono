@@ -70,11 +70,7 @@ export default async function scrapeWelcomeToTheJungle(
   limit: number = MAX_JOBS_PER_BOARD
 ): Promise<JobPosting[]> {
   const searchQuery = criteria.jobTitle;
-  let baseUrl = `${BASE_URL}?query=${encodeURIComponent(searchQuery)}`;
-
-  if (criteria.location && !criteria.location.toLowerCase().includes('remote')) {
-    baseUrl += `&refinementList[offices.country_code][]=FR`;
-  }
+  const baseUrl = `${BASE_URL}?query=${encodeURIComponent(searchQuery)}`;
 
   try {
     const allJobs: JobPosting[] = [];
