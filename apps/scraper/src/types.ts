@@ -1,11 +1,3 @@
-// Client-side user criteria (coming from job-searcher-client)
-export interface UserCriteria {
-  jobTitle: string;
-  location: string;
-  skills: string;
-  salary: string;
-}
-
 export type ScrapeCriteria = { jobTitle: string };
 
 export interface JobPosting {
