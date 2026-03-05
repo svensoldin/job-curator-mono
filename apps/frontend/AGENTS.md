@@ -29,6 +29,10 @@ Prefer using React Server Components when possible to keep the bundle size minim
 Use `const MyComponent = () => {}` function declaration instead of `function MyComponent() {}` as a convention.
 For dynamic classNames, use clsx library to merge conditional classes.
 
+## Tanstack Query guidelines
+
+For query keys, avoid repeating the same string (i.e "myQueryKey") across modules. Store the query key in a variable that can be reused.
+
 ## Documentation practices
 
 Be concise, specific, and value dense

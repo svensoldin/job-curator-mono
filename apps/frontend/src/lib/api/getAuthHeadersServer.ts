@@ -6,9 +6,11 @@ export const getAuthHeadersServer = async (): Promise<HeadersInit> => {
     data: { session },
   } = await supabase.auth.getSession();
 
+  if (!session?.access_token) throw new Error('Not authenticated');
+
   return {
     'Content-Type': 'application/json',
     Accept: 'application/json',
-    Authorization: `Bearer ${session?.access_token ?? ''}`,
+    Authorization: `Bearer ${session.access_token}`,
   };
 };
