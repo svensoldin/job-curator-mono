@@ -10,7 +10,9 @@ import { DASHBOARD } from '@/constants/routes';
 
 import { useProfile } from '../_lib/queries';
 import { useUpsertProfile } from '../_lib/mutations';
+import { SENIORITY_OPTIONS, CULTURE_OPTIONS, CULTURE_LABELS } from '../_lib/constants';
 import SkillGraphInput from './SkillGraphInput';
+import ProfileView from './ProfileView';
 
 interface ProfileFormData {
   location: string;
@@ -34,25 +36,6 @@ const initFormData = (profile?: UserProfile): ProfileFormData => ({
 
 const STEPS = ['Hard Constraints', 'Skills', 'Seniority', 'Culture', 'Review'] as const;
 
-const SENIORITY_OPTIONS: Array<NonNullable<UserProfile['seniority']>> = [
-  'junior',
-  'mid',
-  'senior',
-  'lead',
-];
-
-const CULTURE_OPTIONS: Array<NonNullable<UserProfile['culture_preference']>> = [
-  'startup',
-  'scale-up',
-  'big_corp',
-];
-
-const CULTURE_LABELS: Record<NonNullable<UserProfile['culture_preference']>, string> = {
-  startup: 'Startup',
-  'scale-up': 'Scale-up',
-  big_corp: 'Big Corp',
-};
-
 interface ProfileFormProps {
   user: User;
 }
@@ -62,6 +45,8 @@ const ProfileForm = ({ user }: ProfileFormProps) => {
   const { data: profile } = useProfile(user.id);
   const { mutate, isPending } = useUpsertProfile();
 
+  const hasProfile = !!profile;
+  const [isEditing, setIsEditing] = useState(false);
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<ProfileFormData>(() => initFormData(profile));
 
@@ -90,13 +75,23 @@ const ProfileForm = ({ user }: ProfileFormProps) => {
         culturePreference: formData.culture_preference ?? undefined,
       },
       {
-        onSuccess: () => router.push(DASHBOARD),
+        onSuccess: () => {
+          if (hasProfile) {
+            setIsEditing(false);
+          } else {
+            router.push(DASHBOARD);
+          }
+        },
       }
     );
   };
 
+  if (hasProfile && !isEditing) {
+    return <ProfileView profile={profile} onEdit={() => setIsEditing(true)} />;
+  }
+
   return (
-    <div className='mx-auto px-4 py-10'>
+    <div className='w-full max-w-3xl px-4 py-10'>
       <header className='mb-8'>
         <h1 className='text-2xl font-semibold text-white'>Your profile</h1>
         <p className='mt-1 text-sm text-gray-400'>

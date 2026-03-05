@@ -21,8 +21,9 @@ export const fetchMatchesByUser = async (
   return (json.data ?? []) as MatchWithJob[];
 };
 
-export const useMatchesByUser = (userId: string) =>
+export const useMatchesByUser = (userId: string, refetchInterval?: number | false) =>
   useQuery<MatchWithJob[], Error>({
     queryKey: [USER_MATCHES_QUERY_KEY, userId],
     queryFn: () => fetchMatchesByUser(userId),
+    refetchInterval,
   });
