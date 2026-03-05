@@ -1,5 +1,5 @@
 import { logout } from '@/app/login/actions';
-import { ANALYTICS, DASHBOARD, SEARCH } from '@/constants/routes';
+import { DASHBOARD, PROFILE } from '@/constants/routes';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -25,12 +25,10 @@ describe('Sidebar', () => {
     render(<Sidebar />);
 
     const homeLink = screen.getByRole('link', { name: /home/i });
-    const searchLink = screen.getByRole('link', { name: /search/i });
-    const analyticsLink = screen.getByRole('link', { name: /analytics/i });
+    const profileLink = screen.getByRole('link', { name: /profile/i });
 
     expect(homeLink).toHaveAttribute('href', DASHBOARD);
-    expect(searchLink).toHaveAttribute('href', SEARCH);
-    expect(analyticsLink).toHaveAttribute('href', ANALYTICS);
+    expect(profileLink).toHaveAttribute('href', PROFILE);
   });
 
   it('highlights active link based on current pathname', () => {
@@ -54,8 +52,7 @@ describe('Sidebar', () => {
     render(<Sidebar />);
 
     expect(screen.getByTitle('Home')).toBeInTheDocument();
-    expect(screen.getByTitle('Search')).toBeInTheDocument();
-    expect(screen.getByTitle('Analytics')).toBeInTheDocument();
+    expect(screen.getByTitle('Profile')).toBeInTheDocument();
     expect(screen.getByTitle('Logout')).toBeInTheDocument();
   });
 });

@@ -3,13 +3,13 @@
 import { LuLogOut } from 'react-icons/lu';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LuHouse, LuSearch, LuChartBar } from 'react-icons/lu';
+import { LuHouse, LuUser, LuChartBar } from 'react-icons/lu';
 
 import { logout } from '@/app/login/actions';
 
 const navigation = [
   { name: 'Home', href: '/dashboard', icon: LuHouse },
-  { name: 'Search', href: '/search', icon: LuSearch },
+  { name: 'Profile', href: '/profile', icon: LuUser },
   // { name: 'Analytics', href: '/analytics', icon: LuChartBar },
 ];
 

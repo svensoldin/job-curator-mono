@@ -1,11 +1,14 @@
+import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import { redirect } from 'next/navigation';
 
-import { LOGIN } from '@/constants/routes';
+import { LOGIN, PROFILE } from '@/constants/routes';
 import { getUser } from '@/lib/supabase/server';
 import { getQueryClient } from '@/lib/tanstack-query/client';
+import { prefetchProfileByUser } from '@/app/(authenticated)/profile/_lib/prefetch';
 
 import Dashboard from './_components/Dashboard';
-import { prefetchSearchTasksByUser } from './_lib/queries';
+import { prefetchMatchesByUser } from './_lib/prefetch';
+import { PROFILE_QUERY_KEY } from '../profile/_lib/queries';
 
 const DashboardPage = async () => {
   const user = await getUser();
@@ -14,9 +17,18 @@ const DashboardPage = async () => {
 
   const queryClient = getQueryClient();
 
-  await prefetchSearchTasksByUser(queryClient, user.id);
+  await prefetchProfileByUser(queryClient, user.id);
 
-  return <Dashboard user={user} />;
+  const profileState = queryClient.getQueryState([PROFILE_QUERY_KEY, user.id]);
+  if (profileState?.error) redirect(PROFILE);
+
+  await prefetchMatchesByUser(queryClient, user.id);
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <Dashboard user={user} />
+    </HydrationBoundary>
+  );
 };
 
 export default DashboardPage;
