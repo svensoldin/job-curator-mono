@@ -17,7 +17,7 @@ const upsertProfile = async (payload: UpsertProfilePayload): Promise<UserProfile
   const headers = await getAuthHeaders();
   const res = await fetch(`${BASE}/profiles`, {
     method: 'POST',
-    headers,
+    headers: { ...headers, 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
 
@@ -32,4 +32,5 @@ const upsertProfile = async (payload: UpsertProfilePayload): Promise<UserProfile
 export const useUpsertProfile = () =>
   useMutation({
     mutationFn: (payload: UpsertProfilePayload) => upsertProfile(payload),
+    throwOnError: true,
   });

@@ -5,8 +5,14 @@ import { LOGIN } from '@/constants/routes';
 import { getUser } from '@/lib/supabase/server';
 import { getQueryClient } from '@/lib/tanstack-query/client';
 
+import type { Metadata } from 'next';
+
 import ProfileForm from './_components/ProfileForm';
 import { prefetchProfileByUser } from './_lib/prefetch';
+
+export const metadata: Metadata = {
+  title: 'Profile',
+};
 
 const ProfilePage = async () => {
   const user = await getUser();

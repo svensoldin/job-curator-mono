@@ -12,22 +12,31 @@ interface SkillGraphInputProps {
 const SkillGraphInput = ({ value, onChange }: SkillGraphInputProps) => {
   const [skillName, setSkillName] = useState('');
   const [years, setYears] = useState('');
-  const [error, setError] = useState('');
+  const [skillError, setSkillError] = useState('');
+  const [yearsError, setYearsError] = useState('');
 
   const handleAdd = () => {
     const trimmed = skillName.trim();
     const parsed = parseInt(years, 10);
 
+    let hasError = false;
     if (!trimmed) {
-      setError('Skill name is required.');
-      return;
+      setSkillError('Skill name is required.');
+      hasError = true;
+    } else if (trimmed in value) {
+      setSkillError(`"${trimmed}" is already added. Remove it first to update.`);
+      hasError = true;
+    } else {
+      setSkillError('');
     }
     if (isNaN(parsed) || parsed < 0) {
-      setError('Years must be a valid number ≥ 0.');
-      return;
+      setYearsError('Must be a number ≥ 0.');
+      hasError = true;
+    } else {
+      setYearsError('');
     }
+    if (hasError) return;
 
-    setError('');
     onChange({ ...value, [trimmed]: parsed });
     setSkillName('');
     setYears('');
@@ -61,44 +70,42 @@ const SkillGraphInput = ({ value, onChange }: SkillGraphInputProps) => {
               className='ml-1 text-gray-400 hover:text-white transition-colors'
               aria-label={`Remove ${skill}`}
             >
-              ×
+              <svg xmlns='http://www.w3.org/2000/svg' width={12} height={12} viewBox='0 0 12 12' aria-hidden='true'>
+                <path stroke='currentColor' strokeWidth={1.5} strokeLinecap='round' d='M2 2l8 8M10 2l-8 8' />
+              </svg>
             </button>
           </span>
         ))}
       </div>
 
-      <div className='flex gap-3 items-start'>
+      <div className='flex gap-3 items-end'>
         <Input
           label='Skill'
           placeholder='e.g. TypeScript'
           value={skillName}
           onChange={(e) => setSkillName(e.target.value)}
           onKeyDown={handleKeyDown}
-          error={error && !years ? error : undefined}
-          className='flex-1'
+          error={skillError || undefined}
         />
         <Input
           label='Years'
           type='number'
           min={0}
+          step={1}
           placeholder='0'
           value={years}
           onChange={(e) => setYears(e.target.value)}
           onKeyDown={handleKeyDown}
-          error={error && years ? error : undefined}
-          className='w-28'
+          error={yearsError || undefined}
         />
         <button
           type='button'
           onClick={handleAdd}
-          className='mt-8 rounded-lg bg-gray-800 px-4 py-3 text-sm font-medium text-white hover:bg-gray-700 transition-colors'
+          className='rounded-lg bg-gray-800 px-4 py-3 text-sm font-medium text-white hover:bg-gray-700 transition-colors'
         >
           Add
         </button>
       </div>
-      {error && !skillName && !years && (
-        <p className='text-sm text-red-500'>{error}</p>
-      )}
     </div>
   );
 };

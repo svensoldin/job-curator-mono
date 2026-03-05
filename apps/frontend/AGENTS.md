@@ -17,6 +17,7 @@ Stack:
 - Tailwind CSS
 - Vitest, Playwright,
 - Radix UI
+- clsx
 
 ## Coding style
 
@@ -26,6 +27,7 @@ Use semantic HTML as much as possible.
 Use CSS as much as possible for styling and animations.
 Prefer using React Server Components when possible to keep the bundle size minimal.
 Use `const MyComponent = () => {}` function declaration instead of `function MyComponent() {}` as a convention.
+For dynamic classNames, use clsx library to merge conditional classes.
 
 ## Documentation practices
 

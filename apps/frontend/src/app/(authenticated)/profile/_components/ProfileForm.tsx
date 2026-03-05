@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { User } from '@supabase/supabase-js';
 import type { UserProfile } from '@repo/types';
@@ -32,13 +32,7 @@ const initFormData = (profile?: UserProfile): ProfileFormData => ({
   culture_preference: profile?.culture_preference ?? null,
 });
 
-const STEPS = [
-  'Hard Constraints',
-  'Skills',
-  'Seniority',
-  'Culture',
-  'Review',
-] as const;
+const STEPS = ['Hard Constraints', 'Skills', 'Seniority', 'Culture', 'Review'] as const;
 
 const SENIORITY_OPTIONS: Array<NonNullable<UserProfile['seniority']>> = [
   'junior',
@@ -66,10 +60,14 @@ interface ProfileFormProps {
 const ProfileForm = ({ user }: ProfileFormProps) => {
   const router = useRouter();
   const { data: profile } = useProfile(user.id);
-  const { mutate, isPending, isError, error } = useUpsertProfile();
+  const { mutate, isPending } = useUpsertProfile();
 
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<ProfileFormData>(() => initFormData(profile));
+
+  useEffect(() => {
+    if (profile) setFormData(initFormData(profile));
+  }, [profile]);
 
   const isNextEnabled = () => {
     if (step === 2) return formData.seniority !== null;
@@ -97,12 +95,8 @@ const ProfileForm = ({ user }: ProfileFormProps) => {
     );
   };
 
-  if (isError) {
-    throw error;
-  }
-
   return (
-    <div className='mx-auto max-w-2xl px-4 py-10'>
+    <div className='mx-auto px-4 py-10'>
       <header className='mb-8'>
         <h1 className='text-2xl font-semibold text-white'>Your profile</h1>
         <p className='mt-1 text-sm text-gray-400'>
@@ -267,9 +261,7 @@ const ProfileForm = ({ user }: ProfileFormProps) => {
               <div className='flex justify-between'>
                 <dt className='text-gray-400'>Culture</dt>
                 <dd className='text-gray-100'>
-                  {formData.culture_preference
-                    ? CULTURE_LABELS[formData.culture_preference]
-                    : '—'}
+                  {formData.culture_preference ? CULTURE_LABELS[formData.culture_preference] : '—'}
                 </dd>
               </div>
             </dl>
