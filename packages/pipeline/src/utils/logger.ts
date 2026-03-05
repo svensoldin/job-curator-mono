@@ -1,3 +1,5 @@
 import { createLogger } from '@repo/logger';
 
-export default createLogger('pipeline');
+const logger: ReturnType<typeof createLogger> = createLogger('pipeline');
+
+export default logger;

@@ -7,7 +7,7 @@
     ".": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc --noEmit",
+    "build": "tsc",
     "clean": "rm -rf dist",
     "test": "vitest"
   },

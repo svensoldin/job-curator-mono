@@ -2,6 +2,8 @@ export const DASHBOARD = `/dashboard`;
 export const HOME = `/`;
 export const LOGIN = `/login`;
 export const SEARCH = `/search`;
+export const PROFILE = `/profile`;
+export const MATCHES = `/matches`;
 export const ANALYTICS = `/analytics`;
 
 // API

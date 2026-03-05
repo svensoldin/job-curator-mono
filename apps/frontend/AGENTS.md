@@ -31,6 +31,7 @@ Use `const MyComponent = () => {}` function declaration instead of `function MyC
 
 Be concise, specific, and value dense
 Write so that a new developer to this codebase can understand your writing, don’t assume your audience are experts in the topic/area you are writing about.
+Write documentation above functions/APIs using JSDoc style annotations.
 
 ## MCP Servers
 
