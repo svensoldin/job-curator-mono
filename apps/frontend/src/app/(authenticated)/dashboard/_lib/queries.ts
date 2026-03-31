@@ -1,40 +1,29 @@
-import type { SearchTask } from '@repo/types';
-import { useQuery, type QueryClient } from '@tanstack/react-query';
+import type { MatchWithJob } from '@repo/types';
+import { useQuery } from '@tanstack/react-query';
 
-export const QueryKeys = {
-  allTasks: 'allTasks',
-};
+import { getAuthHeaders } from '@/lib/api/getAuthHeaders';
+import { BASE } from '@/lib/api/apiBase';
 
-/**
- * POST request to fetch all of the user's search tasks
- * @param id the user's id in database
- */
-const fetchSearchTasksByUser = async (userId: string): Promise<SearchTask[]> => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_JOB_SCRAPER_URL}/searches`, {
-    method: 'POST',
-    body: JSON.stringify({
-      userId,
-    }),
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-  });
+export const USER_MATCHES_QUERY_KEY = 'userMatches';
 
+export const fetchMatchesByUser = async (
+  userId: string,
+  getHeaders: typeof getAuthHeaders = getAuthHeaders
+): Promise<MatchWithJob[]> => {
+  const headers = await getHeaders();
+  const url = `${BASE}/matches/${userId}?limit=50&minScore=0&hiddenGemsOnly=false`;
+  const res = await fetch(url, { headers });
   if (!res.ok) {
-    throw new Error('Failed to fetch user tasks');
+    console.error(`[fetch] ${url} returned ${res.status}`);
+    throw new Error('Failed to fetch matches');
   }
-
   const json = await res.json();
-
-  return json.data;
+  return (json.data ?? []) as MatchWithJob[];
 };
 
-export const prefetchSearchTasksByUser = async (queryClient: QueryClient, userId: string) =>
-  await queryClient.prefetchQuery({
-    queryKey: [QueryKeys.allTasks, userId],
-    queryFn: () => fetchSearchTasksByUser(userId),
-  });
-
-export const useSearchTasksByUser = (userId: string) =>
-  useQuery({
-    queryKey: [QueryKeys.allTasks, userId],
-    queryFn: () => fetchSearchTasksByUser(userId),
+export const useMatchesByUser = (userId: string, refetchInterval?: number | false) =>
+  useQuery<MatchWithJob[], Error>({
+    queryKey: [USER_MATCHES_QUERY_KEY, userId],
+    queryFn: () => fetchMatchesByUser(userId),
+    refetchInterval,
   });

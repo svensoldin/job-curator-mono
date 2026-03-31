@@ -17,6 +17,7 @@ Stack:
 - Tailwind CSS
 - Vitest, Playwright,
 - Radix UI
+- clsx
 
 ## Coding style
 
@@ -26,11 +27,17 @@ Use semantic HTML as much as possible.
 Use CSS as much as possible for styling and animations.
 Prefer using React Server Components when possible to keep the bundle size minimal.
 Use `const MyComponent = () => {}` function declaration instead of `function MyComponent() {}` as a convention.
+For dynamic classNames, use clsx library to merge conditional classes.
+
+## Tanstack Query guidelines
+
+For query keys, avoid repeating the same string (i.e "myQueryKey") across modules. Store the query key in a variable that can be reused.
 
 ## Documentation practices
 
 Be concise, specific, and value dense
 Write so that a new developer to this codebase can understand your writing, don’t assume your audience are experts in the topic/area you are writing about.
+Write documentation above functions/APIs using JSDoc style annotations.
 
 ## MCP Servers
 

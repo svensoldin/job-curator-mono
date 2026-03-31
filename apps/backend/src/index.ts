@@ -1,5 +1,6 @@
-import resultsRoutes from './routes/results.js';
-import tasksRoutes from './routes/searches.js';
+import profilesRoutes from './routes/profiles.js';
+import matchesRoutes from './routes/matches.js';
+import jobsRoutes from './routes/jobs.js';
 import logger from './utils/logger.js';
 import cors from 'cors';
 import express, { type Express } from 'express';
@@ -25,8 +26,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/results', resultsRoutes);
-app.use('/searches', tasksRoutes);
+app.use('/profiles', profilesRoutes);
+app.use('/matches', matchesRoutes);
+app.use('/jobs', jobsRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
@@ -55,9 +57,28 @@ app.use(
 );
 
 /**
+ * Validates that all required environment variables are set.
+ * Throws with the full list of missing variables so they can all be fixed at once.
+ */
+function validateEnv() {
+  const required = [
+    'SUPABASE_URL',
+    'SUPABASE_SERVICE_ROLE_KEY',
+    'MISTRAL_API_KEY',
+    'CORS_ORIGIN',
+  ] as const;
+  const missing = required.filter((key) => !process.env[key]);
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+}
+
+/**
  * Initialize the server and required services
  */
 async function initializeServer() {
+  validateEnv();
+
   try {
     logger.info('🚀 Initializing Job scraping API Server...');
 
@@ -66,7 +87,6 @@ async function initializeServer() {
       logger.info('🎯 Ready to analyze jobs!');
     });
   } catch (error) {
-    console.error('❌ Failed to initialize server:', error);
     logger.error('❌ Failed to initialize server:', error);
     process.exit(1);
   }
