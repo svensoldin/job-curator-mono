@@ -32,6 +32,11 @@ COPY packages/typescript-config/package.json ./packages/typescript-config/
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --filter ai-job-hunter
 
+# Copy workspace package sources so tsc can resolve @repo/* imports
+COPY packages/types/ ./packages/types/
+COPY packages/logger/ ./packages/logger/
+COPY packages/pipeline/ ./packages/pipeline/
+
 # Copy backend source code and compile
 COPY apps/backend/ ./apps/backend/
 WORKDIR /usr/src/app/apps/backend
