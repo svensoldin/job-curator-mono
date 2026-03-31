@@ -78,6 +78,6 @@ export async function loginWithGitHub(clientOrigin?: string) {
 export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  revalidatePath('/', 'layout');
+  revalidatePath(HOME, 'layout');
   redirect(LOGIN);
 }

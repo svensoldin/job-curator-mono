@@ -139,7 +139,7 @@ const ProfileForm = ({ user }: ProfileFormProps) => {
                 min={0}
                 placeholder='e.g. 50'
                 value={formData.salary_min}
-                onChange={(e) => setFormData((f) => ({ ...f, salary_min: e.target.value }))}
+                onChange={(e) => setFormData((form) => ({ ...form, salary_min: e.target.value }))}
               />
               <Input
                 label='Max salary (k€)'
@@ -147,7 +147,7 @@ const ProfileForm = ({ user }: ProfileFormProps) => {
                 min={0}
                 placeholder='e.g. 80'
                 value={formData.salary_max}
-                onChange={(e) => setFormData((f) => ({ ...f, salary_max: e.target.value }))}
+                onChange={(e) => setFormData((form) => ({ ...form, salary_max: e.target.value }))}
               />
             </div>
           </fieldset>
