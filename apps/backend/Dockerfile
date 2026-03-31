@@ -19,23 +19,31 @@ RUN --mount=type=cache,target=/root/.npm \
 
 ################################################################################
 # Install all dependencies and build the backend.
-# Uses pnpm's workspace-aware --filter to install only what the backend needs.
 FROM base AS build
 
-# Copy workspace configuration so pnpm can resolve the lockfile
+# Copy all workspace package manifests so pnpm can resolve the full lockfile
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backend/package.json ./apps/backend/
 COPY packages/types/package.json ./packages/types/
+COPY packages/logger/package.json ./packages/logger/
+COPY packages/pipeline/package.json ./packages/pipeline/
 COPY packages/typescript-config/package.json ./packages/typescript-config/
 
-# Install all dependencies (including devDependencies for tsc)
+# Install all workspace dependencies (including devDependencies for tsc)
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile --filter ai-job-hunter
+    pnpm install --frozen-lockfile
 
-# Copy workspace package sources so tsc can resolve @repo/* imports
+# Copy all package sources
 COPY packages/types/ ./packages/types/
 COPY packages/logger/ ./packages/logger/
 COPY packages/pipeline/ ./packages/pipeline/
+
+# Build workspace packages in dependency order before building the backend
+WORKDIR /usr/src/app/packages/logger
+RUN pnpm run build
+
+WORKDIR /usr/src/app/packages/pipeline
+RUN pnpm run build
 
 # Copy backend source code and compile
 COPY apps/backend/ ./apps/backend/
