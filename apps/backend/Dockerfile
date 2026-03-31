@@ -34,6 +34,7 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile
 
 # Copy all package sources
+COPY packages/typescript-config/ ./packages/typescript-config/
 COPY packages/types/ ./packages/types/
 COPY packages/logger/ ./packages/logger/
 COPY packages/pipeline/ ./packages/pipeline/
