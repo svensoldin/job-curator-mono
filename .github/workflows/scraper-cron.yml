@@ -1,43 +1,48 @@
 name: Scraper Pipeline
 
 on:
-    schedule:
-        - cron: "0 8 * * *"
-    workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * *"
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/scraper-cron.yml"
+  workflow_dispatch:
 
 jobs:
-    run-pipeline:
-        runs-on: ubuntu-latest
-        timeout-minutes: 30
-        steps:
-            - uses: actions/checkout@v4
+  run-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
 
-            - uses: pnpm/action-setup@v3
-              with:
-                  version: 9
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
 
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: 22
-                  cache: pnpm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
 
-            - name: Install Chromium dependencies
-              run: |
-                  sudo apt-get update
-                  sudo apt-get install -y libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 \
-                    libgbm1 libasound2t64 libxrandr2 libxdamage1 libpangocairo-1.0-0
+      - name: Install Chromium dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 \
+            libgbm1 libasound2t64 libxrandr2 libxdamage1 libpangocairo-1.0-0
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-            - name: Build pipeline package
-              run: pnpm --filter @repo/pipeline build
+      - name: Build packages
+        run: pnpm --filter @repo/logger build && pnpm --filter @repo/pipeline build
 
-            - name: Run scraper pipeline
-              run: pnpm --filter scraper start
-              env:
-                  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-                  SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-                  MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
-                  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
-                  PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+      - name: Run scraper pipeline
+        run: pnpm --filter scraper start
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
