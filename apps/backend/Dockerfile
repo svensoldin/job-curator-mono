@@ -39,17 +39,14 @@ COPY packages/types/ ./packages/types/
 COPY packages/logger/ ./packages/logger/
 COPY packages/pipeline/ ./packages/pipeline/
 
-# Build workspace packages in dependency order before building the backend
-WORKDIR /usr/src/app/packages/logger
-RUN pnpm run build
-
-WORKDIR /usr/src/app/packages/pipeline
-RUN pnpm run build
-
-# Copy backend source code and compile
+# Build workspace packages in dependency order before building the backend.
+# Use --filter from the workspace root to unambiguously target each package's
+# own build script (avoids pnpm resolving up to the root turbo build script).
 COPY apps/backend/ ./apps/backend/
-WORKDIR /usr/src/app/apps/backend
-RUN pnpm run build
+WORKDIR /usr/src/app
+RUN pnpm --filter @repo/logger run build && \
+    pnpm --filter @repo/pipeline run build && \
+    pnpm --filter ai-job-hunter run build
 
 # Create a standalone production bundle with only prod dependencies.
 # pnpm deploy flattens the workspace into a self-contained directory.
