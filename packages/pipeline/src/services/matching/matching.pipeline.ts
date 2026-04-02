@@ -179,7 +179,7 @@ async function buildAndUpsertMatches(
       missing_skills: llm.missing_skills,
       salary_alignment: llm.salary_alignment,
       is_hidden_gem: isHiddenGem,
-      updated_at: new Date().toISOString(),
+      cached_at: new Date().toISOString(),
     };
   });
 
