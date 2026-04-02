@@ -33,11 +33,11 @@ export const initializePageAndNavigate = async (
   const page: Page = await browser.newPage();
 
   await page.setUserAgent(USER_AGENT);
-  await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+  await page.goto(url, { waitUntil: 'networkidle2', timeout: 15_000 });
 
   try {
     await page.waitForSelector(primarySelector, {
-      timeout: 10000,
+      timeout: 15_000,
     });
   } catch (selectorError) {
     logger.warn('Primary selectors not found', selectorError);
