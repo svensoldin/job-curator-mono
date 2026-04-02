@@ -31,12 +31,13 @@ export const scrapeLinkedIn = async (
 ): Promise<JobPosting[]> => {
   const keywords = criteria.jobTitle;
   const baseUrl = `${BASE_URL}?keywords=${encodeURIComponent(keywords)}`;
+  const baseUrlFrance = `${baseUrl}&geoId=105015875`;
 
   try {
     const allJobs: JobPosting[] = [];
 
     for (let pageNum = 0; pageNum < MAX_PAGES_PER_BOARD; pageNum++) {
-      const pagedUrl = `${baseUrl}&start=${pageNum * 25}`;
+      const pagedUrl = `${baseUrlFrance}&start=${pageNum * 25}`;
       const listingPage = await initializePageAndNavigate(browser, pagedUrl, PRIMARY_SELECTOR);
       const jobs = await getJobs(listingPage, 25);
       await listingPage.close();
