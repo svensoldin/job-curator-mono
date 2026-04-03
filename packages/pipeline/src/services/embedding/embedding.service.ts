@@ -2,6 +2,7 @@ import { Mistral } from '@mistralai/mistralai';
 import { supabase } from '../../lib/supabase.js';
 import { SUPABASE_SCRAPED_JOBS_TABLE } from '../../constants/supabase.js';
 import logger from '../../utils/logger.js';
+import { withRetry } from '../../utils/retry.js';
 
 const EMBED_CHUNK_SIZE = 20;
 const EMBED_CHUNK_DELAY_MS = 1000;
@@ -27,30 +28,36 @@ export async function embedText(text: string): Promise<number[]> {
  * chunks to respect rate limits. Returns one embedding vector per input text.
  */
 export async function embedBatch(texts: string[]): Promise<number[][]> {
-  const results: number[][] = [];
+  return withRetry(
+    async () => {
+      const results: number[][] = [];
 
-  for (let i = 0; i < texts.length; i += EMBED_CHUNK_SIZE) {
-    const chunk = texts.slice(i, i + EMBED_CHUNK_SIZE);
+      for (let i = 0; i < texts.length; i += EMBED_CHUNK_SIZE) {
+        const chunk = texts.slice(i, i + EMBED_CHUNK_SIZE);
 
-    // Mistral's API takes an array of texts, and returns an array of embeddings in the same order
-    // See https://docs.mistral.ai/capabilities/embeddings/text_embeddings
-    const response = await client.embeddings.create({
-      model: 'mistral-embed',
-      inputs: chunk,
-    });
-    results.push(
-      ...response.data.map((d) => {
-        if (!d.embedding) throw new Error('Missing embedding in batch response');
-        return d.embedding;
-      })
-    );
+        // Mistral's API takes an array of texts, and returns an array of embeddings in the same order
+        // See https://docs.mistral.ai/capabilities/embeddings/text_embeddings
+        const response = await client.embeddings.create({
+          model: 'mistral-embed',
+          inputs: chunk,
+        });
+        results.push(
+          ...response.data.map((d) => {
+            if (!d.embedding) throw new Error('Missing embedding in batch response');
+            return d.embedding;
+          })
+        );
 
-    if (i + EMBED_CHUNK_SIZE < texts.length) {
-      await new Promise((resolve) => setTimeout(resolve, EMBED_CHUNK_DELAY_MS));
-    }
-  }
+        if (i + EMBED_CHUNK_SIZE < texts.length) {
+          await new Promise((resolve) => setTimeout(resolve, EMBED_CHUNK_DELAY_MS));
+        }
+      }
 
-  return results;
+      return results;
+    },
+    undefined,
+    (attempt, err) => logger.warn(`embedBatch attempt ${attempt} failed: ${err}`)
+  );
 }
 
 /**
