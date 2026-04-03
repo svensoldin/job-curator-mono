@@ -89,8 +89,8 @@ export const getJobDescription = async (browser: Browser, job: JobPosting, selec
     await descPage.setUserAgent(USER_AGENT);
 
     await descPage.goto(job.url, {
-      waitUntil: 'networkidle2',
-      timeout: 30000,
+      waitUntil: 'load',
+      timeout: 15_000,
     });
 
     const description = await parseJobDescription(descPage, selectors);

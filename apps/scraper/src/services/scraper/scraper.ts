@@ -6,7 +6,7 @@ import logger from '../../utils/logger.js';
 
 import { scrapeLinkedIn } from './linkedin/linkedin.js';
 import { closeBrowser, createBrowser } from './helpers.js';
-import scrapeWelcomeToTheJungle from './wttj/wttj.js';
+// import scrapeWelcomeToTheJungle from './wttj/wttj.js';
 
 dotenv.config();
 
@@ -18,9 +18,10 @@ export default async function scrapeJobs(targets: ScrapeCriteria[]) {
 
     for (const target of targets) {
       logger.info(`Starting job scraping for: ${target.jobTitle}`);
-      const wttjJobs = await scrapeWelcomeToTheJungle(browser, target);
+      // Currently not working and just wasting time
+      // const wttjJobs = await scrapeWelcomeToTheJungle(browser, target);
       const linkedInJobs = await scrapeLinkedIn(browser, target);
-      allJobs.push(...wttjJobs, ...linkedInJobs);
+      allJobs.push(...linkedInJobs);
     }
 
     const uniqueJobs = allJobs.filter(

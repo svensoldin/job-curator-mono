@@ -13,6 +13,7 @@ const BASE_URL = 'https://www.linkedin.com/jobs/search/';
 const PRIMARY_SELECTOR = '.jobs-search__results-list';
 
 export const LINKEDIN_DESCRIPTION_SELECTORS = [
+  '[data-testid="expandable-text-box"]',
   '.show-more-less-html__markup',
   '.description__text',
   '[class*="description"]',
@@ -49,15 +50,13 @@ export const scrapeLinkedIn = async (
       await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
     }
 
-    const jobs = allJobs.slice(0, limit);
+    logger.info(`Found ${allJobs.length} LinkedIn jobs`);
+    logger.info(`Fetching descriptions for ${allJobs.length} LinkedIn jobs...`);
 
-    logger.info(`Found ${jobs.length} LinkedIn jobs`);
-    logger.info(`Fetching descriptions for ${jobs.length} LinkedIn jobs...`);
+    await getJobDescriptions(browser, allJobs, LINKEDIN_DESCRIPTION_SELECTORS);
 
-    await getJobDescriptions(browser, jobs, LINKEDIN_DESCRIPTION_SELECTORS);
-
-    logger.info(`Scraped ${jobs.length} jobs from LinkedIn`);
-    return jobs;
+    logger.info(`Scraped ${allJobs.length} jobs from LinkedIn`);
+    return allJobs;
   } catch (error) {
     logger.error('Error scraping LinkedIn:', error);
     return [];

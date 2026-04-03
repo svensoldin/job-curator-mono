@@ -4,6 +4,7 @@ import type { StructuredSummary } from '@repo/types';
 import { supabase } from '../../lib/supabase.js';
 import { SUPABASE_SCRAPED_JOBS_TABLE } from '../../constants/supabase.js';
 import logger from '../../utils/logger.js';
+import { withRetry } from '../../utils/retry.js';
 
 dotenv.config();
 
@@ -26,38 +27,44 @@ export async function summarizeJob(job: {
   id: number;
   description: string;
 }): Promise<StructuredSummary> {
-  const response = await client.chat.complete({
-    model: 'mistral-small-latest',
-    responseFormat: { type: 'json_object' },
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: job.description },
-    ],
-  });
+  return withRetry(
+    async () => {
+      const response = await client.chat.complete({
+        model: 'mistral-small-latest',
+        responseFormat: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: job.description },
+        ],
+      });
 
-  const content = response.choices?.[0]?.message?.content;
-  const text = typeof content === 'string' ? content : JSON.stringify(content);
+      const content = response.choices?.[0]?.message?.content;
+      const text = typeof content === 'string' ? content : JSON.stringify(content);
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    throw new Error(`Malformed JSON response for job ${job.id}: ${text}`);
-  }
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        throw new Error(`Malformed JSON response for job ${job.id}: ${text}`);
+      }
 
-  if (
-    typeof parsed !== 'object' ||
-    parsed === null ||
-    !Array.isArray((parsed as Record<string, unknown>)['stack']) ||
-    typeof (parsed as Record<string, unknown>)['seniority'] !== 'string' ||
-    typeof (parsed as Record<string, unknown>)['culture'] !== 'string' ||
-    typeof (parsed as Record<string, unknown>)['responsibilities'] !== 'string' ||
-    typeof (parsed as Record<string, unknown>)['salary'] !== 'string'
-  ) {
-    throw new Error(`Invalid StructuredSummary shape for job ${job.id}`);
-  }
+      if (
+        typeof parsed !== 'object' ||
+        parsed === null ||
+        !Array.isArray((parsed as Record<string, unknown>)['stack']) ||
+        typeof (parsed as Record<string, unknown>)['seniority'] !== 'string' ||
+        typeof (parsed as Record<string, unknown>)['culture'] !== 'string' ||
+        typeof (parsed as Record<string, unknown>)['responsibilities'] !== 'string' ||
+        typeof (parsed as Record<string, unknown>)['salary'] !== 'string'
+      ) {
+        throw new Error(`Invalid StructuredSummary shape for job ${job.id}`);
+      }
 
-  return parsed as StructuredSummary;
+      return parsed as StructuredSummary;
+    },
+    3,
+    (attempt, err) => logger.warn(`summarizeJob attempt ${attempt} failed for job ${job.id}: ${err}`),
+  );
 }
 
 /**
