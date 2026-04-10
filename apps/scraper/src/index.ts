@@ -5,9 +5,13 @@ import logger from './utils/logger.js';
 import scrapeJobs from './services/scraper/scraper.js';
 import { SCRAPE_TARGETS } from './constants/scraper.js';
 import { processPendingSummaries, processUnembeddedJobs, runForAllUsers } from '@repo/pipeline';
+import { emptyJobsTables } from './utils/database.js';
 
 async function main() {
   logger.info('🚀 Starting scraper pipeline...');
+
+  logger.info('Step 0: Emptying all jobs dbs');
+  await emptyJobsTables();
 
   logger.info('📡 Step 1: Scraping jobs...');
   await scrapeJobs(SCRAPE_TARGETS);

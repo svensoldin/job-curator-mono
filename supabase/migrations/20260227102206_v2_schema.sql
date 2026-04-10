@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 -- 2d. Create match_cache
 CREATE TABLE IF NOT EXISTS match_cache (
   id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id          text NOT NULL,
+  user_id          text NOT NULL REFERENCES user_profiles(user_id),
   job_id           integer NOT NULL REFERENCES scraped_jobs(id) ON DELETE CASCADE,
   score            integer,
   reasoning        text,
