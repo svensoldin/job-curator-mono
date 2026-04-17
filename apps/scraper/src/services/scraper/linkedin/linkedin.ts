@@ -9,7 +9,10 @@ import {
   MAX_PAGES_PER_BOARD,
 } from '../../../constants/scraper.js';
 
-const BASE_URL = 'https://www.linkedin.com/jobs/search/';
+const BASE_URL = 'https://fr.linkedin.com/jobs/search/';
+const LAST_WEEK_QUERY_PARAM = '&f_TPR=r604800';
+const PARIS_QUERY_PARAM = '&geoId=101240143';
+
 const PRIMARY_SELECTOR = '.jobs-search__results-list';
 
 export const LINKEDIN_DESCRIPTION_SELECTORS = [
@@ -31,14 +34,16 @@ export const scrapeLinkedIn = async (
   limit: number = MAX_JOBS_PER_BOARD
 ): Promise<JobPosting[]> => {
   const keywords = criteria.jobTitle;
-  const baseUrl = `${BASE_URL}?keywords=${encodeURIComponent(keywords)}`;
-  const baseUrlFrance = `${baseUrl}&geoId=105015875`;
+  const targetUrl =
+    `${BASE_URL}?keywords=${encodeURIComponent(keywords)}` +
+    PARIS_QUERY_PARAM +
+    LAST_WEEK_QUERY_PARAM;
 
   try {
     const allJobs: JobPosting[] = [];
 
     for (let pageNum = 0; pageNum < MAX_PAGES_PER_BOARD; pageNum++) {
-      const pagedUrl = `${baseUrlFrance}&start=${pageNum * 25}`;
+      const pagedUrl = `${targetUrl}&start=${pageNum * 25}`;
       const listingPage = await initializePageAndNavigate(browser, pagedUrl, PRIMARY_SELECTOR);
       const jobs = await getJobs(listingPage, 25);
       await listingPage.close();
